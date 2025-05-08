@@ -9,16 +9,18 @@ import UserEditPage from './pages/UserEditPage';
 export default function App() {
   return (
     <Routes>
-      {/* 1. Route công khai cho login */}
+      {/* public */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* 2. Bọc tất cả route cần auth vào PrivateRoute */}
+      {/* chỉ /admin phải auth */}
       <Route element={<PrivateRoute />}>
         <Route path="/admin" element={<AdminPage />} />
-        <Route path="/user/edit/:id" element={<UserEditPage />} />
       </Route>
 
-      {/* 3. Mọi path khác chuyển về login */}
+      {/* public: user scan QR vẫn vào edit được */}
+      <Route path="/user/edit/:id" element={<UserEditPage />} />
+
+      {/* fallback */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
