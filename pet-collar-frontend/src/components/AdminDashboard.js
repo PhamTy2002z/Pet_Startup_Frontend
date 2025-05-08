@@ -1,19 +1,23 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiCircle } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 import {
   getAllPets,
   createPet,
   createBulkPets
 } from '../api/petService';
-import PetCard from './PetCard';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
-  const [bulkQty, setBulkQty] = useState('');  // allow free typing
+  const [bulkQty, setBulkQty] = useState('');
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 25;
 
   const fetchPets = async () => {
     setLoading(true);
@@ -21,21 +25,35 @@ export default function AdminDashboard() {
       const data = await getAllPets();
       setPets(data);
     } catch (err) {
-      console.error('Error fetching pets:', err);
+      toast.error('Lỗi khi tải danh sách pet');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchPets(); }, []);
+  useEffect(() => {
+    fetchPets();
+  }, []);
+
+  const downloadQR = pet => {
+    const link = document.createElement('a');
+    link.href = pet.qrCodeUrl;
+    link.download = `qr-${pet._id}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleCreate = async () => {
     setLoading(true);
     try {
-      await createPet();
+      const newPet = await createPet();
+      downloadQR(newPet);
+      toast.success('Tạo QR thành công!');
       await fetchPets();
     } catch (err) {
-      console.error('Error creating pet:', err);
+      console.error(err);
+      toast.error('Tạo QR thất bại');
     } finally {
       setLoading(false);
     }
@@ -43,30 +61,40 @@ export default function AdminDashboard() {
 
   const startBulk = () => {
     setBulkMode(true);
-    setBulkQty(''); // clear default
+    setBulkQty('');
   };
   const cancelBulk = () => setBulkMode(false);
 
   const confirmBulk = async () => {
     const qty = parseInt(bulkQty, 10);
     if (!qty || qty < 1) {
-      alert('Vui lòng nhập số nguyên lớn hơn 0');
+      toast.warn('Vui lòng nhập số nguyên > 0');
       return;
     }
     setLoading(true);
     try {
-      await createBulkPets(qty);
+      const newPets = await createBulkPets(qty);
+      newPets.forEach(downloadQR);
+      toast.success(`Tạo ${newPets.length} QR thành công!`);
       setBulkMode(false);
+      setPage(1);
       await fetchPets();
     } catch (err) {
-      console.error('Error bulk creating:', err);
+      console.error(err);
+      toast.error('Tạo hàng loạt thất bại');
     } finally {
       setLoading(false);
     }
   };
 
+  // pagination
+  const pageCount = Math.ceil(pets.length / PAGE_SIZE);
+  const pagedPets = pets.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <div className="dashboard-container">
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <header className="dashboard-header">
         <div className="header-left">
           <FiCircle className="header-logo" />
@@ -78,16 +106,14 @@ export default function AdminDashboard() {
             disabled={loading || bulkMode}
             className="create-button"
           >
-            <FiPlus size={20} />
-            {loading ? 'Đang tạo...' : 'Tạo QR mới'}
+            <FiPlus size={20} /> {loading ? 'Đang...' : 'Tạo QR'}
           </button>
           <button
             onClick={startBulk}
             disabled={loading || bulkMode}
             className="bulk-button"
           >
-            <FiPlus size={20} />
-            Tạo QR hàng loạt
+            <FiPlus size={20} /> QR hàng loạt
           </button>
         </div>
       </header>
@@ -99,32 +125,72 @@ export default function AdminDashboard() {
             <input
               type="number"
               min="1"
-              placeholder="Nhập số lượng"
+              placeholder="Nhập số"
               value={bulkQty}
               onChange={e => setBulkQty(e.target.value)}
             />
           </label>
           <div className="bulk-actions">
-            <button onClick={confirmBulk} disabled={loading} className="confirm-button">
-              Xác nhận
-            </button>
-            <button onClick={cancelBulk} disabled={loading} className="cancel-button">
-              Hủy
-            </button>
+            <button
+              onClick={confirmBulk}
+              disabled={loading}
+              className="confirm-button"
+            >Xác nhận</button>
+            <button
+              onClick={cancelBulk}
+              disabled={loading}
+              className="cancel-button"
+            >Hủy</button>
           </div>
         </div>
       )}
 
-      {pets.length === 0 && !loading ? (
-        <p className="empty">
-          Chưa có pet nào. Nhấn “Tạo QR mới” để khởi tạo.
-        </p>
+      {!loading && pets.length === 0 ? (
+        <p className="empty">Chưa có pet nào. Nhấn “Tạo QR mới” để khởi tạo.</p>
       ) : (
-        <div className="grid">
-          {pets.map(pet => (
-            <PetCard key={pet._id} pet={pet} />
-          ))}
-        </div>
+        <>
+          <table className="list-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>QR</th>
+                <th>Tên Pet</th>
+                <th>Tên Chủ</th>
+                <th>Điện thoại</th>
+                <th>Ngày tạo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagedPets.map(p => (
+                <tr key={p._id}>
+                  <td>
+                    <Link
+                      to={`/user/edit/${p._id}`}
+                      className="id-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {p._id}
+                    </Link>
+                  </td>
+                  <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
+                  <td>{p.info.name || '-'}</td>
+                  <td>{p.owner.name || '-'}</td>
+                  <td>{p.owner.phone || '-'}</td>
+                  <td>{new Date(p.createdAt).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {pageCount > 1 && (
+            <div className="pagination">
+              <button onClick={() => setPage(page-1)} disabled={page===1}>‹ Prev</button>
+              <span>Page {page} / {pageCount}</span>
+              <button onClick={() => setPage(page+1)} disabled={page===pageCount}>Next ›</button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

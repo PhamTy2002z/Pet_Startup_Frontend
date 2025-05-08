@@ -1,11 +1,12 @@
-/* AdminDashboard.css */
+/* src/components/AdminDashboard.css */
 
 .dashboard-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 0;
   background-color: #F3F4F6;
-  padding: 24px;
+  min-height: 100vh;
 }
 
 /* ─── HEADER ─────────────────────────────────────────── */
@@ -14,7 +15,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   background: linear-gradient(90deg, #F8C8DC 0%, #A3DFF2 100%);
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.08);
@@ -23,59 +24,64 @@
 .header-left {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
-
 .header-logo {
   font-size: 32px;
-  margin-right: 12px;
+  color: #FFFFFF;
 }
-
 .header-title {
   font-size: 28px;
   font-weight: 600;
   color: #FFFFFF;
-  line-height: 1;
 }
 
-/* Container for create and bulk buttons */
+/* Container for action buttons */
 .header-actions {
   display: flex;
   gap: 12px;
 }
 
+/* Common button styles */
 .create-button,
-.bulk-button {
+.bulk-button,
+.confirm-button,
+.cancel-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, opacity 0.2s;
+}
+
+.create-button {
   background: #FFFFFF;
   color: #333333;
-  border: none;
-  border-radius: 9999px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 500;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
 }
+.create-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
 .bulk-button {
   background: #FFF0F6;
+  color: #333333;
 }
 .bulk-button:hover:not(:disabled) {
   background: #FFD6E7;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.create-button:hover:not(:disabled),
-.bulk-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .create-button:disabled,
-.bulk-button:disabled {
+.bulk-button:disabled,
+.confirm-button:disabled,
+.cancel-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -91,14 +97,13 @@
   padding: 12px 16px;
   margin-bottom: 24px;
 }
-
 .bulk-label {
   font-size: 16px;
   color: #333333;
 }
 .bulk-label input {
   margin-left: 8px;
-  width: 200px;
+  width: 80px;
   padding: 6px 8px;
   font-size: 14px;
   border: 1px solid #DDDDDD;
@@ -108,17 +113,6 @@
 .bulk-actions {
   display: flex;
   gap: 8px;
-}
-
-.confirm-button,
-.cancel-button {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background 0.2s, transform 0.2s;
 }
 .confirm-button {
   background: #A3DFF2;
@@ -136,22 +130,106 @@
   background: #DDDDDD;
   transform: translateY(-1px);
 }
-.confirm-button:disabled,
-.cancel-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+
+/* ─── TABLE LIST ──────────────────────────────────────── */
+.list-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #FFFFFF;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.list-table thead {
+  background: #A3DFF2;
+}
+.list-table th,
+.list-table td {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid #EFEFEF;
+}
+.list-table th {
+  color: #333333;
+  font-weight: 600;
+}
+.list-table tbody tr:nth-child(odd) {
+  background: #FAFAFA;
+}
+.list-table tbody tr:hover {
+  background: #F0F8FF;
 }
 
-/* ─── EMPTY STATE & GRID ────────────────────────────── */
+/* ID link */
+.id-link {
+  color: #3182ce;
+  text-decoration: none;
+}
+.id-link:hover {
+  text-decoration: underline;
+}
+
+/* QR image */
+.qr-image {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+/* Empty state */
 .empty {
   text-align: center;
-  color: #666666;
   font-size: 18px;
+  color: #666666;
   margin-top: 40px;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
+/* Responsive: horizontal scroll on small screens */
+@media (max-width: 768px) {
+  .list-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Thêm cho QR image và ID link */
+.qr-image {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+.id-link {
+  color: #3182ce;
+  text-decoration: none;
+}
+.id-link:hover {
+  text-decoration: underline;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+}
+.pagination button {
+  padding: 6px 12px;
+  background: #A3DFF2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.pagination span {
+  font-size: 14px;
+  color: #333;
 }
