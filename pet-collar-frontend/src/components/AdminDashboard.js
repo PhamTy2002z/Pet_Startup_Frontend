@@ -158,29 +158,31 @@ export default function AdminDashboard() {
                 <th>Tên Chủ</th>
                 <th>Điện thoại</th>
                 <th>Ngày tạo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pagedPets.map(p => (
-                <tr key={p._id}>
-                  <td>
-                    <Link
-                      to={`/user/edit/${p._id}`}
-                      className="id-link"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {p._id}
-                    </Link>
-                  </td>
-                  <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
-                  <td>{p.info.name || '-'}</td>
-                  <td>{p.owner.name || '-'}</td>
-                  <td>{p.owner.phone || '-'}</td>
-                  <td>{new Date(p.createdAt).toLocaleString()}</td>
+                <th>Cập nhật gần nhất</th> 
                 </tr>
-              ))}
-            </tbody>
+        </thead>
+        <tbody>
+          {pagedPets.map(p => (
+            <tr key={p._id}>
+              <td>
+                <Link to={`/user/edit/${p._id}`} target="_blank" rel="noopener noreferrer" className="id-link">
+                  {p._id}
+                </Link>
+              </td>
+              <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
+              <td>{p.info.name || '-'}</td>
+              <td>{p.owner.name || '-'}</td>
+              <td>{p.owner.phone || '-'}</td>
+              <td>{new Date(p.createdAt).toLocaleString()}</td>
+              <td>
+                {p.updatedAt
+                  ? new Date(p.updatedAt).toLocaleString()
+                  : '-'
+                }
+              </td>
+            </tr>
+          ))}
+        </tbody>
           </table>
 
           {pageCount > 1 && (
