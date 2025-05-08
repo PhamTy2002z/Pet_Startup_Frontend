@@ -29,6 +29,10 @@ export const uploadPetAvatar = (id, file) => {
     .then(res => res.data);
 };
 
+// Bulk create: gửi { quantity: n }
+export const createBulkPets = quantity =>
+  api.post('/admin/pets/bulk', { quantity }).then(res => res.data);
+
 // ——— User APIs ———
 
 // Lấy thông tin Pet theo ID
