@@ -17,7 +17,7 @@ export default function AdminDashboard() {
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkQty, setBulkQty] = useState('');
   const [page, setPage] = useState(1);
-  const PAGE_SIZE = 25;
+  const PAGE_SIZE = 20;  // Giới hạn 20 dòng mỗi trang
 
   const fetchPets = async () => {
     setLoading(true);
@@ -152,44 +152,58 @@ export default function AdminDashboard() {
           <table className="list-table">
             <thead>
               <tr>
+                <th>#</th>
                 <th>ID</th>
                 <th>QR</th>
                 <th>Tên Pet</th>
                 <th>Tên Chủ</th>
                 <th>Điện thoại</th>
                 <th>Ngày tạo</th>
-                <th>Cập nhật gần nhất</th> 
+                <th>Cập nhật gần nhất</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagedPets.map((p, idx) => (
+                <tr key={p._id} className={idx % 2 === 0 ? 'even' : 'odd'}>
+                  <td>{(page - 1) * PAGE_SIZE + idx + 1}</td>
+                  <td>
+                    <Link
+                      to={`/user/edit/${p._id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="id-link"
+                    >
+                      {p._id}
+                    </Link>
+                  </td>
+                  <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
+                  <td>{p.info.name || '-'}</td>
+                  <td>{p.owner.name || '-'}</td>
+                  <td>{p.owner.phone || '-'}</td>
+                  <td>{new Date(p.createdAt).toLocaleString()}</td>
+                  <td>{p.updatedAt ? new Date(p.updatedAt).toLocaleString() : '-'}</td>
                 </tr>
-        </thead>
-        <tbody>
-          {pagedPets.map(p => (
-            <tr key={p._id}>
-              <td>
-                <Link to={`/user/edit/${p._id}`} target="_blank" rel="noopener noreferrer" className="id-link">
-                  {p._id}
-                </Link>
-              </td>
-              <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
-              <td>{p.info.name || '-'}</td>
-              <td>{p.owner.name || '-'}</td>
-              <td>{p.owner.phone || '-'}</td>
-              <td>{new Date(p.createdAt).toLocaleString()}</td>
-              <td>
-                {p.updatedAt
-                  ? new Date(p.updatedAt).toLocaleString()
-                  : '-'
-                }
-              </td>
-            </tr>
-          ))}
-        </tbody>
+              ))}
+            </tbody>
           </table>
 
           {pageCount > 1 && (
             <div className="pagination">
-              <button onClick={() => setPage(page-1)} disabled={page===1}>‹ Prev</button>
-              <span>Page {page} / {pageCount}</span>
-              <button onClick={() => setPage(page+1)} disabled={page===pageCount}>Next ›</button>
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+              >‹</button>
+              {[...Array(pageCount)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPage(i + 1)}
+                  className={page === i + 1 ? 'active' : ''}
+                >{i + 1}</button>
+              ))}
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page === pageCount}
+              >›</button>
             </div>
           )}
         </>

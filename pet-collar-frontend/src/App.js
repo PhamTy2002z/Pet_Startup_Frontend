@@ -6,22 +6,20 @@ import PrivateRoute from './components/PrivateRoute';
 import AdminPage from './pages/AdminPage';
 import UserEditPage from './pages/UserEditPage';
 
-function App() {
+export default function App() {
   return (
     <Routes>
-      {/* Route công khai */}
+      {/* 1. Route công khai cho login */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Các route bảo vệ */}
+      {/* 2. Bọc tất cả route cần auth vào PrivateRoute */}
       <Route element={<PrivateRoute />}>
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/user/edit/:id" element={<UserEditPage />} />
       </Route>
 
-      {/* Chuyển hướng mặc định */}
+      {/* 3. Mọi path khác chuyển về login */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
-
-export default App;
