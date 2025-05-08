@@ -5,28 +5,31 @@ import { loginAdmin, authApi } from '../api/authService';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  // Khởi tạo token từ sessionStorage (nếu đã có) để giữ phiên trong tab
+  const [token, setToken] = useState(() => sessionStorage.getItem('token'));
 
-  // Hàm login gọi API, lưu token lên localStorage và state
+  // Hàm login gọi API, lưu token vào sessionStorage và state
   const login = async (username, password) => {
     const t = await loginAdmin({ username, password });
-    localStorage.setItem('token', t);
+    sessionStorage.setItem('token', t);
     setToken(t);
   };
 
+  // Hàm logout xóa token
   const logout = () => {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     setToken(null);
   };
 
-  // Gắn interceptor vào axios để attach Authorization header mỗi request
+  // Gắn interceptor để attach Authorization header cho tất cả request
   useEffect(() => {
     const id = authApi.interceptors.request.use(config => {
-      if (token) config.headers.Authorization = `Bearer ${token}`;
+      const sessionToken = sessionStorage.getItem('token');
+      if (sessionToken) config.headers.Authorization = `Bearer ${sessionToken}`;
       return config;
     });
     return () => authApi.interceptors.request.eject(id);
-  }, [token]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ token, login, logout }}>
