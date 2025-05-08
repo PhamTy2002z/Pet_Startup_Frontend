@@ -1,0 +1,178 @@
+/* UserEditForm.css */
+
+.form-container {
+    max-width: 600px;
+    margin: 40px auto;
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    padding: 24px;
+  }
+  
+  .section {
+    margin-bottom: 32px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+  }
+  
+  .field-group label {
+    font-size: 14px;
+    color: #555555;
+    margin-bottom: 6px;
+  }
+  
+  .field-group input {
+    padding: 10px 12px;
+    border: 1px solid #DDDDDD;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .field-group input:focus {
+    outline: none;
+    border-color: #A3DFF2;
+    box-shadow: 0 0 0 3px rgba(163,223,242,0.5);
+  }
+  
+  .vax-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .vax-item {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .add-vax-btn {
+    margin-top: 8px;
+    background: none;
+    border: 2px solid #F8C8DC;
+    color: #F8C8DC;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .add-vax-btn:hover {
+    background: #F8C8DC;
+    color: #FFFFFF;
+  }
+  
+  .submit-btn {
+    width: 100%;
+    margin-top: 24px;
+    background: #A3DFF2;
+    color: #FFFFFF;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .submit-btn:hover {
+    opacity: 0.9;
+  }
+  
+  /* CSS for Vaccination Fields in UserEditForm */
+
+/* Container for the vaccination list */
+.vax-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  /* Each vaccination item */
+  .vax-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FAFAFA;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px;
+    transition: box-shadow 0.2s;
+  }
+  .vax-item:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  
+  /* Inputs inside each item */
+  .vax-item input[type="text"],
+  .vax-item input[type="date"] {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #DDDDDD;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .vax-item input[type="text"]:focus,
+  .vax-item input[type="date"]:focus {
+    outline: none;
+    border-color: #A3DFF2;
+    box-shadow: 0 0 0 3px rgba(163,223,242,0.5);
+  }
+  
+  /* Remove-button (trash icon) */
+  .remove-vax-btn {
+    background: transparent;
+    border: none;
+    color: #E53E3E;
+    cursor: pointer;
+    font-size: 18px;
+    transition: color 0.2s;
+  }
+  .remove-vax-btn:hover {
+    color: #C53030;
+  }
+  
+  /* “No vaccination” placeholder */
+  .no-vax {
+    color: #666666;
+    font-style: italic;
+    padding: 8px 0;
+  }
+  
+  /* Add-vaccination button */
+  .add-vax-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #F8C8DC;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.2s;
+  }
+  .add-vax-btn:hover {
+    background: #f5b8c7;
+    transform: translateY(-1px);
+  }
+  

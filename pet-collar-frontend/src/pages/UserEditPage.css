@@ -1,0 +1,15 @@
+/* UserEditPage.css */
+
+.user-edit-page {
+    background-color: #F3F4F6;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  
+  .edit-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    /* Bổ sung khoảng cách trên/dưới */
+    padding: 24px 0;
+  }
+  
