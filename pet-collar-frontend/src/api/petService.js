@@ -4,9 +4,22 @@ import axios from 'axios';
 // Sử dụng biến môi trường REACT_APP_API_BASE_URL hoặc fallback
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
+// Tạo axios instance
 const api = axios.create({
   baseURL: API_BASE
 });
+
+// ——— Interceptor: tự động gắn JWT token lên header nếu có ———
+api.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  error => Promise.reject(error)
+);
 
 // ——— Admin APIs ———
 
@@ -35,7 +48,7 @@ export const createBulkPets = quantity =>
 
 // ——— User APIs ———
 
-// Lấy thông tin Pet theo ID
+// Lấy thông tin Pet theo ID (public hoặc có thể cũng cần token tuỳ API)
 export const getPetById = id =>
   api.get(`/user/pet/${id}`).then(res => res.data);
 
