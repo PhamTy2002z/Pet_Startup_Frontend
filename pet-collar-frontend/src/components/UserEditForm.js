@@ -19,12 +19,12 @@ const labels = {
   vi: {
     edit: 'Chỉnh sửa',
     closeEdit: 'Đóng chỉnh sửa',
-    petPhoto: 'Ảnh Pet',
+    petPhoto: 'Ảnh Của Bé',
     petInfoTitle: 'Thông tin Của Bé',
     petName: 'Tên Pet',
     species: 'Loài',
     birthDate: 'Ngày Sinh',
-    revisitDate: 'Ngày tái khám',  // New label for revisitDate
+    revisitDate: 'Ngày tái khám',
     ownerInfoTitle: 'Thông tin Của Sen',
     ownerName: 'Tên Chủ',
     ownerPhone: 'Số điện thoại',
@@ -32,10 +32,16 @@ const labels = {
     vaxTitle: 'Lịch tiêm ngừa',
     noVax: 'Chưa có mũi tiêm nào.',
     addVax: 'Thêm mũi tiêm',
+    reExamTitle: 'Lịch tái khám',
+    noReExam: 'Chưa có lịch tái khám nào.',
+    addReExam: 'Thêm lịch tái khám',
+    reExamDate: 'Ngày tái khám',
+    reExamNote: 'Ghi chú',
     save: 'Lưu thông tin',
     toggleLang: 'EN',
     success: 'Thao tác thành công!',
-    error: 'Có lỗi xảy ra, vui lòng thử lại!'
+    error: 'Có lỗi xảy ra, vui lòng thử lại!',
+    reExaminationDate: 'Ngày tái khám'
   },
   en: {
     edit: 'Edit',
@@ -45,7 +51,7 @@ const labels = {
     petName: 'Name',
     species: 'Species',
     birthDate: 'Birth Date',
-    revisitDate: 'Revisit Date', // New label for revisitDate
+    revisitDate: 'Revisit Date',
     ownerInfoTitle: "Owner's Information",
     ownerName: 'Owner Name',
     ownerPhone: 'Owner Phone',
@@ -53,10 +59,16 @@ const labels = {
     vaxTitle: 'Vaccination History',
     noVax: 'No vaccinations yet.',
     addVax: 'Add Vaccination',
+    reExamTitle: 'Re-examination Schedule',
+    noReExam: 'No re-examination schedule yet.',
+    addReExam: 'Add Re-examination',
+    reExamDate: 'Re-examination Date',
+    reExamNote: 'Note',
     save: 'Save',
     toggleLang: 'VI',
     success: 'Action was successful!',
-    error: 'Something went wrong, please try again!'
+    error: 'Something went wrong, please try again!',
+    reExaminationDate: 'Re-examination Date'
   }
 };
 
@@ -67,9 +79,10 @@ export default function UserEditForm() {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [form, setForm] = useState({
-    info: { name: '', species: '', birthDate: '', revisitDate: '' },  // Added revisitDate to info
+    info: { name: '', species: '', birthDate: '' },
     owner: { name: '', phone: '', email: '' },
-    vaccinations: []
+    vaccinations: [],
+    reExaminations: []
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -84,10 +97,7 @@ export default function UserEditForm() {
           species: pet.info.species || '',
           birthDate: pet.info.birthDate
             ? new Date(pet.info.birthDate).toISOString().split('T')[0]
-            : '',
-          revisitDate: pet.revisitDate
-            ? new Date(pet.revisitDate).toISOString().split('T')[0]
-            : ''  // Handle revisitDate
+            : ''
         },
         owner: {
           name: pet.owner.name || '',
@@ -99,6 +109,10 @@ export default function UserEditForm() {
           date: v.date
             ? new Date(v.date).toISOString().split('T')[0]
             : ''
+        })),
+        reExaminations: (pet.reExaminations || []).map(r => ({
+          date: r.date ? new Date(r.date).toISOString().split('T')[0] : '',
+          note: r.note || ''
         }))
       });
       if (pet.avatarFileId) {
@@ -153,23 +167,68 @@ export default function UserEditForm() {
     setAvatarFile(e.target.files[0] || null);
   };
 
+  const handleReExamChange = (idx, field, value) => {
+    setForm(f => {
+      const reExams = [...f.reExaminations];
+      reExams[idx] = { ...reExams[idx], [field]: value };
+      return { ...f, reExaminations: reExams };
+    });
+  };
+
+  const addReExam = () => {
+    setForm(f => ({
+      ...f,
+      reExaminations: [...f.reExaminations, { date: '', note: '' }]
+    }));
+  };
+
+  const removeReExam = idx => {
+    setForm(f => ({
+      ...f,
+      reExaminations: f.reExaminations.filter((_, i) => i !== idx)
+    }));
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     try {
+      // Format the data for submission
       const payload = {
-        info: { ...form.info, birthDate: form.info.birthDate || null, revisitDate: form.info.revisitDate || null },  // Include revisitDate in payload
-        owner: { ...form.owner },
-        vaccinations: form.vaccinations.filter(v => v.name && v.date).map(v => ({ name: v.name, date: v.date }))
+        info: {
+          name: form.info.name,
+          species: form.info.species,
+          birthDate: form.info.birthDate ? new Date(form.info.birthDate).toISOString() : null
+        },
+        owner: {
+          name: form.owner.name,
+          phone: form.owner.phone,
+          email: form.owner.email
+        },
+        vaccinations: form.vaccinations
+          .filter(v => v.name && v.date)
+          .map(v => ({
+            name: v.name,
+            date: new Date(v.date).toISOString()
+          })),
+        reExaminations: form.reExaminations
+          .filter(r => r.date)
+          .map(r => ({
+            date: new Date(r.date).toISOString(),
+            note: r.note || ''
+          }))
       };
+
+      console.log('Submitting payload:', payload);
 
       // Check if email has changed and update it if necessary
       const pet = await getPetById(id);
       if (pet && pet.owner.email !== form.owner.email) {
-        await updatePetOwnerEmail(id, form.owner.email); // Update email if it changed
+        await updatePetOwnerEmail(id, form.owner.email);
       }
 
       // Update the pet information
-      await updatePetById(id, payload);
+      const updatedPet = await updatePetById(id, payload);
+      console.log('Update response:', updatedPet);
 
       // Upload avatar if it exists
       if (avatarFile) {
@@ -181,37 +240,40 @@ export default function UserEditForm() {
       toast.success(t.success);
 
       // Re-fetch the pet data after saving
-      getPetById(id).then(pet => {
-        setForm({
-          info: {
-            name: pet.info.name || '',
-            species: pet.info.species || '',
-            birthDate: pet.info.birthDate
-              ? new Date(pet.info.birthDate).toISOString().split('T')[0]
-              : '',
-            revisitDate: pet.revisitDate
-              ? new Date(pet.revisitDate).toISOString().split('T')[0]
-              : ''  // Handle revisitDate again
-          },
-          owner: {
-            name: pet.owner.name || '',
-            phone: pet.owner.phone || '',
-            email: pet.owner.email || ''
-          },
-          vaccinations: (pet.vaccinations || []).map(v => ({
-            name: v.name,
-            date: v.date ? new Date(v.date).toISOString().split('T')[0] : ''
-          }))
-        });
-        if (pet.avatarFileId) {
-          setAvatarUrl(getPetAvatarUrl(pet.avatarFileId));
-        }
+      const refreshedPet = await getPetById(id);
+      console.log('Refreshed pet data:', refreshedPet);
+
+      setForm({
+        info: {
+          name: refreshedPet.info.name || '',
+          species: refreshedPet.info.species || '',
+          birthDate: refreshedPet.info.birthDate
+            ? new Date(refreshedPet.info.birthDate).toISOString().split('T')[0]
+            : ''
+        },
+        owner: {
+          name: refreshedPet.owner.name || '',
+          phone: refreshedPet.owner.phone || '',
+          email: refreshedPet.owner.email || ''
+        },
+        vaccinations: (refreshedPet.vaccinations || []).map(v => ({
+          name: v.name,
+          date: v.date ? new Date(v.date).toISOString().split('T')[0] : ''
+        })),
+        reExaminations: (refreshedPet.reExaminations || []).map(r => ({
+          date: r.date ? new Date(r.date).toISOString().split('T')[0] : '',
+          note: r.note || ''
+        }))
       });
+
+      if (refreshedPet.avatarFileId) {
+        setAvatarUrl(getPetAvatarUrl(refreshedPet.avatarFileId));
+      }
 
       setIsEditMode(false);
       setPreview('');
     } catch (err) {
-      console.error(err);
+      console.error('Error updating pet:', err);
       toast.error(t.error);
     }
   };
@@ -283,18 +345,6 @@ export default function UserEditForm() {
               type="date"
               name="birthDate"
               value={form.info.birthDate}
-              onChange={e => handleChange(e, 'info')}
-              disabled={!isEditMode}
-            />
-          </div>
-          {/* Revisit Date */}
-          <div className="field-group">
-            <label htmlFor="revisitDate">{t.revisitDate}</label>
-            <input
-              id="revisitDate"
-              type="date"
-              name="revisitDate"
-              value={form.info.revisitDate}
               onChange={e => handleChange(e, 'info')}
               disabled={!isEditMode}
             />
@@ -371,6 +421,44 @@ export default function UserEditForm() {
           {isEditMode && (
             <button type="button" className="add-vax-btn" onClick={addVax}>
               <FiPlus /> {t.addVax}
+            </button>
+          )}
+        </div>
+
+        {/* Re-examination Schedule */}
+        <div className="section">
+          <h3 className="section-title">📅 {t.reExamTitle}</h3>
+          {form.reExaminations.length === 0 && <p>{t.noReExam}</p>}
+          {form.reExaminations.map((r, i) => (
+            <div key={i} className="vax-item">
+              <input
+                type="text"
+                value={r.note}
+                onChange={e => handleReExamChange(i, 'note', e.target.value)}
+                disabled={!isEditMode}
+                placeholder={t.reExamNote}
+              />
+              <input
+                type="date"
+                value={r.date}
+                onChange={e => handleReExamChange(i, 'date', e.target.value)}
+                disabled={!isEditMode}
+                placeholder={t.reExamDate}
+              />
+              {isEditMode && (
+                <button
+                  type="button"
+                  className="remove-vax-btn"
+                  onClick={() => removeReExam(i)}
+                >
+                  <FiTrash2 />
+                </button>
+              )}
+            </div>
+          ))}
+          {isEditMode && (
+            <button type="button" className="add-vax-btn" onClick={addReExam}>
+              <FiPlus /> {t.addReExam}
             </button>
           )}
         </div>
