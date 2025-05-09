@@ -4,16 +4,17 @@ import {
   getPetById,
   updatePetById,
   uploadPetAvatar,
-  getPetAvatarUrl
+  getPetAvatarUrl,
+  updatePetOwnerEmail
 } from '../api/petService';
 import { FiPlus, FiTrash2, FiEdit2 } from 'react-icons/fi';
 import './UserEditForm.css';
 
 // Import react-toastify
 import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Import style cho Toastify
+import 'react-toastify/dist/ReactToastify.css';
 
-// Nhãn cho hai ngôn ngữ
+// Labels for both languages
 const labels = {
   vi: {
     edit: 'Chỉnh sửa',
@@ -23,9 +24,11 @@ const labels = {
     petName: 'Tên Pet',
     species: 'Loài',
     birthDate: 'Ngày Sinh',
+    revisitDate: 'Ngày tái khám',  // New label for revisitDate
     ownerInfoTitle: 'Thông tin Của Sen',
     ownerName: 'Tên Chủ',
     ownerPhone: 'Số điện thoại',
+    ownerEmail: 'Email Chủ',
     vaxTitle: 'Lịch tiêm ngừa',
     noVax: 'Chưa có mũi tiêm nào.',
     addVax: 'Thêm mũi tiêm',
@@ -42,9 +45,11 @@ const labels = {
     petName: 'Name',
     species: 'Species',
     birthDate: 'Birth Date',
+    revisitDate: 'Revisit Date', // New label for revisitDate
     ownerInfoTitle: "Owner's Information",
     ownerName: 'Owner Name',
     ownerPhone: 'Owner Phone',
+    ownerEmail: 'Owner Email',
     vaxTitle: 'Vaccination History',
     noVax: 'No vaccinations yet.',
     addVax: 'Add Vaccination',
@@ -62,8 +67,8 @@ export default function UserEditForm() {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [form, setForm] = useState({
-    info: { name: '', species: '', birthDate: '' },
-    owner: { name: '', phone: '' },
+    info: { name: '', species: '', birthDate: '', revisitDate: '' },  // Added revisitDate to info
+    owner: { name: '', phone: '', email: '' },
     vaccinations: []
   });
   const [avatarFile, setAvatarFile] = useState(null);
@@ -79,11 +84,15 @@ export default function UserEditForm() {
           species: pet.info.species || '',
           birthDate: pet.info.birthDate
             ? new Date(pet.info.birthDate).toISOString().split('T')[0]
-            : ''
+            : '',
+          revisitDate: pet.revisitDate
+            ? new Date(pet.revisitDate).toISOString().split('T')[0]
+            : ''  // Handle revisitDate
         },
         owner: {
           name: pet.owner.name || '',
-          phone: pet.owner.phone || ''
+          phone: pet.owner.phone || '',
+          email: pet.owner.email || ''
         },
         vaccinations: (pet.vaccinations || []).map(v => ({
           name: v.name,
@@ -109,7 +118,7 @@ export default function UserEditForm() {
     return () => URL.revokeObjectURL(url);
   }, [avatarFile]);
 
-  // Handlers
+  // Handlers for form fields
   const handleChange = (e, section) => {
     const { name, value } = e.target;
     setForm(f => ({
@@ -147,33 +156,62 @@ export default function UserEditForm() {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      // Chuẩn hóa payload
       const payload = {
-        info: { ...form.info, birthDate: form.info.birthDate || null },
+        info: { ...form.info, birthDate: form.info.birthDate || null, revisitDate: form.info.revisitDate || null },  // Include revisitDate in payload
         owner: { ...form.owner },
-        vaccinations: form.vaccinations
-          .filter(v => v.name && v.date)
-          .map(v => ({ name: v.name, date: v.date }))
+        vaccinations: form.vaccinations.filter(v => v.name && v.date).map(v => ({ name: v.name, date: v.date }))
       };
 
-      // Cập nhật text fields
+      // Check if email has changed and update it if necessary
+      const pet = await getPetById(id);
+      if (pet && pet.owner.email !== form.owner.email) {
+        await updatePetOwnerEmail(id, form.owner.email); // Update email if it changed
+      }
+
+      // Update the pet information
       await updatePetById(id, payload);
 
-      // Upload avatar nếu có
+      // Upload avatar if it exists
       if (avatarFile) {
         const updated = await uploadPetAvatar(id, avatarFile);
         setAvatarUrl(getPetAvatarUrl(updated.avatarFileId));
         setAvatarFile(null);
       }
 
-      // Hiển thị thông báo thành công
       toast.success(t.success);
+
+      // Re-fetch the pet data after saving
+      getPetById(id).then(pet => {
+        setForm({
+          info: {
+            name: pet.info.name || '',
+            species: pet.info.species || '',
+            birthDate: pet.info.birthDate
+              ? new Date(pet.info.birthDate).toISOString().split('T')[0]
+              : '',
+            revisitDate: pet.revisitDate
+              ? new Date(pet.revisitDate).toISOString().split('T')[0]
+              : ''  // Handle revisitDate again
+          },
+          owner: {
+            name: pet.owner.name || '',
+            phone: pet.owner.phone || '',
+            email: pet.owner.email || ''
+          },
+          vaccinations: (pet.vaccinations || []).map(v => ({
+            name: v.name,
+            date: v.date ? new Date(v.date).toISOString().split('T')[0] : ''
+          }))
+        });
+        if (pet.avatarFileId) {
+          setAvatarUrl(getPetAvatarUrl(pet.avatarFileId));
+        }
+      });
 
       setIsEditMode(false);
       setPreview('');
     } catch (err) {
       console.error(err);
-      // Hiển thị thông báo lỗi
       toast.error(t.error);
     }
   };
@@ -200,20 +238,17 @@ export default function UserEditForm() {
       {/* Avatar Section */}
       <div className="section avatar-section">
         <h3 className="section-title">📷 {t.petPhoto}</h3>
-        {/* Hiển thị ảnh nếu có */}
         {avatarUrl ? (
           <img src={avatarUrl} alt="Pet Avatar" className="pet-image-preview" />
         ) : (
-          // Nếu không có avatar, hiển thị khung trống
           <div className="pet-image-preview empty-avatar" />
         )}
-
         <input
           type="file"
           accept="image/*"
           className="file-input"
           onChange={handleFileChange}
-          disabled={!isEditMode} // Chỉ cho phép upload khi ở chế độ chỉnh sửa
+          disabled={!isEditMode}
         />
       </div>
 
@@ -252,6 +287,18 @@ export default function UserEditForm() {
               disabled={!isEditMode}
             />
           </div>
+          {/* Revisit Date */}
+          <div className="field-group">
+            <label htmlFor="revisitDate">{t.revisitDate}</label>
+            <input
+              id="revisitDate"
+              type="date"
+              name="revisitDate"
+              value={form.info.revisitDate}
+              onChange={e => handleChange(e, 'info')}
+              disabled={!isEditMode}
+            />
+          </div>
         </div>
 
         {/* Owner Info */}
@@ -275,15 +322,18 @@ export default function UserEditForm() {
               value={form.owner.phone}
               onChange={e => handleChange(e, 'owner')}
               disabled={!isEditMode}
-              maxLength="10" // Giới hạn tối đa là 10 ký tự
-              onInput={e => {
-                // Đảm bảo chỉ có 10 chữ số
-                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); // Loại bỏ chữ và giữ 10 số
-              }}
-              placeholder="Nhập số điện thoại (10 chữ số)"
-              type="tel" // Chỉ định là nhập số điện thoại
-              pattern="[0-9]{10}" // Chỉ cho phép 10 chữ số
-              title="Số điện thoại phải có 10 chữ số"
+            />
+          </div>
+          <div className="field-group">
+            <label htmlFor="owner-email">{t.ownerEmail}</label>
+            <input
+              id="owner-email"
+              name="email"
+              value={form.owner.email}
+              onChange={e => handleChange(e, 'owner')}
+              disabled={!isEditMode}
+              type="email"
+              placeholder="Enter owner's email"
             />
           </div>
         </div>
@@ -333,7 +383,7 @@ export default function UserEditForm() {
         )}
       </div>
 
-      {/* Toast container để hiển thị thông báo */}
+      {/* Toast container */}
       <ToastContainer />
     </form>
   );

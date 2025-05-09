@@ -1,4 +1,3 @@
-// src/api/petService.js
 import axios from 'axios';
 
 // Sử dụng biến môi trường REACT_APP_API_BASE_URL hoặc fallback
@@ -61,4 +60,9 @@ export const getPetById = id =>
 export const updatePetById = (id, payload) =>
   api.put(`/user/pet/${id}`, payload).then(res => res.data);
 
-
+// Cập nhật thông tin chủ Pet bao gồm email
+export const updatePetOwnerEmail = (id, email) => {
+  return api
+    .put(`/user/pet/${id}/owner-email`, { email })
+    .then(res => res.data);
+};
