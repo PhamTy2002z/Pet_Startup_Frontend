@@ -41,7 +41,10 @@ const labels = {
     toggleLang: 'EN',
     success: 'Thao tác thành công!',
     error: 'Có lỗi xảy ra, vui lòng thử lại!',
-    reExaminationDate: 'Ngày tái khám'
+    reExaminationDate: 'Ngày tái khám',
+    allergicInfoTitle: 'Thông tin Dị ứng',
+    allergicSubstances: 'Chất gây dị ứng',
+    allergicNote: 'Ghi chú về dị ứng',
   },
   en: {
     edit: 'Edit',
@@ -58,7 +61,7 @@ const labels = {
     ownerEmail: 'Owner Email',
     vaxTitle: 'Vaccination History',
     noVax: 'No vaccinations yet.',
-    addVax: '+ Vaccination',
+    addVax: 'Vaccination',
     reExamTitle: 'Re-examination Schedule',
     noReExam: 'No re-examination schedule yet.',
     addReExam: 'Add Re-examination',
@@ -68,7 +71,10 @@ const labels = {
     toggleLang: 'VI',
     success: 'Action was successful!',
     error: 'Something went wrong, please try again!',
-    reExaminationDate: 'Re-examination Date'
+    reExaminationDate: 'Re-examination Date',
+    allergicInfoTitle: 'Allergic Information',
+    allergicSubstances: 'Allergic Substances',
+    allergicNote: 'Allergy Note',
   }
 };
 
@@ -82,12 +88,14 @@ export default function UserEditForm() {
     info: { name: '', species: '', birthDate: '' },
     owner: { name: '', phone: '', email: '' },
     vaccinations: [],
-    reExaminations: []
+    reExaminations: [],
+    allergicInfo: { substances: [], note: '' }
   });
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [preview, setPreview] = useState('');
   const [existingEmail, setExistingEmail] = useState('');
+  const [showAllergicFields, setShowAllergicFields] = useState(false);
 
   // Load pet data
   useEffect(() => {
@@ -114,7 +122,8 @@ export default function UserEditForm() {
         reExaminations: (pet.reExaminations || []).map(r => ({
           date: r.date ? new Date(r.date).toISOString().split('T')[0] : '',
           note: r.note || ''
-        }))
+        })),
+        allergicInfo: pet.allergicInfo || { substances: [], note: '' }
       });
       if (pet.avatarFileId) {
         setAvatarUrl(getPetAvatarUrl(pet.avatarFileId));
@@ -212,6 +221,19 @@ export default function UserEditForm() {
     }));
   };
 
+  const handleAllergicInfoChange = (field, value) => {
+    setForm(f => ({
+      ...f,
+      allergicInfo: { ...f.allergicInfo, [field]: value }
+    }));
+  };
+
+  // Add new handler for allergic substances
+  const handleAllergicSubstancesChange = (e) => {
+    const substances = e.target.value.split(',').map(s => s.trim()).filter(s => s);
+    handleAllergicInfoChange('substances', substances);
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     try {
@@ -238,7 +260,8 @@ export default function UserEditForm() {
           .map(r => ({
             date: new Date(r.date).toISOString(),
             note: r.note || ''
-          }))
+          })),
+        allergicInfo: form.allergicInfo
       };
 
       console.log('Submitting payload:', payload);
@@ -280,7 +303,8 @@ export default function UserEditForm() {
         reExaminations: (refreshedPet.reExaminations || []).map(r => ({
           date: r.date ? new Date(r.date).toISOString().split('T')[0] : '',
           note: r.note || ''
-        }))
+        })),
+        allergicInfo: refreshedPet.allergicInfo || { substances: [], note: '' }
       });
 
       if (refreshedPet.avatarFileId) {
@@ -367,6 +391,50 @@ export default function UserEditForm() {
               onChange={e => handleChange(e, 'info')}
               disabled={!isEditMode}
             />
+          </div>
+
+          {/* Allergic Information */}
+          <div className="allergic-info">
+            <div className="allergic-header">
+              <h4 className="subsection-title">⚠️ {t.allergicInfoTitle}</h4>
+              {isEditMode && (
+                <button
+                  type="button"
+                  className="toggle-allergic-btn"
+                  onClick={() => setShowAllergicFields(!showAllergicFields)}
+                >
+                  {showAllergicFields ? <FiTrash2 /> : <FiPlus />}
+                </button>
+              )}
+            </div>
+            
+            {showAllergicFields && (
+              <div className="allergic-fields">
+                <div className="field-group">
+                  <label htmlFor="substances">{t.allergicSubstances}</label>
+                  <input
+                    id="substances"
+                    name="substances"
+                    value={form.allergicInfo.substances.join(', ')}
+                    onChange={handleAllergicSubstancesChange}
+                    disabled={!isEditMode}
+                    placeholder={t.allergicSubstances}
+                  />
+                </div>
+                <div className="field-group">
+                  <label htmlFor="note">{t.allergicNote}</label>
+                  <textarea
+                    id="note"
+                    name="note"
+                    value={form.allergicInfo.note}
+                    onChange={e => handleAllergicInfoChange('note', e.target.value)}
+                    disabled={!isEditMode}
+                    placeholder={t.allergicNote}
+                    rows="3"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
