@@ -80,7 +80,7 @@
 .submit-btn {
   width: 100%;
   margin-top: 24px;
-  background: #A3DFF2;
+  background: #4ECDC4;
   color: #FFFFFF;
   border: none;
   padding: 12px;
@@ -88,10 +88,12 @@
   font-size: 18px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
 }
 .submit-btn:hover {
-  opacity: 0.9;
+  background: #45B7AF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
 }
 
 /* CSS for Vaccination Fields in UserEditForm */
@@ -149,7 +151,7 @@
   color: #C53030;
 }
 
-/* “No vaccination” placeholder */
+/* "No vaccination" placeholder */
 .no-vax {
   color: #666666;
   font-style: italic;
@@ -162,7 +164,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #F8C8DC;
+  background: #FF9EBB;
   color: #FFFFFF;
   border: none;
   border-radius: 8px;
@@ -172,7 +174,7 @@
   transition: background-color 0.2s, transform 0.2s;
 }
 .add-vax-btn:hover {
-  background: #f5b8c7;
+  background: #FF7BA4;
   transform: translateY(-1px);
 }
 
@@ -274,4 +276,43 @@ justify-content: center;
 .add-vax-btn,
 .submit-btn {
 width: 100%;
+}
+
+/* Edit controls */
+.edit-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #F8C8DC;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.edit-btn:hover {
+  background: #f5b8c7;
+  transform: translateY(-1px);
+}
+
+.edit-btn.active {
+  background: #A3DFF2;
+}
+
+.edit-btn.active:hover {
+  background: #8fd1e6;
+}
+
+.edit-btn svg {
+  font-size: 16px;
 }
