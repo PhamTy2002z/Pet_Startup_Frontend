@@ -184,35 +184,37 @@
 /* Container khung ảnh */
 .pet-image-preview {
   display: block;
-  max-width: 200px;       /* giới hạn kích thước */
-  width: 100%;
-  margin: 0 auto 16px;    /* canh giữa và margin dưới */
-  border-radius: 50%;     /* bo tròn thành hình tròn */
-  border: 4px solid #F8C8DC;  /* viền pastel hồng */
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1); /* bóng nhẹ */
+  width: 250px;             /* Chiều rộng cố định */
+  height: 250px;            /* Chiều cao cố định bằng với chiều rộng để duy trì hình tròn */
+  margin: 0 auto 16px;      /* Canh giữa và margin dưới */
+  border-radius: 50%;       /* Bo tròn thành hình tròn */
+  border: 4px solid #F8C8DC; /* Viền pastel hồng */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Bóng nhẹ */
+  object-fit: cover;        /* Cắt ảnh cho vừa khung mà không bị kéo dãn */
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 /* Hover effect cho ảnh */
 .pet-image-preview:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+  transform: scale(1.05);    /* Phóng to ảnh một chút khi hover */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 /* Nếu muốn khung bo vuông nhưng góc mềm mại */
 .pet-image-frame {
   display: inline-block;
-  padding: 8px;
+  padding: 12px;             /* Tăng padding để khung chứa ảnh lớn hơn */
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  border-radius: 50%;        /* Đảm bảo khung cũng bo tròn */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 16px;
 }
 
 .pet-image-frame img {
   display: block;
-  max-width: 240px;
-  border-radius: 12px;
+  width: 100%;               /* Chiều rộng ảnh chiếm toàn bộ khung */
+  height: 100%;              /* Chiều cao ảnh chiếm toàn bộ khung */
+  border-radius: 50%;        /* Bo tròn ảnh */
 }
 
 /* Form 2 cột: trái 1fr, phải 260px */
@@ -329,7 +331,7 @@
   border: none;                        /* Không có viền */
   cursor: pointer;                    /* Con trỏ chuột khi hover */
   transition: background-color 0.3s, transform 0.3s;  /* Thêm hiệu ứng chuyển màu và hiệu ứng nhấn */
-  margin-left: 20px;                   /* Khoảng cách giữa nút ngôn ngữ và các nút khác */
+  margin-left: 20px;                  /* Khoảng cách giữa nút ngôn ngữ và các nút khác */
 }
 
 .lang-btn:hover {
