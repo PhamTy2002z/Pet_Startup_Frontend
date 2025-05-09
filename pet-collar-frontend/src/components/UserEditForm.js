@@ -1,7 +1,12 @@
 // src/components/UserEditForm.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getPetById, updatePetById, uploadPetAvatar } from '../api/petService';
+import {
+  getPetById,
+  updatePetById,
+  uploadPetAvatar,
+  getPetAvatarUrl
+} from '../api/petService';
 import { FiPlus, FiTrash2, FiEdit2 } from 'react-icons/fi';
 import './UserEditForm.css';
 
@@ -16,27 +21,37 @@ export default function UserEditForm() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [preview, setPreview] = useState('');
-  const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
-  // Load pet data
+  // 1) Load pet data khi component mount
   useEffect(() => {
     getPetById(id).then(pet => {
       setForm({
         info: {
           name: pet.info.name || '',
           species: pet.info.species || '',
-          birthDate: pet.info.birthDate ? new Date(pet.info.birthDate).toISOString().split('T')[0] : ''
+          birthDate: pet.info.birthDate
+            ? new Date(pet.info.birthDate).toISOString().split('T')[0]
+            : ''
         },
-        owner: pet.owner || { name: '', phone: '' },
-        vaccinations: pet.vaccinations || []
+        owner: {
+          name: pet.owner.name || '',
+          phone: pet.owner.phone || ''
+        },
+        vaccinations: (pet.vaccinations || []).map(v => ({
+          name: v.name,
+          date: v.date
+            ? new Date(v.date).toISOString().split('T')[0]
+            : ''
+        }))
       });
+
       if (pet.avatarFileId) {
-        setAvatarUrl(`${API_BASE}/api/admin/avatar/${pet.avatarFileId}`);
+        setAvatarUrl(getPetAvatarUrl(pet.avatarFileId));
       }
     });
   }, [id]);
 
-  // Preview file uploads
+  // 2) Tạo preview khi chọn file mới
   useEffect(() => {
     if (!avatarFile) {
       setPreview('');
@@ -47,10 +62,13 @@ export default function UserEditForm() {
     return () => URL.revokeObjectURL(url);
   }, [avatarFile]);
 
-  // Handlers
+  // 3) Handlers cho form fields
   const handleChange = (e, section) => {
     const { name, value } = e.target;
-    setForm(f => ({ ...f, [section]: { ...f[section], [name]: value } }));
+    setForm(f => ({
+      ...f,
+      [section]: { ...f[section], [name]: value }
+    }));
   };
 
   const handleVaxChange = (idx, field, value) => {
@@ -79,18 +97,35 @@ export default function UserEditForm() {
     setAvatarFile(e.target.files[0] || null);
   };
 
+  // 4) Submit form
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      // 1) Update text fields
-      await updatePetById(id, form);
-      // 2) Upload avatar if any
+      // Chuẩn hóa payload
+      const payload = {
+        info: {
+          ...form.info,
+          birthDate: form.info.birthDate || null
+        },
+        owner: { ...form.owner },
+        vaccinations: form.vaccinations
+          .filter(v => v.name && v.date)
+          .map(v => ({ name: v.name, date: v.date }))
+      };
+
+      // 4.1) Cập nhật text fields
+      await updatePetById(id, payload);
+
+      // 4.2) Upload avatar nếu có chọn file
       if (avatarFile) {
-        const res = await uploadPetAvatar(id, avatarFile);
-        setAvatarUrl(`${API_BASE}/api/admin/avatar/${res.avatarFileId}`);
+        const updated = await uploadPetAvatar(id, avatarFile);
+        setAvatarUrl(getPetAvatarUrl(updated.avatarFileId));
         setAvatarFile(null);
       }
+
       alert('Lưu thông tin thành công!');
+      setIsEditMode(false);
+      setPreview('');
     } catch (err) {
       console.error(err);
       alert('Có lỗi, vui lòng thử lại.');
@@ -98,18 +133,19 @@ export default function UserEditForm() {
   };
 
   return (
-    <div className="form-container">
+    <form className="form-container" onSubmit={handleSubmit}>
+      {/* nút bật/tắt edit */}
       <div className="edit-controls">
-        <button 
-          type="button" 
+        <button
+          type="button"
           className={`edit-btn ${isEditMode ? 'active' : ''}`}
-          onClick={() => setIsEditMode(!isEditMode)}
+          onClick={() => setIsEditMode(m => !m)}
         >
           <FiEdit2 /> {isEditMode ? 'Đóng chỉnh sửa' : 'Chỉnh sửa'}
         </button>
       </div>
 
-      {/* RIGHT: Avatar */}
+      {/* Avatar Section */}
       <div className="section avatar-section">
         <h3 className="section-title">📷 Ảnh Pet</h3>
         {(preview || avatarUrl) && (
@@ -119,16 +155,17 @@ export default function UserEditForm() {
             className="pet-image-preview"
           />
         )}
-        <input 
-          type="file" 
-          accept="image/*" 
-          className="file-input" 
-          onChange={handleFileChange}
-          disabled={!isEditMode}
-        />
+        {isEditMode && (
+          <input
+            type="file"
+            accept="image/*"
+            className="file-input"
+            onChange={handleFileChange}
+          />
+        )}
       </div>
 
-      {/* LEFT: Fields */}
+      {/* Left Column: Fields */}
       <div className="fields-column">
         {/* Pet Info */}
         <div className="section">
@@ -140,7 +177,6 @@ export default function UserEditForm() {
               name="name"
               value={form.info.name}
               onChange={e => handleChange(e, 'info')}
-              placeholder="Nhập tên pet"
               disabled={!isEditMode}
             />
           </div>
@@ -151,7 +187,6 @@ export default function UserEditForm() {
               name="species"
               value={form.info.species}
               onChange={e => handleChange(e, 'info')}
-              placeholder="Nhập loài pet"
               disabled={!isEditMode}
             />
           </div>
@@ -178,7 +213,6 @@ export default function UserEditForm() {
               name="name"
               value={form.owner.name}
               onChange={e => handleChange(e, 'owner')}
-              placeholder="Nhập tên chủ"
               disabled={!isEditMode}
             />
           </div>
@@ -189,7 +223,6 @@ export default function UserEditForm() {
               name="phone"
               value={form.owner.phone}
               onChange={e => handleChange(e, 'owner')}
-              placeholder="Nhập số điện thoại"
               disabled={!isEditMode}
             />
           </div>
@@ -198,56 +231,47 @@ export default function UserEditForm() {
         {/* Vaccinations */}
         <div className="section">
           <h3 className="section-title">💉 Lịch tiêm ngừa</h3>
-          <div className="vax-list">
-            {form.vaccinations.length === 0 && (
-              <p className="no-vax">Chưa có mũi tiêm nào.</p>
-            )}
-            {form.vaccinations.map((v, i) => (
-              <div key={i} className="vax-item">
-                <input
-                  type="text"
-                  placeholder="Tên vaccine"
-                  value={v.name}
-                  onChange={e => handleVaxChange(i, 'name', e.target.value)}
-                  disabled={!isEditMode}
-                />
-                <input
-                  type="date"
-                  value={v.date}
-                  onChange={e => handleVaxChange(i, 'date', e.target.value)}
-                  disabled={!isEditMode}
-                />
+          {form.vaccinations.length === 0 && <p>Chưa có mũi tiêm nào.</p>}
+          {form.vaccinations.map((v, i) => (
+            <div key={i} className="vax-item">
+              <input
+                type="text"
+                placeholder="Tên vaccine"
+                value={v.name}
+                onChange={e => handleVaxChange(i, 'name', e.target.value)}
+                disabled={!isEditMode}
+              />
+              <input
+                type="date"
+                value={v.date}
+                onChange={e => handleVaxChange(i, 'date', e.target.value)}
+                disabled={!isEditMode}
+              />
+              {isEditMode && (
                 <button
                   type="button"
                   className="remove-vax-btn"
                   onClick={() => removeVax(i)}
-                  disabled={!isEditMode}
                 >
                   <FiTrash2 />
                 </button>
-              </div>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="add-vax-btn"
-            onClick={addVax}
-            disabled={!isEditMode}
-          >
-            <FiPlus /> Thêm mũi tiêm
-          </button>
+              )}
+            </div>
+          ))}
+          {isEditMode && (
+            <button type="button" className="add-vax-btn" onClick={addVax}>
+              <FiPlus /> Thêm mũi tiêm
+            </button>
+          )}
         </div>
 
-        {/* Submit */}
-        <button 
-          type="submit" 
-          className="submit-btn" 
-          onClick={handleSubmit}
-          disabled={!isEditMode}
-        >
-          Lưu thông tin
-        </button>
+        {/* Submit Button */}
+        {isEditMode && (
+          <button type="submit" className="submit-btn">
+            Lưu thông tin
+          </button>
+        )}
       </div>
-    </div>
+    </form>
   );
 }

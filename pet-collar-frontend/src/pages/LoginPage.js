@@ -1,38 +1,32 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './LoginPage.css';
 import logo from '../assets/logo.jpg';
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useAuth();
-  const navigate = useNavigate();
 
   const handleSubmit = async e => {
-    e.preventDefault();
+    e.preventDefault();            // tránh reload
+    setError('');
     try {
       await login(username, password);
-      navigate('/admin');
+      // navigate đã được gọi bên trong login()
     } catch (err) {
-      setError(err.response?.data?.error || 'Login thất bại 😢');
+      setError(err.response?.data?.error || 'Đăng nhập thất bại.');
     }
   };
 
   return (
     <div className="login-page">
       <div className="login-card">
-        <div className="login-header">
-          {/* Dùng đúng logo đã import */}
-          <img src={logo} alt="Logo" className="login-logo" />
-          <h2>Xin chào!</h2>
-          <p>Đăng nhập để tiếp tục</p>
-        </div>
-
+        <img src={logo} alt="Logo" className="login-logo" />
+        <h2>Xin chào!</h2>
+        <p>Đăng nhập để tiếp tục</p>
         {error && <div className="login-error">{error}</div>}
-
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="input-group">
             <label htmlFor="username">Tên đăng nhập</label>
