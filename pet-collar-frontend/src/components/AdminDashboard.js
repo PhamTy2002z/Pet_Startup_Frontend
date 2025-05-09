@@ -1,17 +1,20 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import { FiPlus, FiCircle } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   getAllPets,
   createPet,
   createBulkPets
 } from '../api/petService';
 import { toast, ToastContainer } from 'react-toastify';
+import { useAuth } from '../contexts/AuthContext';
 import 'react-toastify/dist/ReactToastify.css';
 import './AdminDashboard.css';
 
 export default function AdminDashboard() {
+  const { token, logout } = useAuth();
+  const navigate = useNavigate();
   const [pets, setPets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
@@ -20,12 +23,24 @@ export default function AdminDashboard() {
   const PAGE_SIZE = 20;  // Giới hạn 20 dòng mỗi trang
 
   const fetchPets = async () => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
     setLoading(true);
     try {
       const data = await getAllPets();
       setPets(data);
     } catch (err) {
-      toast.error('Lỗi khi tải danh sách pet');
+      console.error('Error fetching pets:', err);
+      if (err.response?.status === 401) {
+        toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        logout();
+        navigate('/login');
+      } else {
+        toast.error('Lỗi khi tải danh sách pet');
+      }
     } finally {
       setLoading(false);
     }
@@ -33,7 +48,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchPets();
-  }, []);
+  }, [token]);
 
   const downloadQR = pet => {
     const link = document.createElement('a');
