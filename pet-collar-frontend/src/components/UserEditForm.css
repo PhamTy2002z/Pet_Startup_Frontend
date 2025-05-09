@@ -176,106 +176,107 @@
 .add-vax-btn:hover {
   background: #FF7BA4;
   transform: translateY(-1px);
+  transition: transform 0.2s;
 }
 
 /* Thêm vào cuối file UserEditForm.css */
 
 /* Container khung ảnh */
 .pet-image-preview {
-display: block;
-max-width: 200px;       /* giới hạn kích thước */
-width: 100%;
-margin: 0 auto 16px;    /* canh giữa và margin dưới */
-border-radius: 50%;     /* bo tròn thành hình tròn */
-border: 4px solid #F8C8DC;  /* viền pastel hồng */
-box-shadow: 0 8px 16px rgba(0,0,0,0.1); /* bóng nhẹ */
-transition: transform 0.2s, box-shadow 0.2s;
+  display: block;
+  max-width: 200px;       /* giới hạn kích thước */
+  width: 100%;
+  margin: 0 auto 16px;    /* canh giữa và margin dưới */
+  border-radius: 50%;     /* bo tròn thành hình tròn */
+  border: 4px solid #F8C8DC;  /* viền pastel hồng */
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1); /* bóng nhẹ */
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 /* Hover effect cho ảnh */
 .pet-image-preview:hover {
-transform: scale(1.05);
-box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+  transform: scale(1.05);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
 }
 
 /* Nếu muốn khung bo vuông nhưng góc mềm mại */
 .pet-image-frame {
-display: inline-block;
-padding: 8px;
-background: #fff;
-border-radius: 16px;
-box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-margin-bottom: 16px;
+  display: inline-block;
+  padding: 8px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  margin-bottom: 16px;
 }
 
 .pet-image-frame img {
-display: block;
-max-width: 240px;
-border-radius: 12px;
+  display: block;
+  max-width: 240px;
+  border-radius: 12px;
 }
 
 /* Form 2 cột: trái 1fr, phải 260px */
 .form-container form {
-display: grid;
-grid-template-columns: minmax(0, 1fr) 260px;
-gap: 24px;
-align-items: start;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 24px;
+  align-items: start;
 }
 
 /* Đóng gói tất cả section ngoài avatar vào cột trái */
 .fields-column {
-grid-column: 1;
-display: flex;
-flex-direction: column;
-gap: 24px; /* khoảng cách giữa các section */
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* khoảng cách giữa các section */
 }
 
 /* Avatar section cố định cột phải */
 .avatar-section {
-grid-column: 2;
+  grid-column: 2;
 }
 
 /* Responsive: stack trên mobile */
 @media (max-width: 768px) {
-.form-container form {
-  display: block;
-}
+  .form-container form {
+    display: block;
+  }
 }
 
 /* --- Căn chỉnh lại Vaccination để tràn hết cột trái --- */
 .vax-list {
-width: 100%;
+  width: 100%;
 }
 
 /* Cho mỗi mục tiêm full width + căn giữa icon delete */
 .vax-item {
-width: 100%;
-display: flex;
-align-items: center;
-gap: 12px;
-padding: 12px;
-background: #FAFAFA;
-border: 1px solid #E2E8F0;
-border-radius: 8px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #FAFAFA;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
 }
 
 .vax-item input[type="text"],
 .vax-item input[type="date"] {
-flex: 1;
+  flex: 1;
 }
 
 /* Delete button canh giữa, không giãn */
 .remove-vax-btn {
-display: flex;
-align-items: center;
-justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Đảm bảo button + inputs đều tràn hết khung trái */
 .field-group input,
 .add-vax-btn,
 .submit-btn {
-width: 100%;
+  width: 100%;
 }
 
 /* Edit controls */
@@ -315,4 +316,56 @@ width: 100%;
 
 .edit-btn svg {
   font-size: 16px;
+}
+
+/* Nút chọn ngôn ngữ */
+.lang-btn {
+  background: #4ECDC4;                /* Màu nền dễ chịu */
+  color: white;                        /* Màu chữ sáng */
+  padding: 8px 16px;                   /* Khoảng cách xung quanh chữ */
+  font-size: 16px;                     /* Kích thước chữ */
+  font-weight: 500;                    /* Đậm nhẹ */
+  border-radius: 8px;                  /* Bo góc mềm mại */
+  border: none;                        /* Không có viền */
+  cursor: pointer;                    /* Con trỏ chuột khi hover */
+  transition: background-color 0.3s, transform 0.3s;  /* Thêm hiệu ứng chuyển màu và hiệu ứng nhấn */
+  margin-left: 20px;                   /* Khoảng cách giữa nút ngôn ngữ và các nút khác */
+}
+
+.lang-btn:hover {
+  background: #45B7AF;                /* Màu nền khi hover */
+  transform: translateY(-2px);         /* Hiệu ứng nhấn nhẹ */
+}
+
+.lang-btn:active {
+  background: #45B7AF;                /* Màu nền khi nhấn */
+  transform: translateY(0);            /* Hoàn tác hiệu ứng nhấn */
+}
+
+.lang-btn:focus {
+  outline: none;                       /* Xóa đường viền khi nút được focus */
+  box-shadow: 0 0 3px rgba(78, 205, 196, 0.6); /* Thêm hiệu ứng shadow khi focus */
+}
+
+/* Nút chỉnh sửa */
+.edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #F8C8DC;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+/* Khoảng cách giữa các nút */
+.edit-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
 }

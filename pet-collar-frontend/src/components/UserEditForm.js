@@ -10,8 +10,49 @@ import {
 import { FiPlus, FiTrash2, FiEdit2 } from 'react-icons/fi';
 import './UserEditForm.css';
 
+// Nhãn cho hai ngôn ngữ
+const labels = {
+  vi: {
+    edit: 'Chỉnh sửa',
+    closeEdit: 'Đóng chỉnh sửa',
+    petPhoto: 'Ảnh Pet',
+    petInfoTitle: 'Thông tin Của Bé',
+    petName: 'Tên Pet',
+    species: 'Loài',
+    birthDate: 'Ngày Sinh',
+    ownerInfoTitle: 'Thông tin Của Sen',
+    ownerName: 'Tên Chủ',
+    ownerPhone: 'Số điện thoại',
+    vaxTitle: 'Lịch tiêm ngừa',
+    noVax: 'Chưa có mũi tiêm nào.',
+    addVax: 'Thêm mũi tiêm',
+    save: 'Lưu thông tin',
+    toggleLang: 'EN'
+  },
+  en: {
+    edit: 'Edit',
+    closeEdit: 'Close Edit',
+    petPhoto: 'Pet Photo',
+    petInfoTitle: "Pet's Information",
+    petName: 'Name',
+    species: 'Species',
+    birthDate: 'Birth Date',
+    ownerInfoTitle: "Owner's Information",
+    ownerName: 'Owner Name',
+    ownerPhone: 'Owner Phone',
+    vaxTitle: 'Vaccination History',
+    noVax: 'No vaccinations yet.',
+    addVax: 'Add Vaccination',
+    save: 'Save',
+    toggleLang: 'VI'
+  }
+};
+
 export default function UserEditForm() {
   const { id } = useParams();
+  const [lang, setLang] = useState('vi');
+  const t = labels[lang];
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [form, setForm] = useState({
     info: { name: '', species: '', birthDate: '' },
@@ -22,7 +63,7 @@ export default function UserEditForm() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [preview, setPreview] = useState('');
 
-  // 1) Load pet data khi component mount
+  // Load pet data
   useEffect(() => {
     getPetById(id).then(pet => {
       setForm({
@@ -44,14 +85,13 @@ export default function UserEditForm() {
             : ''
         }))
       });
-
       if (pet.avatarFileId) {
         setAvatarUrl(getPetAvatarUrl(pet.avatarFileId));
       }
     });
   }, [id]);
 
-  // 2) Tạo preview khi chọn file mới
+  // Preview file uploads
   useEffect(() => {
     if (!avatarFile) {
       setPreview('');
@@ -62,7 +102,7 @@ export default function UserEditForm() {
     return () => URL.revokeObjectURL(url);
   }, [avatarFile]);
 
-  // 3) Handlers cho form fields
+  // Handlers
   const handleChange = (e, section) => {
     const { name, value } = e.target;
     setForm(f => ({
@@ -97,33 +137,29 @@ export default function UserEditForm() {
     setAvatarFile(e.target.files[0] || null);
   };
 
-  // 4) Submit form
   const handleSubmit = async e => {
     e.preventDefault();
     try {
       // Chuẩn hóa payload
       const payload = {
-        info: {
-          ...form.info,
-          birthDate: form.info.birthDate || null
-        },
+        info: { ...form.info, birthDate: form.info.birthDate || null },
         owner: { ...form.owner },
         vaccinations: form.vaccinations
           .filter(v => v.name && v.date)
           .map(v => ({ name: v.name, date: v.date }))
       };
 
-      // 4.1) Cập nhật text fields
+      // Cập nhật text fields
       await updatePetById(id, payload);
 
-      // 4.2) Upload avatar nếu có chọn file
+      // Upload avatar nếu có
       if (avatarFile) {
         const updated = await uploadPetAvatar(id, avatarFile);
         setAvatarUrl(getPetAvatarUrl(updated.avatarFileId));
         setAvatarFile(null);
       }
 
-      alert('Lưu thông tin thành công!');
+      alert(t.save + ' thành công!');
       setIsEditMode(false);
       setPreview('');
     } catch (err) {
@@ -134,20 +170,26 @@ export default function UserEditForm() {
 
   return (
     <form className="form-container" onSubmit={handleSubmit}>
-      {/* nút bật/tắt edit */}
       <div className="edit-controls">
         <button
           type="button"
           className={`edit-btn ${isEditMode ? 'active' : ''}`}
           onClick={() => setIsEditMode(m => !m)}
         >
-          <FiEdit2 /> {isEditMode ? 'Đóng chỉnh sửa' : 'Chỉnh sửa'}
+          <FiEdit2 /> {isEditMode ? t.closeEdit : t.edit}
         </button>
+        <button
+        type="button"
+         className="lang-btn"
+            onClick={() => setLang(l => (l === 'vi' ? 'en' : 'vi'))}
+              >
+            {t.toggleLang}
+           </button>
       </div>
 
       {/* Avatar Section */}
       <div className="section avatar-section">
-        <h3 className="section-title">📷 Ảnh Pet</h3>
+        <h3 className="section-title">📷 {t.petPhoto}</h3>
         {(preview || avatarUrl) && (
           <img
             src={preview || avatarUrl}
@@ -165,13 +207,12 @@ export default function UserEditForm() {
         )}
       </div>
 
-      {/* Left Column: Fields */}
       <div className="fields-column">
         {/* Pet Info */}
         <div className="section">
-          <h3 className="section-title">🐾 Thông tin Của Bé</h3>
+          <h3 className="section-title">🐾 {t.petInfoTitle}</h3>
           <div className="field-group">
-            <label htmlFor="name">Tên Pet</label>
+            <label htmlFor="name">{t.petName}</label>
             <input
               id="name"
               name="name"
@@ -181,7 +222,7 @@ export default function UserEditForm() {
             />
           </div>
           <div className="field-group">
-            <label htmlFor="species">Loài</label>
+            <label htmlFor="species">{t.species}</label>
             <input
               id="species"
               name="species"
@@ -191,7 +232,7 @@ export default function UserEditForm() {
             />
           </div>
           <div className="field-group">
-            <label htmlFor="birthDate">Ngày Sinh</label>
+            <label htmlFor="birthDate">{t.birthDate}</label>
             <input
               id="birthDate"
               type="date"
@@ -205,9 +246,9 @@ export default function UserEditForm() {
 
         {/* Owner Info */}
         <div className="section">
-          <h3 className="section-title">👤 Thông tin Của Sen</h3>
+          <h3 className="section-title">👤 {t.ownerInfoTitle}</h3>
           <div className="field-group">
-            <label htmlFor="owner-name">Tên Chủ</label>
+            <label htmlFor="owner-name">{t.ownerName}</label>
             <input
               id="owner-name"
               name="name"
@@ -217,7 +258,7 @@ export default function UserEditForm() {
             />
           </div>
           <div className="field-group">
-            <label htmlFor="owner-phone">Số điện thoại</label>
+            <label htmlFor="owner-phone">{t.ownerPhone}</label>
             <input
               id="owner-phone"
               name="phone"
@@ -230,13 +271,13 @@ export default function UserEditForm() {
 
         {/* Vaccinations */}
         <div className="section">
-          <h3 className="section-title">💉 Lịch tiêm ngừa</h3>
-          {form.vaccinations.length === 0 && <p>Chưa có mũi tiêm nào.</p>}
+          <h3 className="section-title">💉 {t.vaxTitle}</h3>
+          {form.vaccinations.length === 0 && <p>{t.noVax}</p>}
           {form.vaccinations.map((v, i) => (
             <div key={i} className="vax-item">
               <input
                 type="text"
-                placeholder="Tên vaccine"
+                placeholder={t.addVax}
                 value={v.name}
                 onChange={e => handleVaxChange(i, 'name', e.target.value)}
                 disabled={!isEditMode}
@@ -260,18 +301,18 @@ export default function UserEditForm() {
           ))}
           {isEditMode && (
             <button type="button" className="add-vax-btn" onClick={addVax}>
-              <FiPlus /> Thêm mũi tiêm
+              <FiPlus /> {t.addVax}
             </button>
           )}
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         {isEditMode && (
           <button type="submit" className="submit-btn">
-            Lưu thông tin
+            {t.save}
           </button>
         )}
       </div>
     </form>
-  );
+);
 }
