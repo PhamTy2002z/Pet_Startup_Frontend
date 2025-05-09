@@ -36,7 +36,7 @@ const labels = {
     noReExam: 'Chưa có lịch tái khám nào.',
     addReExam: 'Thêm lịch tái khám',
     reExamDate: 'Ngày tái khám',
-    reExamNote: 'Ghi chú',
+    reExamNote: 'Thêm Lịch Khám',
     save: 'Lưu thông tin',
     toggleLang: 'EN',
     success: 'Thao tác thành công!',
@@ -58,12 +58,12 @@ const labels = {
     ownerEmail: 'Owner Email',
     vaxTitle: 'Vaccination History',
     noVax: 'No vaccinations yet.',
-    addVax: 'Add Vaccination',
+    addVax: '+ Vaccination',
     reExamTitle: 'Re-examination Schedule',
     noReExam: 'No re-examination schedule yet.',
     addReExam: 'Add Re-examination',
     reExamDate: 'Re-examination Date',
-    reExamNote: 'Note',
+    reExamNote: '+ Re-examination',
     save: 'Save',
     toggleLang: 'VI',
     success: 'Action was successful!',
@@ -87,6 +87,7 @@ export default function UserEditForm() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [preview, setPreview] = useState('');
+  const [existingEmail, setExistingEmail] = useState('');
 
   // Load pet data
   useEffect(() => {
@@ -118,6 +119,10 @@ export default function UserEditForm() {
       if (pet.avatarFileId) {
         setAvatarUrl(getPetAvatarUrl(pet.avatarFileId));
       }
+      // Set existing email
+      if (pet.owner.email) {
+        setExistingEmail(pet.owner.email);
+      }
     });
   }, [id]);
 
@@ -135,6 +140,18 @@ export default function UserEditForm() {
   // Handlers for form fields
   const handleChange = (e, section) => {
     const { name, value } = e.target;
+    
+    // Phone number validation
+    if (name === 'phone') {
+      // Only allow numbers and limit to 10 digits
+      const phoneNumber = value.replace(/\D/g, '').slice(0, 10);
+      setForm(f => ({
+        ...f,
+        [section]: { ...f[section], [name]: phoneNumber }
+      }));
+      return;
+    }
+
     setForm(f => ({
       ...f,
       [section]: { ...f[section], [name]: value }
@@ -164,7 +181,13 @@ export default function UserEditForm() {
   };
 
   const handleFileChange = e => {
-    setAvatarFile(e.target.files[0] || null);
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      // Create preview URL immediately
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+    }
   };
 
   const handleReExamChange = (idx, field, value) => {
@@ -219,12 +242,6 @@ export default function UserEditForm() {
       };
 
       console.log('Submitting payload:', payload);
-
-      // Check if email has changed and update it if necessary
-      const pet = await getPetById(id);
-      if (pet && pet.owner.email !== form.owner.email) {
-        await updatePetOwnerEmail(id, form.owner.email);
-      }
 
       // Update the pet information
       const updatedPet = await updatePetById(id, payload);
@@ -300,7 +317,9 @@ export default function UserEditForm() {
       {/* Avatar Section */}
       <div className="section avatar-section">
         <h3 className="section-title">📷 {t.petPhoto}</h3>
-        {avatarUrl ? (
+        {preview ? (
+          <img src={preview} alt="Pet Avatar" className="pet-image-preview" />
+        ) : avatarUrl ? (
           <img src={avatarUrl} alt="Pet Avatar" className="pet-image-preview" />
         ) : (
           <div className="pet-image-preview empty-avatar" />
@@ -376,15 +395,19 @@ export default function UserEditForm() {
           </div>
           <div className="field-group">
             <label htmlFor="owner-email">{t.ownerEmail}</label>
-            <input
-              id="owner-email"
-              name="email"
-              value={form.owner.email}
-              onChange={e => handleChange(e, 'owner')}
-              disabled={!isEditMode}
-              type="email"
-              placeholder="Enter owner's email"
-            />
+            {existingEmail && !isEditMode ? (
+              <div className="existing-email">{existingEmail}</div>
+            ) : (
+              <input
+                id="owner-email"
+                name="email"
+                value={form.owner.email}
+                onChange={e => handleChange(e, 'owner')}
+                disabled={!isEditMode}
+                type="email"
+                placeholder="Enter owner's email"
+              />
+            )}
           </div>
         </div>
 
