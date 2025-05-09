@@ -32,8 +32,7 @@ const labels = {
     save: 'Lưu thông tin',
     toggleLang: 'EN',
     success: 'Thao tác thành công!',
-    error: 'Có lỗi xảy ra, vui lòng thử lại!',
-    updatedField: 'Trường {field} đã được cập nhật'
+    error: 'Có lỗi xảy ra, vui lòng thử lại!'
   },
   en: {
     edit: 'Edit',
@@ -52,8 +51,7 @@ const labels = {
     save: 'Save',
     toggleLang: 'VI',
     success: 'Action was successful!',
-    error: 'Something went wrong, please try again!',
-    updatedField: 'The {field} field has been updated'
+    error: 'Something went wrong, please try again!'
   }
 };
 
@@ -146,53 +144,39 @@ export default function UserEditForm() {
     setAvatarFile(e.target.files[0] || null);
   };
 
-  // Thay đổi trong hàm handleSubmit
-const handleSubmit = async e => {
-  e.preventDefault();
-  try {
-    // Chuẩn hóa payload
-    const payload = {
-      info: { ...form.info, birthDate: form.info.birthDate || null },
-      owner: { ...form.owner },
-      vaccinations: form.vaccinations
-        .filter(v => v.name && v.date)
-        .map(v => ({ name: v.name, date: v.date }))
-    };
+  const handleSubmit = async e => {
+    e.preventDefault();
+    try {
+      // Chuẩn hóa payload
+      const payload = {
+        info: { ...form.info, birthDate: form.info.birthDate || null },
+        owner: { ...form.owner },
+        vaccinations: form.vaccinations
+          .filter(v => v.name && v.date)
+          .map(v => ({ name: v.name, date: v.date }))
+      };
 
-    // Cập nhật text fields
-    const updatedFields = [];
+      // Cập nhật text fields
+      await updatePetById(id, payload);
 
-    // Kiểm tra các trường đã thay đổi
-    if (form.info.name !== '') updatedFields.push(t.petName);
-    if (form.info.species !== '') updatedFields.push(t.species);
-    if (form.owner.name !== '') updatedFields.push(t.ownerName);
-    if (form.owner.phone !== '') updatedFields.push(t.ownerPhone);
+      // Upload avatar nếu có
+      if (avatarFile) {
+        const updated = await uploadPetAvatar(id, avatarFile);
+        setAvatarUrl(getPetAvatarUrl(updated.avatarFileId));
+        setAvatarFile(null);
+      }
 
-    await updatePetById(id, payload);
+      // Hiển thị thông báo thành công
+      toast.success(t.success);
 
-    // Upload avatar nếu có
-    if (avatarFile) {
-      const updated = await uploadPetAvatar(id, avatarFile);
-      setAvatarUrl(getPetAvatarUrl(updated.avatarFileId));
-      setAvatarFile(null);
+      setIsEditMode(false);
+      setPreview('');
+    } catch (err) {
+      console.error(err);
+      // Hiển thị thông báo lỗi
+      toast.error(t.error);
     }
-
-    // Hiển thị thông báo thành công cho các trường đã thay đổi
-    updatedFields.forEach(field => {
-      toast.success(`${field} ${t.success}`);
-    });
-
-    // Hiển thị thông báo thành công chung
-    toast.success(t.success);
-
-    setIsEditMode(false);
-    setPreview('');
-  } catch (err) {
-    console.error(err);
-    // Hiển thị thông báo lỗi
-    toast.error(t.error);
-  }
-};
+  };
 
   return (
     <form className="form-container" onSubmit={handleSubmit}>
