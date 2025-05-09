@@ -1,11 +1,10 @@
-/* UserEditForm.css */
-
+/* General Form Styling */
 .form-container {
   max-width: 600px;
   margin: 40px auto;
   background: #FFFFFF;
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   padding: 24px;
 }
 
@@ -46,7 +45,7 @@
 .field-group input:focus {
   outline: none;
   border-color: #A3DFF2;
-  box-shadow: 0 0 0 3px rgba(163,223,242,0.5);
+  box-shadow: 0 0 0 3px rgba(163, 223, 242, 0.5);
 }
 
 .vax-list {
@@ -58,82 +57,18 @@
 .vax-item {
   display: flex;
   gap: 12px;
-}
-
-.add-vax-btn {
-  margin-top: 8px;
-  background: none;
-  border: 2px solid #F8C8DC;
-  color: #F8C8DC;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.2s, color 0.2s;
-}
-.add-vax-btn:hover {
-  background: #F8C8DC;
-  color: #FFFFFF;
-}
-
-.submit-btn {
-  width: 100%;
-  margin-top: 24px;
-  background: #4ECDC4;
-  color: #FFFFFF;
-  border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.submit-btn:hover {
-  background: #45B7AF;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
-}
-
-/* Thông báo lỗi khi số điện thoại không hợp lệ */
-.field-group input:invalid {
-  border-color: #E53E3E;                /* Đỏ viền khi sai */
-  box-shadow: 0 0 5px rgba(229, 62, 62, 0.3); /* Đỏ sáng xung quanh */
-}
-
-.field-group input:valid {
-  border-color: #A3DFF2;                /* Xanh khi đúng */
-  box-shadow: 0 0 5px rgba(163, 223, 242, 0.5);
-}
-
-
-/* CSS for Vaccination Fields in UserEditForm */
-
-/* Container for the vaccination list */
-.vax-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-/* Each vaccination item */
-.vax-item {
-  display: flex;
   align-items: center;
-  gap: 12px;
   background: #FAFAFA;
   border: 1px solid #E2E8F0;
   border-radius: 8px;
   padding: 12px;
   transition: box-shadow 0.2s;
 }
+
 .vax-item:hover {
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Inputs inside each item */
 .vax-item input[type="text"],
 .vax-item input[type="date"] {
   flex: 1;
@@ -143,11 +78,12 @@
   font-size: 16px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
+
 .vax-item input[type="text"]:focus,
 .vax-item input[type="date"]:focus {
   outline: none;
   border-color: #A3DFF2;
-  box-shadow: 0 0 0 3px rgba(163,223,242,0.5);
+  box-shadow: 0 0 0 3px rgba(163, 223, 242, 0.5);
 }
 
 /* Remove-button (trash icon) */
@@ -159,6 +95,7 @@
   font-size: 18px;
   transition: color 0.2s;
 }
+
 .remove-vax-btn:hover {
   color: #C53030;
 }
@@ -185,90 +122,75 @@
   font-weight: 500;
   transition: background-color 0.2s, transform 0.2s;
 }
+
 .add-vax-btn:hover {
   background: #FF7BA4;
   transform: translateY(-1px);
   transition: transform 0.2s;
 }
 
-/* Thêm vào cuối file UserEditForm.css */
+/* "Add Revisit Date" Button */
+.add-revisit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #FF9EBB;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s, transform 0.2s;
+}
 
-/* Container khung ảnh */
+.add-revisit-btn:hover {
+  background: #FF7BA4;
+  transform: translateY(-1px);
+  transition: transform 0.2s;
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  margin-top: 24px;
+  background: #4ECDC4;
+  color: #FFFFFF;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submit-btn:hover {
+  background: #45B7AF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+}
+
+/* Avatar Preview */
 .pet-image-preview {
   display: block;
-  width: 250px;             /* Chiều rộng cố định */
-  height: 250px;            /* Chiều cao cố định bằng với chiều rộng để duy trì hình tròn */
-  margin: 0 auto 16px;      /* Canh giữa và margin dưới */
-  border-radius: 50%;       /* Bo tròn thành hình tròn */
-  border: 4px solid #F8C8DC; /* Viền pastel hồng */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Bóng nhẹ */
-  object-fit: cover;        /* Cắt ảnh cho vừa khung mà không bị kéo dãn */
+  width: 250px;
+  height: 250px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  border: 4px solid #F8C8DC;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* Hover effect cho ảnh */
 .pet-image-preview:hover {
-  transform: scale(1.05);    /* Phóng to ảnh một chút khi hover */
+  transform: scale(1.05);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
-/* Nếu muốn khung bo vuông nhưng góc mềm mại */
-.pet-image-frame {
-  display: inline-block;
-  padding: 12px;             /* Tăng padding để khung chứa ảnh lớn hơn */
-  background: #fff;
-  border-radius: 50%;        /* Đảm bảo khung cũng bo tròn */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-  margin-bottom: 16px;
-}
-
-.pet-image-frame img {
-  display: block;
-  width: 100%;               /* Chiều rộng ảnh chiếm toàn bộ khung */
-  height: 100%;              /* Chiều cao ảnh chiếm toàn bộ khung */
-  border-radius: 50%;        /* Bo tròn ảnh */
-}
-
-/* Form 2 cột: trái 1fr, phải 260px */
-.form-container form {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
-  gap: 24px;
-  align-items: start;
-}
-
-/* Đóng gói tất cả section ngoài avatar vào cột trái */
-.fields-column {
-  grid-column: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 24px; /* khoảng cách giữa các section */
-}
-
-/* Avatar Section */
-.avatar-section {
-  text-align: center;
-  margin-bottom: 20px; /* Giãn cách phía dưới */
-}
-
-/* Khung ảnh avatar */
-.pet-image-preview {
-  display: inline-block;
-  max-width: 200px;
-  height: 200px;
-  margin-bottom: 16px;
-  border-radius: 50%; /* Bo tròn ảnh */
-  border: 4px solid #F8C8DC; /* Viền pastel hồng */
-  background-color: #f0f0f0; /* Màu nền nếu chưa có ảnh */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Hiển thị văn bản khi không có ảnh */
+/* "Empty Avatar" Placeholder */
 .pet-image-preview.empty-avatar {
   font-size: 14px;
   color: #A3A3A3;
@@ -276,13 +198,7 @@
   text-align: center;
 }
 
-/* Hover effect cho ảnh */
-.pet-image-preview:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-/* Nút chọn tệp */
+/* File Input */
 .file-input {
   margin-top: 16px;
   font-size: 14px;
@@ -293,65 +209,20 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s;
-  width: 100%;  /* Đảm bảo nút rộng */
-  max-width: 200px;  /* Giới hạn chiều rộng nút */
+  width: 100%;
+  max-width: 200px;
 }
 
-/* Nếu không được phép chọn tệp (disabled) */
 .file-input:disabled {
   background-color: #E2E8F0;
   cursor: not-allowed;
 }
 
-/* Nút hover */
 .file-input:hover:not(:disabled) {
   background-color: #45B7AF;
 }
 
-/* Responsive: stack trên mobile */
-@media (max-width: 768px) {
-  .form-container form {
-    display: block;
-  }
-}
-
-/* --- Căn chỉnh lại Vaccination để tràn hết cột trái --- */
-.vax-list {
-  width: 100%;
-}
-
-/* Cho mỗi mục tiêm full width + căn giữa icon delete */
-.vax-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: #FAFAFA;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-}
-
-.vax-item input[type="text"],
-.vax-item input[type="date"] {
-  flex: 1;
-}
-
-/* Delete button canh giữa, không giãn */
-.remove-vax-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Đảm bảo button + inputs đều tràn hết khung trái */
-.field-group input,
-.add-vax-btn,
-.submit-btn {
-  width: 100%;
-}
-
-/* Edit controls */
+/* Edit Controls */
 .edit-controls {
   display: flex;
   justify-content: flex-end;
@@ -390,54 +261,70 @@
   font-size: 16px;
 }
 
-/* Nút chọn ngôn ngữ */
+/* Language Toggle Button */
 .lang-btn {
-  background: #4ECDC4;                /* Màu nền dễ chịu */
-  color: white;                        /* Màu chữ sáng */
-  padding: 8px 16px;                   /* Khoảng cách xung quanh chữ */
-  font-size: 16px;                     /* Kích thước chữ */
-  font-weight: 500;                    /* Đậm nhẹ */
-  border-radius: 8px;                  /* Bo góc mềm mại */
-  border: none;                        /* Không có viền */
-  cursor: pointer;                    /* Con trỏ chuột khi hover */
-  transition: background-color 0.3s, transform 0.3s;  /* Thêm hiệu ứng chuyển màu và hiệu ứng nhấn */
-  margin-left: 20px;                  /* Khoảng cách giữa nút ngôn ngữ và các nút khác */
+  background: #4ECDC4;
+  color: white;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+  margin-left: 20px;
 }
 
 .lang-btn:hover {
-  background: #45B7AF;                /* Màu nền khi hover */
-  transform: translateY(-2px);         /* Hiệu ứng nhấn nhẹ */
+  background: #45B7AF;
+  transform: translateY(-2px);
 }
 
 .lang-btn:active {
-  background: #45B7AF;                /* Màu nền khi nhấn */
-  transform: translateY(0);            /* Hoàn tác hiệu ứng nhấn */
+  background: #45B7AF;
+  transform: translateY(0);
 }
 
 .lang-btn:focus {
-  outline: none;                       /* Xóa đường viền khi nút được focus */
-  box-shadow: 0 0 3px rgba(78, 205, 196, 0.6); /* Thêm hiệu ứng shadow khi focus */
+  outline: none;
+  box-shadow: 0 0 3px rgba(78, 205, 196, 0.6);
 }
 
-/* Nút chỉnh sửa */
-.edit-btn {
+/* Responsive Layout */
+@media (max-width: 768px) {
+  .form-container form {
+    display: block;
+  }
+}
+
+.vax-list {
+  width: 100%;
+}
+
+.vax-item {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: #F8C8DC;
-  color: #FFFFFF;
-  border: none;
+  gap: 12px;
+  padding: 12px;
+  background: #FAFAFA;
+  border: 1px solid #E2E8F0;
   border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
 }
 
-/* Khoảng cách giữa các nút */
-.edit-controls {
+.vax-item input[type="text"],
+.vax-item input[type="date"] {
+  flex: 1;
+}
+
+.remove-vax-btn {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-group input,
+.add-vax-btn,
+.submit-btn {
+  width: 100%;
 }
