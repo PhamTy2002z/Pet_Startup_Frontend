@@ -1,4 +1,3 @@
-// src/components/UserEditForm.js
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -9,6 +8,10 @@ import {
 } from '../api/petService';
 import { FiPlus, FiTrash2, FiEdit2 } from 'react-icons/fi';
 import './UserEditForm.css';
+
+// Import react-toastify
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import style cho Toastify
 
 // Nhãn cho hai ngôn ngữ
 const labels = {
@@ -27,7 +30,10 @@ const labels = {
     noVax: 'Chưa có mũi tiêm nào.',
     addVax: 'Thêm mũi tiêm',
     save: 'Lưu thông tin',
-    toggleLang: 'EN'
+    toggleLang: 'EN',
+    success: 'Thao tác thành công!',
+    error: 'Có lỗi xảy ra, vui lòng thử lại!',
+    updatedField: 'Trường {field} đã được cập nhật'
   },
   en: {
     edit: 'Edit',
@@ -44,7 +50,10 @@ const labels = {
     noVax: 'No vaccinations yet.',
     addVax: 'Add Vaccination',
     save: 'Save',
-    toggleLang: 'VI'
+    toggleLang: 'VI',
+    success: 'Action was successful!',
+    error: 'Something went wrong, please try again!',
+    updatedField: 'The {field} field has been updated'
   }
 };
 
@@ -137,36 +146,53 @@ export default function UserEditForm() {
     setAvatarFile(e.target.files[0] || null);
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    try {
-      // Chuẩn hóa payload
-      const payload = {
-        info: { ...form.info, birthDate: form.info.birthDate || null },
-        owner: { ...form.owner },
-        vaccinations: form.vaccinations
-          .filter(v => v.name && v.date)
-          .map(v => ({ name: v.name, date: v.date }))
-      };
+  // Thay đổi trong hàm handleSubmit
+const handleSubmit = async e => {
+  e.preventDefault();
+  try {
+    // Chuẩn hóa payload
+    const payload = {
+      info: { ...form.info, birthDate: form.info.birthDate || null },
+      owner: { ...form.owner },
+      vaccinations: form.vaccinations
+        .filter(v => v.name && v.date)
+        .map(v => ({ name: v.name, date: v.date }))
+    };
 
-      // Cập nhật text fields
-      await updatePetById(id, payload);
+    // Cập nhật text fields
+    const updatedFields = [];
 
-      // Upload avatar nếu có
-      if (avatarFile) {
-        const updated = await uploadPetAvatar(id, avatarFile);
-        setAvatarUrl(getPetAvatarUrl(updated.avatarFileId));
-        setAvatarFile(null);
-      }
+    // Kiểm tra các trường đã thay đổi
+    if (form.info.name !== '') updatedFields.push(t.petName);
+    if (form.info.species !== '') updatedFields.push(t.species);
+    if (form.owner.name !== '') updatedFields.push(t.ownerName);
+    if (form.owner.phone !== '') updatedFields.push(t.ownerPhone);
 
-      alert(t.save + ' thành công!');
-      setIsEditMode(false);
-      setPreview('');
-    } catch (err) {
-      console.error(err);
-      alert('Có lỗi, vui lòng thử lại.');
+    await updatePetById(id, payload);
+
+    // Upload avatar nếu có
+    if (avatarFile) {
+      const updated = await uploadPetAvatar(id, avatarFile);
+      setAvatarUrl(getPetAvatarUrl(updated.avatarFileId));
+      setAvatarFile(null);
     }
-  };
+
+    // Hiển thị thông báo thành công cho các trường đã thay đổi
+    updatedFields.forEach(field => {
+      toast.success(`${field} ${t.success}`);
+    });
+
+    // Hiển thị thông báo thành công chung
+    toast.success(t.success);
+
+    setIsEditMode(false);
+    setPreview('');
+  } catch (err) {
+    console.error(err);
+    // Hiển thị thông báo lỗi
+    toast.error(t.error);
+  }
+};
 
   return (
     <form className="form-container" onSubmit={handleSubmit}>
@@ -179,32 +205,32 @@ export default function UserEditForm() {
           <FiEdit2 /> {isEditMode ? t.closeEdit : t.edit}
         </button>
         <button
-        type="button"
-         className="lang-btn"
-            onClick={() => setLang(l => (l === 'vi' ? 'en' : 'vi'))}
-              >
-            {t.toggleLang}
-           </button>
+          type="button"
+          className="lang-btn"
+          onClick={() => setLang(l => (l === 'vi' ? 'en' : 'vi'))}
+        >
+          {t.toggleLang}
+        </button>
       </div>
 
       {/* Avatar Section */}
       <div className="section avatar-section">
         <h3 className="section-title">📷 {t.petPhoto}</h3>
-        {(preview || avatarUrl) && (
-          <img
-            src={preview || avatarUrl}
-            alt="Pet"
-            className="pet-image-preview"
-          />
+        {/* Hiển thị ảnh nếu có */}
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="Pet Avatar" className="pet-image-preview" />
+        ) : (
+          // Nếu không có avatar, hiển thị khung trống
+          <div className="pet-image-preview empty-avatar" />
         )}
-        {isEditMode && (
-          <input
-            type="file"
-            accept="image/*"
-            className="file-input"
-            onChange={handleFileChange}
-          />
-        )}
+
+        <input
+          type="file"
+          accept="image/*"
+          className="file-input"
+          onChange={handleFileChange}
+          disabled={!isEditMode} // Chỉ cho phép upload khi ở chế độ chỉnh sửa
+        />
       </div>
 
       <div className="fields-column">
@@ -265,6 +291,15 @@ export default function UserEditForm() {
               value={form.owner.phone}
               onChange={e => handleChange(e, 'owner')}
               disabled={!isEditMode}
+              maxLength="10" // Giới hạn tối đa là 10 ký tự
+              onInput={e => {
+                // Đảm bảo chỉ có 10 chữ số
+                e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); // Loại bỏ chữ và giữ 10 số
+              }}
+              placeholder="Nhập số điện thoại (10 chữ số)"
+              type="tel" // Chỉ định là nhập số điện thoại
+              pattern="[0-9]{10}" // Chỉ cho phép 10 chữ số
+              title="Số điện thoại phải có 10 chữ số"
             />
           </div>
         </div>
@@ -313,6 +348,9 @@ export default function UserEditForm() {
           </button>
         )}
       </div>
+
+      {/* Toast container để hiển thị thông báo */}
+      <ToastContainer />
     </form>
-);
+  );
 }
