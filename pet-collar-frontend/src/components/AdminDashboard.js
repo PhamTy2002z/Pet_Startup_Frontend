@@ -1,11 +1,12 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiCircle } from 'react-icons/fi';
+import { FiPlus, FiCircle, FiSearch, FiX, FiClock } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   getAllPets,
   createPet,
-  createBulkPets
+  createBulkPets,
+  searchPets
 } from '../api/petService';
 import { toast, ToastContainer } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
@@ -20,6 +21,21 @@ export default function AdminDashboard() {
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkQty, setBulkQty] = useState('');
   const [page, setPage] = useState(1);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchParams, setSearchParams] = useState({
+    id: '',
+    petName: '',
+    ownerName: '',
+    phone: '',
+    createdAtStart: '',
+    createdAtEnd: '',
+    updatedAtStart: '',
+    updatedAtEnd: '',
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
+  });
+  const [showOnlyRecent, setShowOnlyRecent] = useState(false);
+  const [recentCount, setRecentCount] = useState(0);
   const PAGE_SIZE = 20;  // Giới hạn 20 dòng mỗi trang
 
   const fetchPets = async () => {
@@ -32,6 +48,40 @@ export default function AdminDashboard() {
     try {
       const data = await getAllPets();
       setPets(data);
+      
+      // Count recently updated pets
+      const recentPets = data.filter(pet => pet.recentlyUpdated);
+      setRecentCount(recentPets.length);
+      
+      // Show toast if there are recent updates
+      if (recentPets.length > 0) {
+        toast.info(
+          <div>
+            Có {recentPets.length} pet vừa được cập nhật
+            <button 
+              onClick={() => {
+                setShowOnlyRecent(true);
+                setSearchParams(prev => ({
+                  ...prev,
+                  updatedAtStart: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                }));
+                handleSearch();
+              }}
+              className="toast-link"
+            >
+              Xem ngay
+            </button>
+          </div>,
+          {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
+        );
+      }
     } catch (err) {
       console.error('Error fetching pets:', err);
       if (err.response?.status === 401) {
@@ -44,6 +94,36 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      const result = await searchPets(searchParams);
+      setPets(result.pets);
+      setPage(1);
+    } catch (err) {
+      console.error('Error searching pets:', err);
+      toast.error('Lỗi khi tìm kiếm');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setSearchParams({
+      id: '',
+      petName: '',
+      ownerName: '',
+      phone: '',
+      createdAtStart: '',
+      createdAtEnd: '',
+      updatedAtStart: '',
+      updatedAtEnd: '',
+      sortBy: 'createdAt',
+      sortOrder: 'desc'
+    });
+    fetchPets();
   };
 
   useEffect(() => {
@@ -117,6 +197,12 @@ export default function AdminDashboard() {
         </div>
         <div className="header-actions">
           <button
+            onClick={() => setShowSearch(!showSearch)}
+            className="search-toggle-button"
+          >
+            <FiSearch size={20} /> Tìm kiếm
+          </button>
+          <button
             onClick={handleCreate}
             disabled={loading || bulkMode}
             className="create-button"
@@ -132,6 +218,140 @@ export default function AdminDashboard() {
           </button>
         </div>
       </header>
+
+      {showSearch && (
+        <div className="search-form">
+          <div className="search-grid">
+            <div className="search-field">
+              <label>ID:</label>
+              <input
+                type="text"
+                value={searchParams.id}
+                onChange={(e) => setSearchParams({...searchParams, id: e.target.value})}
+                placeholder="Nhập ID"
+              />
+            </div>
+            <div className="search-field">
+              <label>Tên Pet:</label>
+              <input
+                type="text"
+                value={searchParams.petName}
+                onChange={(e) => setSearchParams({...searchParams, petName: e.target.value})}
+                placeholder="Nhập tên pet"
+              />
+            </div>
+            <div className="search-field">
+              <label>Tên Chủ:</label>
+              <input
+                type="text"
+                value={searchParams.ownerName}
+                onChange={(e) => setSearchParams({...searchParams, ownerName: e.target.value})}
+                placeholder="Nhập tên chủ"
+              />
+            </div>
+            <div className="search-field">
+              <label>Số điện thoại:</label>
+              <input
+                type="text"
+                value={searchParams.phone}
+                onChange={(e) => setSearchParams({...searchParams, phone: e.target.value})}
+                placeholder="Nhập số điện thoại"
+              />
+            </div>
+            <div className="search-field">
+              <label>Ngày tạo từ:</label>
+              <input
+                type="date"
+                value={searchParams.createdAtStart}
+                onChange={(e) => setSearchParams({...searchParams, createdAtStart: e.target.value})}
+              />
+            </div>
+            <div className="search-field">
+              <label>đến:</label>
+              <input
+                type="date"
+                value={searchParams.createdAtEnd}
+                onChange={(e) => setSearchParams({...searchParams, createdAtEnd: e.target.value})}
+              />
+            </div>
+            <div className="search-field">
+              <label>Cập nhật từ:</label>
+              <input
+                type="date"
+                value={searchParams.updatedAtStart}
+                onChange={(e) => setSearchParams({...searchParams, updatedAtStart: e.target.value})}
+              />
+            </div>
+            <div className="search-field">
+              <label>đến:</label>
+              <input
+                type="date"
+                value={searchParams.updatedAtEnd}
+                onChange={(e) => setSearchParams({...searchParams, updatedAtEnd: e.target.value})}
+              />
+            </div>
+            <div className="search-field">
+              <label>Sắp xếp theo:</label>
+              <select
+                value={searchParams.sortBy}
+                onChange={(e) => setSearchParams({...searchParams, sortBy: e.target.value})}
+              >
+                <option value="createdAt">Ngày tạo</option>
+                <option value="petName">Tên Pet</option>
+                <option value="ownerName">Tên Chủ</option>
+                <option value="lastUpdated">Cập nhật gần nhất</option>
+              </select>
+            </div>
+            <div className="search-field">
+              <label>Thứ tự:</label>
+              <select
+                value={searchParams.sortOrder}
+                onChange={(e) => setSearchParams({...searchParams, sortOrder: e.target.value})}
+              >
+                <option value="desc">Giảm dần</option>
+                <option value="asc">Tăng dần</option>
+              </select>
+            </div>
+            <div className="search-field recent-toggle">
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={showOnlyRecent}
+                  onChange={(e) => {
+                    setShowOnlyRecent(e.target.checked);
+                    if (e.target.checked) {
+                      setSearchParams(prev => ({
+                        ...prev,
+                        updatedAtStart: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                      }));
+                      handleSearch();
+                    } else {
+                      // Clear the date filter and reset search
+                      setSearchParams(prev => ({
+                        ...prev,
+                        updatedAtStart: '',
+                        updatedAtEnd: ''
+                      }));
+                      fetchPets(); // Reset to show all pets
+                    }
+                  }}
+                />
+                <span className="toggle-text">
+                  <FiClock size={16} /> Chỉ xem cập nhật trong 24h
+                </span>
+              </label>
+            </div>
+          </div>
+          <div className="search-actions">
+            <button onClick={handleSearch} className="search-button">
+              <FiSearch size={20} /> Tìm kiếm
+            </button>
+            <button onClick={handleReset} className="reset-button">
+              <FiX size={20} /> Đặt lại
+            </button>
+          </div>
+        </div>
+      )}
 
       {bulkMode && (
         <div className="bulk-form">
@@ -161,7 +381,7 @@ export default function AdminDashboard() {
       )}
 
       {!loading && pets.length === 0 ? (
-        <p className="empty">Chưa có pet nào. Nhấn “Tạo QR mới” để khởi tạo.</p>
+        <p className="empty">Chưa có pet nào. Nhấn "Tạo QR mới" để khởi tạo.</p>
       ) : (
         <>
           <table className="list-table">
@@ -179,7 +399,10 @@ export default function AdminDashboard() {
             </thead>
             <tbody>
               {pagedPets.map((p, idx) => (
-                <tr key={p._id} className={idx % 2 === 0 ? 'even' : 'odd'}>
+                <tr 
+                  key={p._id} 
+                  className={`${idx % 2 === 0 ? 'even' : 'odd'} ${p.recentlyUpdated ? 'recently-updated' : ''}`}
+                >
                   <td>{(page - 1) * PAGE_SIZE + idx + 1}</td>
                   <td>
                     <Link
@@ -192,11 +415,23 @@ export default function AdminDashboard() {
                     </Link>
                   </td>
                   <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
-                  <td>{p.info.name || '-'}</td>
+                  <td>
+                    {p.info.name || '-'}
+                    {p.recentlyUpdated && (
+                      <span className="new-badge">NEW</span>
+                    )}
+                  </td>
                   <td>{p.owner.name || '-'}</td>
                   <td>{p.owner.phone || '-'}</td>
                   <td>{new Date(p.createdAt).toLocaleString()}</td>
-                  <td>{p.updatedAt ? new Date(p.updatedAt).toLocaleString() : '-'}</td>
+                  <td>
+                    {p.updatedAt ? new Date(p.updatedAt).toLocaleString() : '-'}
+                    {p.recentlyUpdated && (
+                      <span className="update-badge">
+                        <FiClock size={14} /> 24h
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

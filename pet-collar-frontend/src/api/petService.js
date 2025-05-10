@@ -32,6 +32,10 @@ adminApi.interceptors.request.use(
 
 /* ========================= ADMIN APIs ============================ */
 
+// Search pets with filters
+export const searchPets = (params) =>
+  adminApi.get('/admin/pets/search', { params }).then((r) => r.data);
+
 // Tạo mới Pet (record rỗng + QR)
 export const createPet = () =>
   adminApi.post('/admin/pet').then((r) => r.data);
