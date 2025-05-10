@@ -1,12 +1,13 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiCircle, FiSearch, FiX, FiClock } from 'react-icons/fi';
+import { FiPlus, FiCircle, FiSearch, FiX, FiClock, FiCheck, FiXCircle } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   getAllPets,
   createPet,
   createBulkPets,
-  searchPets
+  searchPets,
+  updatePetStatus
 } from '../api/petService';
 import { toast, ToastContainer } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
@@ -32,7 +33,8 @@ export default function AdminDashboard() {
     updatedAtStart: '',
     updatedAtEnd: '',
     sortBy: 'createdAt',
-    sortOrder: 'desc'
+    sortOrder: 'desc',
+    status: ''
   });
   const [showOnlyRecent, setShowOnlyRecent] = useState(false);
   const [recentCount, setRecentCount] = useState(0);
@@ -121,7 +123,8 @@ export default function AdminDashboard() {
       updatedAtStart: '',
       updatedAtEnd: '',
       sortBy: 'createdAt',
-      sortOrder: 'desc'
+      sortOrder: 'desc',
+      status: ''
     });
     fetchPets();
   };
@@ -179,6 +182,17 @@ export default function AdminDashboard() {
       toast.error('Tạo hàng loạt thất bại');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (petId, newStatus) => {
+    try {
+      await updatePetStatus(petId, newStatus);
+      toast.success('Cập nhật trạng thái thành công');
+      await fetchPets(); // Refresh the list
+    } catch (err) {
+      console.error('Error updating status:', err);
+      toast.error(err.response?.data?.error || 'Lỗi khi cập nhật trạng thái');
     }
   };
 
@@ -291,6 +305,17 @@ export default function AdminDashboard() {
               />
             </div>
             <div className="search-field">
+              <label>Trạng thái:</label>
+              <select
+                value={searchParams.status}
+                onChange={(e) => setSearchParams({...searchParams, status: e.target.value})}
+              >
+                <option value="">Tất cả</option>
+                <option value="unused">Chưa sử dụng</option>
+                <option value="active">Đang sử dụng</option>
+              </select>
+            </div>
+            <div className="search-field">
               <label>Sắp xếp theo:</label>
               <select
                 value={searchParams.sortBy}
@@ -395,6 +420,7 @@ export default function AdminDashboard() {
                 <th>Điện thoại</th>
                 <th>Ngày tạo</th>
                 <th>Cập nhật gần nhất</th>
+                <th>Trạng thái</th>
               </tr>
             </thead>
             <tbody>
@@ -431,6 +457,32 @@ export default function AdminDashboard() {
                         <FiClock size={14} /> 24h
                       </span>
                     )}
+                  </td>
+                  <td>
+                    <div className="status-cell">
+                      <span className={`status-badge ${p.status}`}>
+                        {p.status === 'active' ? 'Đang sử dụng' : 'Chưa sử dụng'}
+                      </span>
+                      <div className="status-actions">
+                        {p.status === 'unused' ? (
+                          <button
+                            onClick={() => handleStatusChange(p._id, 'active')}
+                            className="status-button activate"
+                            title="Kích hoạt QR"
+                          >
+                            <FiCheck size={16} />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleStatusChange(p._id, 'unused')}
+                            className="status-button deactivate"
+                            title="Hủy kích hoạt"
+                          >
+                            <FiXCircle size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ))}

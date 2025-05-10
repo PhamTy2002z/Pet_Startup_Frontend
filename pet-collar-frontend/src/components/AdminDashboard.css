@@ -501,3 +501,75 @@
     opacity: 0;
   }
 }
+
+/* Status Styles */
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.status-badge.unused {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.status-badge.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.status-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+}
+
+.status-button.activate {
+  background-color: #28a745;
+}
+
+.status-button.activate:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.status-button.deactivate {
+  background-color: #dc3545;
+}
+
+.status-button.deactivate:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.status-button:active {
+  transform: translateY(0);
+}
+
+/* Status Badge Animation */
+.status-badge {
+  animation: badgePop 0.3s ease-out;
+}

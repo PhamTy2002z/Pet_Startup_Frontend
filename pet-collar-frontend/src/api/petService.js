@@ -36,6 +36,10 @@ adminApi.interceptors.request.use(
 export const searchPets = (params) =>
   adminApi.get('/admin/pets/search', { params }).then((r) => r.data);
 
+// Update pet status
+export const updatePetStatus = (id, status) =>
+  adminApi.put(`/admin/pet/${id}/status`, { status }).then((r) => r.data);
+
 // Tạo mới Pet (record rỗng + QR)
 export const createPet = () =>
   adminApi.post('/admin/pet').then((r) => r.data);
