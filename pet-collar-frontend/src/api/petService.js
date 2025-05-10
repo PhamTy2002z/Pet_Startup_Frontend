@@ -1,68 +1,78 @@
+// src/api/petService.js
 import axios from 'axios';
 
-// Sử dụng biến môi trường REACT_APP_API_BASE_URL hoặc fallback
-// Lưu ý: không thêm `/api` thừa để tránh thành `/api/api`
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+// -------------------------------------------------------------------
+// Lấy endpoint backend
+// -------------------------------------------------------------------
+const API_BASE =
+  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
-// Tạo axios instance
-const api = axios.create({
-  baseURL: `${API_BASE}/api`
+/* ****************************************************************** */
+/* 1.  PUBLIC API  –  KHÔNG tự gắn token (người dùng quét QR)          */
+/* ****************************************************************** */
+const publicApi = axios.create({
+  baseURL: `${API_BASE}/api`,
 });
 
-// Gắn token nếu có (giống chỗ login lưu vào localStorage)
-api.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('token');    // <— đổi từ sessionStorage sang localStorage
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+/* ****************************************************************** */
+/* 2.  ADMIN API  –  TỰ gắn token từ localStorage (màn quản trị)      */
+/* ****************************************************************** */
+const adminApi = axios.create({
+  baseURL: `${API_BASE}/api`,
+});
+
+adminApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
-  err => Promise.reject(err)
+  (err) => Promise.reject(err),
 );
 
-// ——— Admin APIs ———
+/* ========================= ADMIN APIs ============================ */
 
-// Tạo mới Pet (chỉ tạo QR, record rỗng)
+// Tạo mới Pet (record rỗng + QR)
 export const createPet = () =>
-  api.post('/admin/pet').then(res => res.data);
+  adminApi.post('/admin/pet').then((r) => r.data);
 
-// Lấy danh sách tất cả Pet
+// Tạo hàng loạt pets
+export const createBulkPets = (quantity) =>
+  adminApi.post('/admin/pets/bulk', { quantity }).then((r) => r.data);
+
+// Lấy danh sách Pet
 export const getAllPets = () =>
-  api.get('/admin/pets').then(res => res.data);
+  adminApi.get('/admin/pets').then((r) => r.data);
 
-// Upload avatar qua user route
+/* ========================= USER APIs  ============================ */
+
+// Lấy thông tin Pet
+export const getPetById = (id) =>
+  publicApi.get(`/user/pet/${id}`).then((r) => r.data);
+
+// Cập nhật info / owner / vaccinations
+export const updatePetById = (id, payload) =>
+  publicApi.put(`/user/pet/${id}`, payload).then((r) => r.data);
+
+// Cập nhật email chủ Pet
+export const updatePetOwnerEmail = (id, email) =>
+  publicApi
+    .put(`/user/pet/${id}/owner-email`, { email })
+    .then((r) => r.data);
+
+// Upload avatar (dùng route user để khỏi yêu cầu token)
 export const uploadPetAvatar = (id, file) => {
   const formData = new FormData();
   formData.append('avatar', file);
-  return api
+  return publicApi
     .post(`/user/pet/${id}/avatar`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     })
-    .then(res => res.data);
+    .then((r) => r.data);
 };
 
-// Lấy ảnh avatar trực tiếp (GridFS stream)
-export const getPetAvatarUrl = fileId =>
+/* ===================== TIỆN ÍCH KHÁC ============================= */
+
+// URL trực tiếp tới file avatar (GridFS)
+export const getPetAvatarUrl = (fileId) =>
   `${API_BASE}/api/avatar/${fileId}`;
-
-// Bulk create: gửi { quantity: n }
-export const createBulkPets = quantity =>
-  api.post('/admin/pets/bulk', { quantity }).then(res => res.data);
-
-// ——— User APIs ———
-
-// Lấy thông tin Pet theo ID
-export const getPetById = id =>
-  api.get(`/user/pet/${id}`).then(res => res.data);
-
-// Cập nhật thông tin Pet (info, owner, vaccinations)
-export const updatePetById = (id, payload) =>
-  api.put(`/user/pet/${id}`, payload).then(res => res.data);
-
-// Cập nhật thông tin chủ Pet bao gồm email
-export const updatePetOwnerEmail = (id, email) => {
-  return api
-    .put(`/user/pet/${id}/owner-email`, { email })
-    .then(res => res.data);
-};
