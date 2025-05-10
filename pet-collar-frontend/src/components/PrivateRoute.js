@@ -11,5 +11,5 @@ export default function PrivateRoute() {
     return <Navigate to="/login" replace />;
   }
 
-  return <Outlet />;  // Cho phép truy cập các route con
+  return <Outlet />;  // Tiếp tục với các route bảo vệ
 }

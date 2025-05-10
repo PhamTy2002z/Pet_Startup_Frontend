@@ -12,12 +12,12 @@ export default function App() {
     <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/user/edit/:id" element={<UserEditPage />} /> {/* Không cần PrivateRoute ở đây */}
+      <Route path="/user/edit/:id" element={<UserEditPage />} /> {/* Không bảo vệ */}
 
       {/* Protected Admin Routes */}
       <Route element={<PrivateRoute />}>
         <Route path="/admin" element={<AdminPage />} />
-        {/* Add other admin routes here */}
+        {/* Các route admin khác */}
       </Route>
 
       {/* Fallback */}
