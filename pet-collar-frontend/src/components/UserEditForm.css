@@ -118,6 +118,7 @@
   background: #FFFFFF;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
 .pet-image-preview {
@@ -128,6 +129,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   object-fit: cover;
   transition: all 0.3s ease;
+  margin: 0 auto;
 }
 
 .pet-image-preview:hover {
@@ -140,29 +142,41 @@
   border: 2px dashed #CBD5E0;
 }
 
-/* File Input */
+/* Avatar Controls */
+.avatar-controls {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 .file-input {
-  margin-top: 20px;
-  padding: 12px 24px;
   background: #4ECDC4;
   color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-weight: 500;
   transition: all 0.3s ease;
-  width: auto;
-  min-width: 200px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
+  min-width: 200px;
+  max-width: 300px;
+  margin: 0 auto;
 }
 
-.file-input:hover:not(:disabled) {
+.file-input:hover {
   background: #45B7AF;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+}
+
+.file-input:active {
+  transform: translateY(0);
 }
 
 /* Vaccination Section */
@@ -226,18 +240,25 @@
 /* Edit Controls */
 .edit-controls {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 16px;
-  margin-bottom: 24px;
+  margin: 24px 0;
+  padding: 0 16px;
 }
 
 .edit-btn {
-  padding: 10px 20px;
+  padding: 12px 24px;
   background: #F8C8DC;
   color: white;
   border-radius: 10px;
   font-weight: 500;
   transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
 }
 
 .edit-btn:hover {
@@ -253,10 +274,13 @@
 .lang-btn {
   background: #4ECDC4;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 10px;
   font-weight: 500;
   transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  min-width: 80px;
 }
 
 .lang-btn:hover {
@@ -423,27 +447,29 @@
     border-radius: 8px;
   }
 
-  /* Improve touch targets */
   .edit-controls {
     flex-direction: row;
     gap: 12px;
-    margin-bottom: 20px;
+    margin: 20px 0;
+    padding: 0 12px;
   }
 
   .edit-btn,
   .lang-btn {
     padding: 12px 20px;
-    min-height: 44px; /* Minimum touch target size */
+    min-height: 44px;
     font-size: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    flex: 1;
+    max-width: 160px;
   }
 
   /* Avatar section mobile optimization */
   .avatar-section {
-    padding: 20px;
+    padding: 24px 16px;
   }
 
   .pet-image-preview {
@@ -451,17 +477,15 @@
     height: 150px;
   }
 
-  .file-input {
-    width: 100%;
-    min-height: 44px;
-    margin-top: 24px;
-    padding: 12px 20px;
-    font-size: 15px;
+  .avatar-controls {
+    margin-top: 20px;
   }
 
-  .avatar-controls {
-    margin-top: 16px;
+  .file-input {
     width: 100%;
+    max-width: 280px;
+    padding: 14px 24px;
+    font-size: 15px;
   }
 
   /* Vaccination and Re-examination items */
@@ -562,8 +586,8 @@
   }
 
   .file-input {
-    margin-top: 20px;
-    padding: 10px 16px;
+    padding: 12px 20px;
+    font-size: 14px;
   }
 
   .toggle-section-btn {

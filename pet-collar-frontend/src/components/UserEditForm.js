@@ -754,27 +754,6 @@ export default function UserEditForm() {
 
   return (
     <form className="form-container" onSubmit={handleSubmit}>
-      <div className="edit-controls">
-        <button
-          type="button"
-          className={`edit-btn ${isEditMode ? 'active' : ''}`}
-          onClick={() => setIsEditMode(m => !m)}
-          style={{
-            WebkitTapHighlightColor: 'transparent',
-            touchAction: 'manipulation'
-          }}
-        >
-          <FiEdit2 /> {isEditMode ? t.closeEdit : t.edit}
-        </button>
-        <button
-          type="button"
-          className="lang-btn"
-          onClick={() => setLang(l => (l === 'vi' ? 'en' : 'vi'))}
-        >
-          {t.toggleLang}
-        </button>
-      </div>
-
       {/* Avatar Section */}
       <div className="section avatar-section">
         <h3 className="section-title">📷 {t.petPhoto}</h3>
@@ -801,6 +780,28 @@ export default function UserEditForm() {
             </label>
           </div>
         )}
+      </div>
+
+      {/* Edit Controls */}
+      <div className="edit-controls">
+        <button
+          type="button"
+          className={`edit-btn ${isEditMode ? 'active' : ''}`}
+          onClick={() => setIsEditMode(m => !m)}
+          style={{
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation'
+          }}
+        >
+          <FiEdit2 /> {isEditMode ? t.closeEdit : t.edit}
+        </button>
+        <button
+          type="button"
+          className="lang-btn"
+          onClick={() => setLang(l => (l === 'vi' ? 'en' : 'vi'))}
+        >
+          {t.toggleLang}
+        </button>
       </div>
 
       <div className="fields-column">
