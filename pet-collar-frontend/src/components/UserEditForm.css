@@ -1,11 +1,11 @@
 /* General Form Styling */
 .form-container {
   max-width: 800px;
-  margin: 40px auto;
+  margin: 20px auto;
   background: #FFFFFF;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  padding: 32px;
+  padding: 20px;
 }
 
 .section {
@@ -17,16 +17,53 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #E2E8F0;
+}
+
 .section-title {
   font-size: 22px;
   font-weight: 600;
   color: #2D3748;
-  margin-bottom: 24px;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #E2E8F0;
+}
+
+.toggle-section-btn {
+  background: #FF9EBB;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  transform: rotate(0deg);
+}
+
+.toggle-section-btn:hover {
+  background: #FF7BA4;
+  transform: translateY(-2px) rotate(0deg);
+  box-shadow: 0 4px 12px rgba(255, 158, 187, 0.3);
+}
+
+.toggle-section-btn.rotated {
+  transform: rotate(45deg);
+}
+
+.toggle-section-btn.rotated:hover {
+  transform: translateY(-2px) rotate(45deg);
 }
 
 .field-group {
@@ -116,6 +153,10 @@
   transition: all 0.3s ease;
   width: auto;
   min-width: 200px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .file-input:hover:not(:disabled) {
@@ -326,47 +367,235 @@
   opacity: 0.8;
 }
 
-/* Responsive Design */
+/* Section Content Animation */
+.section-content {
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  visibility: hidden;
+}
+
+.section-content.expanded {
+  max-height: 2000px;
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  margin-top: 16px;
+}
+
+/* Mobile Optimizations */
 @media (max-width: 768px) {
   .form-container {
-    margin: 20px;
-    padding: 20px;
+    margin: 10px;
+    padding: 16px;
+    border-radius: 12px;
   }
 
   .section {
     padding: 16px;
+    margin-bottom: 24px;
   }
 
+  .section-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .field-group {
+    margin-bottom: 16px;
+  }
+
+  .field-group label {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .field-group input,
+  .field-group textarea {
+    padding: 12px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    border-radius: 8px;
+  }
+
+  /* Improve touch targets */
   .edit-controls {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    gap: 12px;
+    margin-bottom: 20px;
   }
 
-  .edit-btn, .lang-btn {
+  .edit-btn,
+  .lang-btn {
+    padding: 12px 20px;
+    min-height: 44px; /* Minimum touch target size */
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Avatar section mobile optimization */
+  .avatar-section {
+    padding: 20px;
+  }
+
+  .pet-image-preview {
+    width: 150px;
+    height: 150px;
+  }
+
+  .file-input {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 24px;
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+
+  .avatar-controls {
+    margin-top: 16px;
     width: 100%;
   }
 
+  /* Vaccination and Re-examination items */
   .vax-item {
-    flex-direction: column;
-    gap: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
   }
 
   .vax-item input[type="text"],
   .vax-item input[type="date"] {
-    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 8px;
   }
 
+  .remove-vax-btn {
+    padding: 12px;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .add-vax-btn {
+    width: 100%;
+    min-height: 44px;
+    margin-top: 12px;
+  }
+
+  /* Submit button */
+  .submit-btn {
+    width: 100%;
+    min-height: 48px;
+    font-size: 16px;
+    margin-top: 24px;
+  }
+
+  /* Allergic information section */
   .allergic-info {
     margin-top: 20px;
     padding-top: 20px;
   }
 
-  .subsection-title {
-    font-size: 16px;
-    margin-bottom: 16px;
+  .toggle-allergic-btn {
+    width: 44px;
+    height: 44px;
   }
 
+  .subsection-title {
+    font-size: 16px;
+  }
+
+  /* Improve form field spacing */
+  .field-group + .field-group {
+    margin-top: 16px;
+  }
+
+  /* Add safe area insets for modern iOS devices */
+  @supports (padding: max(0px)) {
+    .form-container {
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right: max(16px, env(safe-area-inset-right));
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+  }
+
+  .toggle-section-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .section-content.expanded {
+    margin-top: 12px;
+  }
+}
+
+/* iPhone SE and smaller devices */
+@media (max-width: 375px) {
+  .form-container {
+    margin: 8px;
+    padding: 12px;
+  }
+
+  .section {
+    padding: 12px;
+  }
+
+  .section-header {
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .pet-image-preview {
+    width: 120px;
+    height: 120px;
+  }
+
+  .file-input {
+    margin-top: 20px;
+    padding: 10px 16px;
+  }
+
+  .toggle-section-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .section-content.expanded {
+    margin-top: 8px;
+  }
+}
+
+/* Fix for iOS input zoom */
+@supports (-webkit-touch-callout: none) {
+  .field-group input,
   .field-group textarea {
-    min-height: 60px;
+    font-size: 16px;
+  }
+}
+
+/* Improve scrolling on iOS */
+.form-container {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Add haptic feedback for buttons */
+@media (hover: none) {
+  .edit-btn:active,
+  .lang-btn:active,
+  .submit-btn:active,
+  .add-vax-btn:active,
+  .remove-vax-btn:active {
+    transform: scale(0.98);
   }
 }

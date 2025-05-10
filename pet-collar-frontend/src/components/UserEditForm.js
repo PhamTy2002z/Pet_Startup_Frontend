@@ -7,7 +7,7 @@ import {
   getPetAvatarUrl,
   updatePetOwnerEmail
 } from '../api/petService';
-import { FiPlus, FiTrash2, FiEdit2 } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiEdit2, FiCamera } from 'react-icons/fi';
 import './UserEditForm.css';
 
 // Import react-toastify
@@ -39,7 +39,7 @@ const labels = {
     reExamNote: 'Thêm Lịch Khám',
     save: 'Lưu thông tin',
     toggleLang: 'EN',
-    success: 'Thao tác thành công!',
+    success: 'Đã lưu ✓',
     error: 'Có lỗi xảy ra, vui lòng thử lại!',
     reExaminationDate: 'Ngày tái khám',
     allergicInfoTitle: 'Thông tin Dị ứng',
@@ -69,12 +69,197 @@ const labels = {
     reExamNote: '+ Re-examination',
     save: 'Save',
     toggleLang: 'VI',
-    success: 'Action was successful!',
+    success: 'Saved ✓',
     error: 'Something went wrong, please try again!',
     reExaminationDate: 'Re-examination Date',
     allergicInfoTitle: 'Allergic Information',
     allergicSubstances: 'Allergic Substances',
     allergicNote: 'Allergy Note',
+  }
+};
+
+// Add custom toast styles
+const customStyles = `
+  .custom-toast-container {
+    padding: 16px;
+  }
+
+  .custom-toast-container .Toastify__toast {
+    margin-bottom: 12px;
+    border-radius: 20px;
+    background: #F8FAFC;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 0.5px solid rgba(226, 232, 240, 0.8);
+    padding: 14px 18px;
+    min-width: 260px;
+    max-width: 300px;
+    transform: translateY(0);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+  }
+
+  .custom-toast-container .Toastify__toast--enter {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  .custom-toast-container .Toastify__toast--enter-active {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .custom-toast-container .Toastify__toast--exit {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .custom-toast-container .Toastify__toast--exit-active {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  .custom-toast-container .Toastify__toast-body {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1E293B;
+  }
+
+  @media (max-width: 768px) {
+    .custom-toast-container {
+      padding: 8px;
+      width: 100%;
+      max-width: 100%;
+      bottom: 0;
+    }
+
+    .custom-toast-container .Toastify__toast {
+      margin: 0 auto 8px;
+      width: calc(100% - 16px);
+      max-width: 320px;
+      border-radius: 16px;
+      padding: 10px 14px;
+      min-width: auto;
+    }
+
+    .custom-toast-container .Toastify__toast-body {
+      font-size: 14px;
+      gap: 10px;
+    }
+
+    .custom-toast-container .Toastify__toast-body > div:first-child {
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+    }
+
+    .custom-toast-container .Toastify__toast-body > div:first-child > div {
+      width: 24px;
+      height: 24px;
+      font-size: 14px;
+    }
+  }
+`;
+
+// Add this right after the customStyles definition
+const styleSheet = document.createElement("style");
+styleSheet.type = "text/css";
+styleSheet.innerText = customStyles;
+document.head.appendChild(styleSheet);
+
+// Update toastStyles for mobile optimization
+const toastStyles = {
+  success: {
+    position: isMobile => isMobile ? "bottom-center" : "top-right",
+    autoClose: isMobile => isMobile ? 1500 : 2000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: false,
+    style: {
+      background: '#F8FAFC',
+      color: '#1E293B',
+      borderRadius: '20px',
+      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
+      padding: '14px 18px',
+      fontSize: '15px',
+      fontWeight: '600',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '14px',
+      border: '0.5px solid rgba(226, 232, 240, 0.8)',
+      minWidth: '260px',
+      maxWidth: '300px',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
+      transform: 'translateY(0)',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      opacity: 1
+    },
+    icon: () => (
+      <div style={{
+        background: 'linear-gradient(135deg, #4ECDC4 0%, #45B7AF 100%)',
+        borderRadius: '50%',
+        width: '28px',
+        height: '28px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontSize: '16px',
+        boxShadow: '0 2px 8px rgba(78, 205, 196, 0.3)',
+        transition: 'transform 0.2s ease'
+      }}>
+        ✓
+      </div>
+    )
+  },
+  error: {
+    position: isMobile => isMobile ? "bottom-center" : "top-right",
+    autoClose: 3000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: false,
+    style: {
+      background: '#F8FAFC',
+      color: '#1E293B',
+      borderRadius: '20px',
+      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
+      padding: '14px 18px',
+      fontSize: '15px',
+      fontWeight: '600',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '14px',
+      border: '0.5px solid rgba(226, 232, 240, 0.8)',
+      minWidth: '260px',
+      maxWidth: '300px',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)'
+    },
+    icon: () => (
+      <div style={{
+        background: 'linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%)',
+        borderRadius: '50%',
+        width: '28px',
+        height: '28px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontSize: '16px',
+        boxShadow: '0 2px 8px rgba(255, 107, 107, 0.3)'
+      }}>
+        ×
+      </div>
+    )
   }
 };
 
@@ -96,6 +281,41 @@ export default function UserEditForm() {
   const [preview, setPreview] = useState('');
   const [existingEmail, setExistingEmail] = useState('');
   const [showAllergicFields, setShowAllergicFields] = useState(false);
+
+  // Add new state for mobile detection
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Modify initial state for section visibility - all collapsed by default
+  const [expandedSections, setExpandedSections] = useState({
+    petInfo: false,
+    ownerInfo: false,
+    vaccinations: false,
+    reExaminations: false,
+    allergicInfo: false
+  });
+
+  // Add effect to collapse all sections when edit mode is disabled
+  useEffect(() => {
+    if (!isEditMode) {
+      setExpandedSections({
+        petInfo: false,
+        ownerInfo: false,
+        vaccinations: false,
+        reExaminations: false,
+        allergicInfo: false
+      });
+    }
+  }, [isEditMode]);
+
+  // Add resize handler
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Load pet data
   useEffect(() => {
@@ -189,13 +409,45 @@ export default function UserEditForm() {
     }));
   };
 
+  // Modify handleFileChange to use camera on mobile
   const handleFileChange = e => {
     const file = e.target.files[0];
     if (file) {
       setAvatarFile(file);
-      // Create preview URL immediately
       const url = URL.createObjectURL(file);
       setPreview(url);
+    }
+  };
+
+  // Add camera capture function for mobile
+  const handleCameraCapture = () => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          const video = document.createElement('video');
+          video.srcObject = stream;
+          video.play();
+
+          video.onloadedmetadata = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            canvas.toBlob(blob => {
+              const file = new File([blob], 'camera-capture.jpg', { type: 'image/jpeg' });
+              setAvatarFile(file);
+              setPreview(URL.createObjectURL(blob));
+            }, 'image/jpeg');
+
+            stream.getTracks().forEach(track => track.stop());
+          };
+        })
+        .catch(err => {
+          console.error('Error accessing camera:', err);
+          toast.error('Could not access camera');
+        });
     }
   };
 
@@ -277,7 +529,25 @@ export default function UserEditForm() {
         setAvatarFile(null);
       }
 
-      toast.success(t.success);
+      toast.success(t.success, {
+        position: isMobile ? "bottom-center" : "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          background: '#4ECDC4',
+          color: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          padding: '16px',
+          fontSize: '15px',
+          fontWeight: '500',
+        },
+        icon: '✅'
+      });
 
       // Re-fetch the pet data after saving
       const refreshedPet = await getPetById(id);
@@ -315,8 +585,34 @@ export default function UserEditForm() {
       setPreview('');
     } catch (err) {
       console.error('Error updating pet:', err);
-      toast.error(t.error);
+      toast.error(t.error, {
+        position: isMobile ? "bottom-center" : "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          background: '#FF6B6B',
+          color: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          padding: '16px',
+          fontSize: '15px',
+          fontWeight: '500',
+        },
+        icon: '❌'
+      });
     }
+  };
+
+  // Add toggle function for sections
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   return (
@@ -348,210 +644,260 @@ export default function UserEditForm() {
         ) : (
           <div className="pet-image-preview empty-avatar" />
         )}
-        <input
-          type="file"
-          accept="image/*"
-          className="file-input"
-          onChange={handleFileChange}
-          disabled={!isEditMode}
-        />
+        {isEditMode && (
+          <div className="avatar-controls">
+            <input
+              type="file"
+              accept="image/*"
+              capture={isMobile ? "environment" : undefined}
+              className="file-input"
+              onChange={handleFileChange}
+              id="avatar-upload"
+              style={{ display: 'none' }}
+            />
+            <label htmlFor="avatar-upload" className="file-input">
+              {isMobile ? <FiCamera /> : null} {isMobile ? 'Take Photo' : 'Upload Photo'}
+            </label>
+          </div>
+        )}
       </div>
 
       <div className="fields-column">
         {/* Pet Info */}
         <div className="section">
-          <h3 className="section-title">🐾 {t.petInfoTitle}</h3>
-          <div className="field-group">
-            <label htmlFor="name">{t.petName}</label>
-            <input
-              id="name"
-              name="name"
-              value={form.info.name}
-              onChange={e => handleChange(e, 'info')}
-              disabled={!isEditMode}
-            />
+          <div className="section-header">
+            <h3 className="section-title">🐾 {t.petInfoTitle}</h3>
+            <button
+              type="button"
+              className={`toggle-section-btn ${expandedSections.petInfo ? 'rotated' : ''}`}
+              onClick={() => toggleSection('petInfo')}
+            >
+              <FiPlus />
+            </button>
           </div>
-          <div className="field-group">
-            <label htmlFor="species">{t.species}</label>
-            <input
-              id="species"
-              name="species"
-              value={form.info.species}
-              onChange={e => handleChange(e, 'info')}
-              disabled={!isEditMode}
-            />
-          </div>
-          <div className="field-group">
-            <label htmlFor="birthDate">{t.birthDate}</label>
-            <input
-              id="birthDate"
-              type="date"
-              name="birthDate"
-              value={form.info.birthDate}
-              onChange={e => handleChange(e, 'info')}
-              disabled={!isEditMode}
-            />
-          </div>
-
-          {/* Allergic Information */}
-          <div className="allergic-info">
-            <div className="allergic-header">
-              <h4 className="subsection-title">⚠️ {t.allergicInfoTitle}</h4>
-              {isEditMode && (
-                <button
-                  type="button"
-                  className="toggle-allergic-btn"
-                  onClick={() => setShowAllergicFields(!showAllergicFields)}
-                >
-                  {showAllergicFields ? <FiTrash2 /> : <FiPlus />}
-                </button>
-              )}
+          <div className={`section-content ${expandedSections.petInfo && isEditMode ? 'expanded' : ''}`}>
+            <div className="field-group">
+              <label htmlFor="name">{t.petName}</label>
+              <input
+                id="name"
+                name="name"
+                value={form.info.name}
+                onChange={e => handleChange(e, 'info')}
+                disabled={!isEditMode}
+              />
             </div>
-            
-            {showAllergicFields && (
-              <div className="allergic-fields">
-                <div className="field-group">
-                  <label htmlFor="substances">{t.allergicSubstances}</label>
-                  <input
-                    id="substances"
-                    name="substances"
-                    value={form.allergicInfo.substances.join(', ')}
-                    onChange={handleAllergicSubstancesChange}
-                    disabled={!isEditMode}
-                    placeholder={t.allergicSubstances}
-                  />
-                </div>
-                <div className="field-group">
-                  <label htmlFor="note">{t.allergicNote}</label>
-                  <textarea
-                    id="note"
-                    name="note"
-                    value={form.allergicInfo.note}
-                    onChange={e => handleAllergicInfoChange('note', e.target.value)}
-                    disabled={!isEditMode}
-                    placeholder={t.allergicNote}
-                    rows="3"
-                  />
-                </div>
-              </div>
-            )}
+            <div className="field-group">
+              <label htmlFor="species">{t.species}</label>
+              <input
+                id="species"
+                name="species"
+                value={form.info.species}
+                onChange={e => handleChange(e, 'info')}
+                disabled={!isEditMode}
+              />
+            </div>
+            <div className="field-group">
+              <label htmlFor="birthDate">{t.birthDate}</label>
+              <input
+                id="birthDate"
+                type="date"
+                name="birthDate"
+                value={form.info.birthDate}
+                onChange={e => handleChange(e, 'info')}
+                disabled={!isEditMode}
+              />
+            </div>
           </div>
         </div>
 
         {/* Owner Info */}
         <div className="section">
-          <h3 className="section-title">👤 {t.ownerInfoTitle}</h3>
-          <div className="field-group">
-            <label htmlFor="owner-name">{t.ownerName}</label>
-            <input
-              id="owner-name"
-              name="name"
-              value={form.owner.name}
-              onChange={e => handleChange(e, 'owner')}
-              disabled={!isEditMode}
-            />
+          <div className="section-header">
+            <h3 className="section-title">👤 {t.ownerInfoTitle}</h3>
+            <button
+              type="button"
+              className={`toggle-section-btn ${expandedSections.ownerInfo ? 'rotated' : ''}`}
+              onClick={() => toggleSection('ownerInfo')}
+            >
+              <FiPlus />
+            </button>
           </div>
-          <div className="field-group">
-            <label htmlFor="owner-phone">{t.ownerPhone}</label>
-            <input
-              id="owner-phone"
-              name="phone"
-              value={form.owner.phone}
-              onChange={e => handleChange(e, 'owner')}
-              disabled={!isEditMode}
-            />
-          </div>
-          <div className="field-group">
-            <label htmlFor="owner-email">{t.ownerEmail}</label>
-            {existingEmail && !isEditMode ? (
-              <div className="existing-email">{existingEmail}</div>
-            ) : (
+          <div className={`section-content ${expandedSections.ownerInfo && isEditMode ? 'expanded' : ''}`}>
+            <div className="field-group">
+              <label htmlFor="owner-name">{t.ownerName}</label>
               <input
-                id="owner-email"
-                name="email"
-                value={form.owner.email}
+                id="owner-name"
+                name="name"
+                value={form.owner.name}
                 onChange={e => handleChange(e, 'owner')}
                 disabled={!isEditMode}
-                type="email"
-                placeholder="Enter owner's email"
               />
-            )}
+            </div>
+            <div className="field-group">
+              <label htmlFor="owner-phone">{t.ownerPhone}</label>
+              <input
+                id="owner-phone"
+                name="phone"
+                value={form.owner.phone}
+                onChange={e => handleChange(e, 'owner')}
+                disabled={!isEditMode}
+              />
+            </div>
+            <div className="field-group">
+              <label htmlFor="owner-email">{t.ownerEmail}</label>
+              {existingEmail && !isEditMode ? (
+                <div className="existing-email">{existingEmail}</div>
+              ) : (
+                <input
+                  id="owner-email"
+                  name="email"
+                  value={form.owner.email}
+                  onChange={e => handleChange(e, 'owner')}
+                  disabled={!isEditMode}
+                  type="email"
+                  placeholder="Enter owner's email"
+                />
+              )}
+            </div>
           </div>
         </div>
 
         {/* Vaccinations */}
         <div className="section">
-          <h3 className="section-title">💉 {t.vaxTitle}</h3>
-          {form.vaccinations.length === 0 && <p>{t.noVax}</p>}
-          {form.vaccinations.map((v, i) => (
-            <div key={i} className="vax-item">
-              <input
-                type="text"
-                placeholder={t.addVax}
-                value={v.name}
-                onChange={e => handleVaxChange(i, 'name', e.target.value)}
-                disabled={!isEditMode}
-              />
-              <input
-                type="date"
-                value={v.date}
-                onChange={e => handleVaxChange(i, 'date', e.target.value)}
-                disabled={!isEditMode}
-              />
-              {isEditMode && (
-                <button
-                  type="button"
-                  className="remove-vax-btn"
-                  onClick={() => removeVax(i)}
-                >
-                  <FiTrash2 />
-                </button>
-              )}
-            </div>
-          ))}
-          {isEditMode && (
-            <button type="button" className="add-vax-btn" onClick={addVax}>
-              <FiPlus /> {t.addVax}
+          <div className="section-header">
+            <h3 className="section-title">💉 {t.vaxTitle}</h3>
+            <button
+              type="button"
+              className={`toggle-section-btn ${expandedSections.vaccinations ? 'rotated' : ''}`}
+              onClick={() => toggleSection('vaccinations')}
+            >
+              <FiPlus />
             </button>
-          )}
+          </div>
+          <div className={`section-content ${expandedSections.vaccinations && isEditMode ? 'expanded' : ''}`}>
+            {form.vaccinations.length === 0 && <p>{t.noVax}</p>}
+            {form.vaccinations.map((v, i) => (
+              <div key={i} className="vax-item">
+                <input
+                  type="text"
+                  placeholder={t.addVax}
+                  value={v.name}
+                  onChange={e => handleVaxChange(i, 'name', e.target.value)}
+                  disabled={!isEditMode}
+                />
+                <input
+                  type="date"
+                  value={v.date}
+                  onChange={e => handleVaxChange(i, 'date', e.target.value)}
+                  disabled={!isEditMode}
+                />
+                {isEditMode && (
+                  <button
+                    type="button"
+                    className="remove-vax-btn"
+                    onClick={() => removeVax(i)}
+                  >
+                    <FiTrash2 />
+                  </button>
+                )}
+              </div>
+            ))}
+            {isEditMode && (
+              <button type="button" className="add-vax-btn" onClick={addVax}>
+                <FiPlus /> {t.addVax}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Re-examination Schedule */}
         <div className="section">
-          <h3 className="section-title">📅 {t.reExamTitle}</h3>
-          {form.reExaminations.length === 0 && <p>{t.noReExam}</p>}
-          {form.reExaminations.map((r, i) => (
-            <div key={i} className="vax-item">
-              <input
-                type="text"
-                value={r.note}
-                onChange={e => handleReExamChange(i, 'note', e.target.value)}
-                disabled={!isEditMode}
-                placeholder={t.reExamNote}
-              />
-              <input
-                type="date"
-                value={r.date}
-                onChange={e => handleReExamChange(i, 'date', e.target.value)}
-                disabled={!isEditMode}
-                placeholder={t.reExamDate}
-              />
-              {isEditMode && (
-                <button
-                  type="button"
-                  className="remove-vax-btn"
-                  onClick={() => removeReExam(i)}
-                >
-                  <FiTrash2 />
-                </button>
-              )}
-            </div>
-          ))}
-          {isEditMode && (
-            <button type="button" className="add-vax-btn" onClick={addReExam}>
-              <FiPlus /> {t.addReExam}
+          <div className="section-header">
+            <h3 className="section-title">📅 {t.reExamTitle}</h3>
+            <button
+              type="button"
+              className={`toggle-section-btn ${expandedSections.reExaminations ? 'rotated' : ''}`}
+              onClick={() => toggleSection('reExaminations')}
+            >
+              <FiPlus />
             </button>
-          )}
+          </div>
+          <div className={`section-content ${expandedSections.reExaminations && isEditMode ? 'expanded' : ''}`}>
+            {form.reExaminations.length === 0 && <p>{t.noReExam}</p>}
+            {form.reExaminations.map((r, i) => (
+              <div key={i} className="vax-item">
+                <input
+                  type="text"
+                  value={r.note}
+                  onChange={e => handleReExamChange(i, 'note', e.target.value)}
+                  disabled={!isEditMode}
+                  placeholder={t.reExamNote}
+                />
+                <input
+                  type="date"
+                  value={r.date}
+                  onChange={e => handleReExamChange(i, 'date', e.target.value)}
+                  disabled={!isEditMode}
+                  placeholder={t.reExamDate}
+                />
+                {isEditMode && (
+                  <button
+                    type="button"
+                    className="remove-vax-btn"
+                    onClick={() => removeReExam(i)}
+                  >
+                    <FiTrash2 />
+                  </button>
+                )}
+              </div>
+            ))}
+            {isEditMode && (
+              <button type="button" className="add-vax-btn" onClick={addReExam}>
+                <FiPlus /> {t.addReExam}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Allergic Information */}
+        <div className="section">
+          <div className="section-header">
+            <h3 className="section-title">⚠️ {t.allergicInfoTitle}</h3>
+            <button
+              type="button"
+              className={`toggle-section-btn ${expandedSections.allergicInfo ? 'rotated' : ''}`}
+              onClick={() => toggleSection('allergicInfo')}
+            >
+              <FiPlus />
+            </button>
+          </div>
+          <div className={`section-content ${expandedSections.allergicInfo && isEditMode ? 'expanded' : ''}`}>
+            <div className="allergic-fields">
+              <div className="field-group">
+                <label htmlFor="substances">{t.allergicSubstances}</label>
+                <input
+                  id="substances"
+                  name="substances"
+                  value={form.allergicInfo.substances.join(', ')}
+                  onChange={handleAllergicSubstancesChange}
+                  disabled={!isEditMode}
+                  placeholder={t.allergicSubstances}
+                />
+              </div>
+              <div className="field-group">
+                <label htmlFor="note">{t.allergicNote}</label>
+                <textarea
+                  id="note"
+                  name="note"
+                  value={form.allergicInfo.note}
+                  onChange={e => handleAllergicInfoChange('note', e.target.value)}
+                  disabled={!isEditMode}
+                  placeholder={t.allergicNote}
+                  rows="3"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Submit */}
@@ -562,8 +908,36 @@ export default function UserEditForm() {
         )}
       </div>
 
-      {/* Toast container */}
-      <ToastContainer />
+      {/* Toast container with improved styling */}
+      <ToastContainer
+        position={isMobile ? "bottom-center" : "top-right"}
+        autoClose={2000}
+        hideProgressBar={true}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable={false}
+        pauseOnHover
+        theme="light"
+        style={{
+          zIndex: 9999
+        }}
+        toastStyle={{
+          margin: '12px',
+          borderRadius: '16px',
+          background: '#F8FAFC',
+          color: '#1E293B',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.06)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          transform: 'translateY(0)',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          opacity: 1
+        }}
+        closeButton={false}
+        className="custom-toast-container"
+      />
     </form>
   );
 }
