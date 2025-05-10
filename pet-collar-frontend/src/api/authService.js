@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Nếu bạn set REACT_APP_API_BASE_URL = "http://localhost:5000",
 // thì baseURL sẽ là "http://localhost:5000/api"
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'https://pet-startup-backend.onrender.com';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 export const authApi = axios.create({
   baseURL: `${API_BASE}/api`
 });
