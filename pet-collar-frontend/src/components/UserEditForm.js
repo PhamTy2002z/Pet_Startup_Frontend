@@ -435,29 +435,6 @@ export default function UserEditForm({ initialData }) {
   const [showAvatarControls, setShowAvatarControls] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  // Add effect to collapse all sections when edit mode is disabled
-  useEffect(() => {
-    if (!isEditMode) {
-      setExpandedSections({
-        petInfo: false,
-        ownerInfo: false,
-        vaccinations: false,
-        reExaminations: false,
-        allergicInfo: false
-      });
-    }
-  }, [isEditMode]);
-
-  // Add resize handler
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   // Load pet data
   useEffect(() => {
     const loadPetData = async () => {
@@ -816,7 +793,6 @@ export default function UserEditForm({ initialData }) {
 
   // Update section content class based on state
   const getSectionContentClass = (section) => {
-    if (!isEditMode) return '';
     if (isClosing) return 'collapsing';
     return expandedSections[section] ? 'expanded' : '';
   };
@@ -897,6 +873,7 @@ export default function UserEditForm({ initialData }) {
                 value={form.info.name}
                 onChange={e => handleChange(e, 'info')}
                 disabled={!isEditMode}
+                readOnly={!isEditMode}
               />
             </div>
             <div className="field-group">
@@ -907,6 +884,7 @@ export default function UserEditForm({ initialData }) {
                 value={form.info.species}
                 onChange={e => handleChange(e, 'info')}
                 disabled={!isEditMode}
+                readOnly={!isEditMode}
               />
             </div>
             <div className="field-group">
@@ -918,6 +896,7 @@ export default function UserEditForm({ initialData }) {
                 value={form.info.birthDate}
                 onChange={e => handleChange(e, 'info')}
                 disabled={!isEditMode}
+                readOnly={!isEditMode}
               />
             </div>
           </div>
@@ -944,6 +923,7 @@ export default function UserEditForm({ initialData }) {
                 value={form.owner.name}
                 onChange={e => handleChange(e, 'owner')}
                 disabled={!isEditMode}
+                readOnly={!isEditMode}
               />
             </div>
             <div className="field-group">
@@ -954,6 +934,7 @@ export default function UserEditForm({ initialData }) {
                 value={form.owner.phone}
                 onChange={e => handleChange(e, 'owner')}
                 disabled={!isEditMode}
+                readOnly={!isEditMode}
               />
             </div>
             <div className="field-group">
@@ -967,6 +948,7 @@ export default function UserEditForm({ initialData }) {
                   value={form.owner.email}
                   onChange={e => handleChange(e, 'owner')}
                   disabled={!isEditMode}
+                  readOnly={!isEditMode}
                   type="email"
                   placeholder="Enter owner's email"
                 />
@@ -997,12 +979,14 @@ export default function UserEditForm({ initialData }) {
                   value={v.name}
                   onChange={e => handleVaxChange(i, 'name', e.target.value)}
                   disabled={!isEditMode}
+                  readOnly={!isEditMode}
                 />
                 <input
                   type="date"
                   value={v.date}
                   onChange={e => handleVaxChange(i, 'date', e.target.value)}
                   disabled={!isEditMode}
+                  readOnly={!isEditMode}
                 />
                 {isEditMode && (
                   <button
@@ -1044,6 +1028,7 @@ export default function UserEditForm({ initialData }) {
                   value={r.note}
                   onChange={e => handleReExamChange(i, 'note', e.target.value)}
                   disabled={!isEditMode}
+                  readOnly={!isEditMode}
                   placeholder={t.reExamNote}
                 />
                 <input
@@ -1051,6 +1036,7 @@ export default function UserEditForm({ initialData }) {
                   value={r.date}
                   onChange={e => handleReExamChange(i, 'date', e.target.value)}
                   disabled={!isEditMode}
+                  readOnly={!isEditMode}
                   placeholder={t.reExamDate}
                 />
                 {isEditMode && (
@@ -1094,6 +1080,7 @@ export default function UserEditForm({ initialData }) {
                   value={form.allergicInfo.substances.join(', ')}
                   onChange={handleAllergicSubstancesChange}
                   disabled={!isEditMode}
+                  readOnly={!isEditMode}
                   placeholder={t.allergicSubstances}
                 />
               </div>
@@ -1105,6 +1092,7 @@ export default function UserEditForm({ initialData }) {
                   value={form.allergicInfo.note}
                   onChange={e => handleAllergicInfoChange('note', e.target.value)}
                   disabled={!isEditMode}
+                  readOnly={!isEditMode}
                   placeholder={t.allergicNote}
                   rows="3"
                 />
@@ -1121,7 +1109,7 @@ export default function UserEditForm({ initialData }) {
         )}
       </div>
 
-      {/* Toast container with improved styling */}
+      {/* Toast container */}
       <ToastContainer
         position={isMobile ? "bottom-center" : "top-right"}
         autoClose={2000}
