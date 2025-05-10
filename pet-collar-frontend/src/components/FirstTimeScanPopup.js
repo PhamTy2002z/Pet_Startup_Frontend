@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiX } from 'react-icons/fi';
+import { FiX, FiUser, FiPhone, FiHeart } from 'react-icons/fi';
 import './FirstTimeScanPopup.css';
 
 const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
@@ -10,6 +10,7 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
   });
 
   const [phoneError, setPhoneError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,7 +46,7 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validate phone number before submission
@@ -53,8 +54,13 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
       setPhoneError('Phone number must be 10 digits');
       return;
     }
-    
-    onSubmit(formData);
+
+    setIsSubmitting(true);
+    try {
+      await onSubmit(formData);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -71,7 +77,9 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
 
         <form onSubmit={handleSubmit} className="popup-form">
           <div className="form-group">
-            <label htmlFor="petName">Pet Name</label>
+            <label htmlFor="petName">
+              <FiHeart /> Pet Name
+            </label>
             <input
               type="text"
               id="petName"
@@ -84,7 +92,9 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="ownerName">Owner Name</label>
+            <label htmlFor="ownerName">
+              <FiUser /> Owner Name
+            </label>
             <input
               type="text"
               id="ownerName"
@@ -97,7 +107,9 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="phoneNumber">Phone Number</label>
+            <label htmlFor="phoneNumber">
+              <FiPhone /> Phone Number
+            </label>
             <input
               type="tel"
               id="phoneNumber"
@@ -109,11 +121,19 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
               pattern="[0-9]{10}"
               maxLength="10"
             />
-            {phoneError && <span className="error-message">{phoneError}</span>}
+            {phoneError && (
+              <span className="error-message">
+                <span role="img" aria-label="error">⚠️</span> {phoneError}
+              </span>
+            )}
           </div>
 
-          <button type="submit" className="submit-button">
-            Get Started
+          <button 
+            type="submit" 
+            className="submit-button"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Getting Started...' : 'Get Started'}
           </button>
         </form>
       </div>
