@@ -165,6 +165,64 @@ const customStyles = `
       font-size: 14px;
     }
   }
+
+  /* Edit Button Effects */
+  .edit-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
+    will-change: transform;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .edit-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%, -50%);
+    transform-origin: 50% 50%;
+  }
+
+  .edit-btn:active {
+    transform: scale(0.98) translateZ(0);
+  }
+
+  .edit-btn:active::after {
+    animation: ripple 0.4s ease-out;
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: scale(0, 0);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(20, 20);
+      opacity: 0;
+    }
+  }
+
+  /* Performance optimizations for mobile */
+  @media (max-width: 768px) {
+    .edit-btn {
+      transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .edit-btn:active {
+      transform: scale(0.96) translateZ(0);
+    }
+
+    .edit-btn::after {
+      display: none; /* Disable ripple on mobile for better performance */
+    }
+  }
 `;
 
 // Add this right after the customStyles definition
@@ -622,6 +680,10 @@ export default function UserEditForm() {
           type="button"
           className={`edit-btn ${isEditMode ? 'active' : ''}`}
           onClick={() => setIsEditMode(m => !m)}
+          style={{
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation'
+          }}
         >
           <FiEdit2 /> {isEditMode ? t.closeEdit : t.edit}
         </button>
