@@ -46,17 +46,20 @@
 .create-button,
 .bulk-button,
 .confirm-button,
-.cancel-button {
+.cancel-button,
+.search-button,
+.reset-button,
+.search-toggle-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 500;
-  border-radius: 9999px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s, opacity 0.2s;
+  transition: all 0.2s;
 }
 
 .create-button {
@@ -240,6 +243,19 @@
   padding: 20px;
   margin: 20px 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s ease-out;
+  transform-origin: top;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
 }
 
 .search-grid {
@@ -283,19 +299,6 @@
   justify-content: flex-end;
 }
 
-.search-button,
-.reset-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
 .search-button {
   background-color: #007bff;
   color: white;
@@ -334,18 +337,44 @@
 /* Recently Updated Styles */
 .recently-updated {
   background-color: rgba(255, 236, 179, 0.3) !important;
+  animation: highlightFade 0.5s ease-out;
+}
+
+@keyframes highlightFade {
+  from {
+    background-color: rgba(255, 236, 179, 0.8);
+  }
+  to {
+    background-color: rgba(255, 236, 179, 0.3);
+  }
 }
 
 .new-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   margin-left: 8px;
-  padding: 2px 6px;
+  padding: 2px 8px;
   background-color: #ff9800;
   color: white;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 0.7rem;
   font-weight: 600;
-  text-transform: uppercase;
+  animation: badgePop 0.3s ease-out;
+}
+
+@keyframes badgePop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .update-badge {
@@ -353,12 +382,13 @@
   align-items: center;
   gap: 4px;
   margin-left: 8px;
-  padding: 2px 6px;
+  padding: 2px 8px;
   background-color: #4caf50;
   color: white;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 0.7rem;
   font-weight: 600;
+  animation: badgePop 0.3s ease-out;
 }
 
 /* Toggle Switch */
@@ -399,11 +429,13 @@
   top: 2px;
   left: 2px;
   background: white;
-  transition: 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-label input[type="checkbox"]:checked::before {
   left: 22px;
+  transform: scale(1.1);
 }
 
 .toggle-text {
@@ -417,17 +449,55 @@
 /* Toast Link */
 .toast-link {
   margin-left: 12px;
-  padding: 4px 8px;
+  padding: 4px 12px;
   background: #4caf50;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.8rem;
   text-decoration: none;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 
 .toast-link:hover {
   background: #388e3c;
+  transform: translateY(-1px);
+}
+
+.toast-link:active {
+  transform: translateY(0);
+}
+
+/* Toast Animation */
+.Toastify__toast {
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.Toastify__toast--exit {
+  animation: toastSlideOut 0.3s ease-in;
+}
+
+@keyframes toastSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
