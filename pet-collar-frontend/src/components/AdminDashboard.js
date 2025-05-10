@@ -474,7 +474,6 @@ export default function AdminDashboard() {
                 <th>Điện thoại</th>
                 <th>Ngày tạo</th>
                 <th>Cập nhật gần nhất</th>
-                <th>Lần quét cuối</th>
                 <th>Trạng thái</th>
               </tr>
             </thead>
@@ -514,9 +513,6 @@ export default function AdminDashboard() {
                           <FiClock size={14} /> 24h
                         </span>
                       )}
-                    </td>
-                    <td>
-                      {p.lastScannedAt ? new Date(p.lastScannedAt).toLocaleString() : '-'}
                     </td>
                     <td>
                       <div className="status-cell">
