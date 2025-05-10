@@ -45,6 +45,7 @@ const labels = {
     allergicInfoTitle: 'Thông tin Dị ứng',
     allergicSubstances: 'Chất gây dị ứng',
     allergicNote: 'Ghi chú về dị ứng',
+    uploadPhoto: 'Tải ảnh lên',
   },
   en: {
     edit: 'Edit',
@@ -75,6 +76,7 @@ const labels = {
     allergicInfoTitle: 'Allergic Information',
     allergicSubstances: 'Allergic Substances',
     allergicNote: 'Allergy Note',
+    uploadPhoto: 'Upload Photo',
   }
 };
 
@@ -467,7 +469,7 @@ export default function UserEditForm() {
     }));
   };
 
-  // Modify handleFileChange to use camera on mobile
+  // Update handleFileChange to handle both camera and gallery
   const handleFileChange = e => {
     const file = e.target.files[0];
     if (file) {
@@ -477,7 +479,7 @@ export default function UserEditForm() {
     }
   };
 
-  // Add camera capture function for mobile
+  // Add new function to handle camera capture
   const handleCameraCapture = () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ video: true })
@@ -504,7 +506,7 @@ export default function UserEditForm() {
         })
         .catch(err => {
           console.error('Error accessing camera:', err);
-          toast.error('Could not access camera');
+          toast.error(t.error);
         });
     }
   };
@@ -711,14 +713,14 @@ export default function UserEditForm() {
             <input
               type="file"
               accept="image/*"
-              capture={isMobile ? "environment" : undefined}
+              capture="environment"
               className="file-input"
               onChange={handleFileChange}
               id="avatar-upload"
               style={{ display: 'none' }}
             />
             <label htmlFor="avatar-upload" className="file-input">
-              {isMobile ? <FiCamera /> : null} {isMobile ? 'Take Photo' : 'Upload Photo'}
+              {t.uploadPhoto}
             </label>
           </div>
         )}
