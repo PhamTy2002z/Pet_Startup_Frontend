@@ -509,29 +509,70 @@
   gap: 8px;
 }
 
-.status-badge {
-  display: inline-flex;
+.status-checkbox {
+  display: flex;
   align-items: center;
+  gap: 8px;
   padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  border-radius: 6px;
+  background-color: #f8f9fa;
+}
+
+.status-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #6c757d;
+  border-radius: 4px;
+  background-color: white;
+  cursor: default;
+  position: relative;
   transition: all 0.2s;
+  margin: 0;
 }
 
-.status-badge.unused {
-  background-color: #e9ecef;
+.status-input.checked {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.status-input.checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  animation: checkmark 0.2s ease-in-out;
+}
+
+.status-label {
+  font-size: 0.9rem;
   color: #495057;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.status-badge.active {
-  background-color: #d4edda;
-  color: #155724;
+@keyframes checkmark {
+  0% {
+    opacity: 0;
+    transform: rotate(45deg) scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(45deg) scale(1);
+  }
 }
 
+/* Status Actions */
 .status-actions {
   display: flex;
   gap: 4px;
+  margin-left: auto;
 }
 
 .status-button {
@@ -541,35 +582,18 @@
   width: 28px;
   height: 28px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   color: white;
-}
-
-.status-button.activate {
-  background-color: #28a745;
-}
-
-.status-button.activate:hover {
-  background-color: #218838;
-  transform: translateY(-1px);
-}
-
-.status-button.deactivate {
   background-color: #dc3545;
 }
 
-.status-button.deactivate:hover {
+.status-button:hover {
   background-color: #c82333;
   transform: translateY(-1px);
 }
 
 .status-button:active {
   transform: translateY(0);
-}
-
-/* Status Badge Animation */
-.status-badge {
-  animation: badgePop 0.3s ease-out;
 }

@@ -200,6 +200,59 @@ export default function AdminDashboard() {
   const pageCount = Math.ceil(pets.length / PAGE_SIZE);
   const pagedPets = pets.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  const getStatusText = (status, hasInfo) => {
+    if (status === 'scanned' || (status === 'unused' && hasInfo)) {
+      return (
+        <div className="status-checkbox">
+          <input 
+            type="checkbox" 
+            className="status-input checked" 
+            checked 
+            readOnly 
+          />
+          <span className="status-label">Đã quét</span>
+        </div>
+      );
+    }
+    if (status === 'active') {
+      return (
+        <div className="status-checkbox">
+          <input 
+            type="checkbox" 
+            className="status-input" 
+            checked 
+            readOnly 
+          />
+          <span className="status-label">Đang sử dụng</span>
+        </div>
+      );
+    }
+    return (
+      <div className="status-checkbox">
+        <input 
+          type="checkbox" 
+          className="status-input" 
+          readOnly 
+        />
+        <span className="status-label">Chưa sử dụng</span>
+      </div>
+    );
+  };
+
+  const getStatusColor = (status, hasInfo) => {
+    if (status === 'scanned' || (status === 'unused' && hasInfo)) {
+      return 'warning';
+    }
+    if (status === 'active') {
+      return 'success';
+    }
+    return 'secondary';
+  };
+
+  const hasPetInfo = (pet) => {
+    return pet.info.name || pet.owner.name || pet.owner.phone || pet.owner.email;
+  };
+
   return (
     <div className="dashboard-container">
       <ToastContainer position="top-right" autoClose={3000} />
@@ -312,6 +365,7 @@ export default function AdminDashboard() {
               >
                 <option value="">Tất cả</option>
                 <option value="unused">Chưa sử dụng</option>
+                <option value="scanned">Đã quét</option>
                 <option value="active">Đang sử dụng</option>
               </select>
             </div>
@@ -420,72 +474,71 @@ export default function AdminDashboard() {
                 <th>Điện thoại</th>
                 <th>Ngày tạo</th>
                 <th>Cập nhật gần nhất</th>
+                <th>Lần quét cuối</th>
                 <th>Trạng thái</th>
               </tr>
             </thead>
             <tbody>
-              {pagedPets.map((p, idx) => (
-                <tr 
-                  key={p._id} 
-                  className={`${idx % 2 === 0 ? 'even' : 'odd'} ${p.recentlyUpdated ? 'recently-updated' : ''}`}
-                >
-                  <td>{(page - 1) * PAGE_SIZE + idx + 1}</td>
-                  <td>
-                    <Link
-                      to={`/user/edit/${p._id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="id-link"
-                    >
-                      {p._id}
-                    </Link>
-                  </td>
-                  <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
-                  <td>
-                    {p.info.name || '-'}
-                    {p.recentlyUpdated && (
-                      <span className="new-badge">NEW</span>
-                    )}
-                  </td>
-                  <td>{p.owner.name || '-'}</td>
-                  <td>{p.owner.phone || '-'}</td>
-                  <td>{new Date(p.createdAt).toLocaleString()}</td>
-                  <td>
-                    {p.updatedAt ? new Date(p.updatedAt).toLocaleString() : '-'}
-                    {p.recentlyUpdated && (
-                      <span className="update-badge">
-                        <FiClock size={14} /> 24h
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <div className="status-cell">
-                      <span className={`status-badge ${p.status}`}>
-                        {p.status === 'active' ? 'Đang sử dụng' : 'Chưa sử dụng'}
-                      </span>
-                      <div className="status-actions">
-                        {p.status === 'unused' ? (
-                          <button
-                            onClick={() => handleStatusChange(p._id, 'active')}
-                            className="status-button activate"
-                            title="Kích hoạt QR"
-                          >
-                            <FiCheck size={16} />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleStatusChange(p._id, 'unused')}
-                            className="status-button deactivate"
-                            title="Hủy kích hoạt"
-                          >
-                            <FiXCircle size={16} />
-                          </button>
-                        )}
+              {pagedPets.map((p, idx) => {
+                const hasInfo = hasPetInfo(p);
+                return (
+                  <tr 
+                    key={p._id} 
+                    className={`${idx % 2 === 0 ? 'even' : 'odd'} ${p.recentlyUpdated ? 'recently-updated' : ''}`}
+                  >
+                    <td>{(page - 1) * PAGE_SIZE + idx + 1}</td>
+                    <td>
+                      <Link
+                        to={`/user/edit/${p._id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="id-link"
+                      >
+                        {p._id}
+                      </Link>
+                    </td>
+                    <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
+                    <td>
+                      {p.info.name || '-'}
+                      {p.recentlyUpdated && (
+                        <span className="new-badge">NEW</span>
+                      )}
+                    </td>
+                    <td>{p.owner.name || '-'}</td>
+                    <td>{p.owner.phone || '-'}</td>
+                    <td>{new Date(p.createdAt).toLocaleString()}</td>
+                    <td>
+                      {p.updatedAt ? new Date(p.updatedAt).toLocaleString() : '-'}
+                      {p.recentlyUpdated && (
+                        <span className="update-badge">
+                          <FiClock size={14} /> 24h
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {p.lastScannedAt ? new Date(p.lastScannedAt).toLocaleString() : '-'}
+                    </td>
+                    <td>
+                      <div className="status-cell">
+                        <span className={`status-badge ${getStatusColor(p.status, hasInfo)}`}>
+                          {getStatusText(p.status, hasInfo)}
+                        </span>
+                        <div className="status-actions">
+                          {p.status === 'active' && (
+                            <button
+                              onClick={() => handleStatusChange(p._id, 'unused')}
+                              className="status-button deactivate"
+                              title="Hủy kích hoạt"
+                            >
+                              <FiXCircle size={16} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 
