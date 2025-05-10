@@ -121,6 +121,23 @@
   transition: all 0.3s ease;
 }
 
+.avatar-controls {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.avatar-controls.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 .pet-image-preview {
   width: 200px;
   height: 200px;
@@ -143,13 +160,6 @@
 }
 
 /* Avatar Controls */
-.avatar-controls {
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
 .file-input {
   background: #4ECDC4;
   color: white;
@@ -167,6 +177,21 @@
   min-width: 200px;
   max-width: 300px;
   margin: 0 auto;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.2s;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .file-input:hover {

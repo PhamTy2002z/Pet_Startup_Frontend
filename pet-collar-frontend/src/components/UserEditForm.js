@@ -431,6 +431,9 @@ export default function UserEditForm({ initialData }) {
     allergicInfo: false
   });
 
+  // Add new state for avatar controls visibility
+  const [showAvatarControls, setShowAvatarControls] = useState(false);
+
   // Add effect to collapse all sections when edit mode is disabled
   useEffect(() => {
     if (!isEditMode) {
@@ -532,8 +535,21 @@ export default function UserEditForm({ initialData }) {
     
     // Phone number validation
     if (name === 'phone') {
-      // Only allow numbers and limit to 10 digits
-      const phoneNumber = value.replace(/\D/g, '').slice(0, 10);
+      // Remove any non-digit characters
+      const phoneNumber = value.replace(/\D/g, '');
+      
+      // Check if the input contains any letters
+      if (value !== phoneNumber) {
+        toast.error('Please enter numbers only');
+        return;
+      }
+      
+      // Limit to 10 digits
+      if (phoneNumber.length > 10) {
+        toast.error('Phone number must be 10 digits');
+        return;
+      }
+
       setForm(f => ({
         ...f,
         [section]: { ...f[section], [name]: phoneNumber }
@@ -775,6 +791,22 @@ export default function UserEditForm({ initialData }) {
     }));
   };
 
+  // Update the edit mode toggle to handle avatar controls animation
+  const toggleEditMode = () => {
+    setIsEditMode(prev => {
+      if (!prev) {
+        // When enabling edit mode, show avatar controls with a delay
+        setTimeout(() => {
+          setShowAvatarControls(true);
+        }, 100);
+      } else {
+        // When disabling edit mode, hide avatar controls immediately
+        setShowAvatarControls(false);
+      }
+      return !prev;
+    });
+  };
+
   return (
     <form className="form-container" onSubmit={handleSubmit}>
       {/* Avatar Section */}
@@ -787,22 +819,24 @@ export default function UserEditForm({ initialData }) {
         ) : (
           <div className="pet-image-preview empty-avatar" />
         )}
-        {isEditMode && (
-          <div className="avatar-controls">
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="file-input"
-              onChange={handleFileChange}
-              id="photo-upload"
-              style={{ display: 'none' }}
-            />
-            <label htmlFor="photo-upload" className="file-input">
-              <FiCamera /> {t.uploadPhoto}
-            </label>
-          </div>
-        )}
+        <div className={`avatar-controls ${showAvatarControls ? 'visible' : ''}`}>
+          {isEditMode && (
+            <>
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="file-input"
+                onChange={handleFileChange}
+                id="photo-upload"
+                style={{ display: 'none' }}
+              />
+              <label htmlFor="photo-upload" className="file-input">
+                <FiCamera /> {t.uploadPhoto}
+              </label>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Edit Controls */}
@@ -810,7 +844,7 @@ export default function UserEditForm({ initialData }) {
         <button
           type="button"
           className={`edit-btn ${isEditMode ? 'active' : ''}`}
-          onClick={() => setIsEditMode(m => !m)}
+          onClick={toggleEditMode}
           style={{
             WebkitTapHighlightColor: 'transparent',
             touchAction: 'manipulation'

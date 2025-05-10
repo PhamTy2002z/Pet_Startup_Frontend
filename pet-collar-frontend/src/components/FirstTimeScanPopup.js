@@ -9,13 +9,29 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
     phoneNumber: ''
   });
 
+  const [phoneError, setPhoneError] = useState('');
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     
     // Phone number validation
     if (name === 'phoneNumber') {
-      // Only allow numbers and limit to 10 digits
-      const phoneNumber = value.replace(/\D/g, '').slice(0, 10);
+      // Remove any non-digit characters
+      const phoneNumber = value.replace(/\D/g, '');
+      
+      // Check if the input contains any letters
+      if (value !== phoneNumber) {
+        setPhoneError('Please enter numbers only');
+        return;
+      }
+      
+      // Limit to 10 digits
+      if (phoneNumber.length > 10) {
+        setPhoneError('Phone number must be 10 digits');
+        return;
+      }
+
+      setPhoneError('');
       setFormData(prev => ({
         ...prev,
         [name]: phoneNumber
@@ -31,6 +47,13 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validate phone number before submission
+    if (formData.phoneNumber.length !== 10) {
+      setPhoneError('Phone number must be 10 digits');
+      return;
+    }
+    
     onSubmit(formData);
   };
 
@@ -81,9 +104,12 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
-              placeholder="Enter your phone number"
+              placeholder="Enter 10-digit phone number"
               required
+              pattern="[0-9]{10}"
+              maxLength="10"
             />
+            {phoneError && <span className="error-message">{phoneError}</span>}
           </div>
 
           <button type="submit" className="submit-button">
