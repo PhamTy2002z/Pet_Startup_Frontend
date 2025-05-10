@@ -10,14 +10,14 @@ import PrivateRoute from './components/PrivateRoute';
 export default function App() {
   return (
     <Routes>
-      {/* Public */}
+      {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/user/edit/:id" element={<UserEditPage />} />
+      <Route path="/user/edit/:id" element={<UserEditPage />} /> {/* Không cần PrivateRoute ở đây */}
 
-      {/* Protected Admin */}
+      {/* Protected Admin Routes */}
       <Route element={<PrivateRoute />}>
         <Route path="/admin" element={<AdminPage />} />
-        {/* ... bạn có thể thêm các route admin khác ở đây */}
+        {/* Add other admin routes here */}
       </Route>
 
       {/* Fallback */}
