@@ -46,6 +46,8 @@ const labels = {
     allergicSubstances: 'Chất gây dị ứng',
     allergicNote: 'Ghi chú về dị ứng',
     uploadPhoto: 'Tải ảnh lên',
+    takePhoto: 'Chụp ảnh',
+    chooseFromGallery: 'Chọn từ thư viện',
   },
   en: {
     edit: 'Edit',
@@ -77,6 +79,8 @@ const labels = {
     allergicSubstances: 'Allergic Substances',
     allergicNote: 'Allergy Note',
     uploadPhoto: 'Upload Photo',
+    takePhoto: 'Take Photo',
+    chooseFromGallery: 'Choose from Gallery',
   }
 };
 
@@ -223,6 +227,79 @@ const customStyles = `
 
     .edit-btn::after {
       display: none; /* Disable ripple on mobile for better performance */
+    }
+  }
+
+  .mobile-upload-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+
+  .camera-btn {
+    background: #4ECDC4;
+  }
+
+  .camera-btn:hover {
+    background: #45B7AF;
+  }
+
+  .gallery-btn {
+    background: #FF9EBB;
+  }
+
+  .gallery-btn:hover {
+    background: #FF7BA4;
+  }
+
+  @media (max-width: 768px) {
+    .mobile-upload-buttons {
+      padding: 0 16px;
+    }
+
+    .file-input {
+      width: 100%;
+      justify-content: center;
+      gap: 8px;
+    }
+  }
+
+  .file-input {
+    background: #4ECDC4;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
+  }
+
+  .file-input:hover {
+    background: #45B7AF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+  }
+
+  .file-input:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    .file-input {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      font-size: 15px;
     }
   }
 `;
@@ -716,11 +793,11 @@ export default function UserEditForm() {
               capture="environment"
               className="file-input"
               onChange={handleFileChange}
-              id="avatar-upload"
+              id="photo-upload"
               style={{ display: 'none' }}
             />
-            <label htmlFor="avatar-upload" className="file-input">
-              {t.uploadPhoto}
+            <label htmlFor="photo-upload" className="file-input">
+              <FiCamera /> {t.uploadPhoto}
             </label>
           </div>
         )}
