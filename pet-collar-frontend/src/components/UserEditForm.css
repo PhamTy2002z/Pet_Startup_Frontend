@@ -130,12 +130,21 @@
   transform: translateY(10px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+  visibility: hidden;
 }
 
 .avatar-controls.visible {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
+  visibility: visible;
+}
+
+.avatar-controls.hiding {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  visibility: visible;
 }
 
 .pet-image-preview {
@@ -183,6 +192,10 @@
   animation-delay: 0.2s;
 }
 
+.file-input.hiding {
+  animation: fadeOutDown 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -191,6 +204,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
   }
 }
 
@@ -277,7 +301,7 @@
   color: white;
   border-radius: 10px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   cursor: pointer;
   display: flex;
@@ -294,6 +318,11 @@
 
 .edit-btn.active {
   background: #A3DFF2;
+  transform: scale(1.02);
+}
+
+.edit-btn:not(.active) {
+  transform: scale(1);
 }
 
 .lang-btn {
@@ -419,7 +448,7 @@
 /* Section Content Animation */
 .section-content {
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   max-height: 0;
   opacity: 0;
   transform: translateY(-10px);
@@ -432,6 +461,14 @@
   transform: translateY(0);
   visibility: visible;
   margin-top: 16px;
+}
+
+.section-content.collapsing {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  visibility: visible;
+  margin-top: 0;
 }
 
 /* Mobile Optimizations */

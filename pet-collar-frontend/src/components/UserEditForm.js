@@ -433,6 +433,7 @@ export default function UserEditForm({ initialData }) {
 
   // Add new state for avatar controls visibility
   const [showAvatarControls, setShowAvatarControls] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   // Add effect to collapse all sections when edit mode is disabled
   useEffect(() => {
@@ -793,18 +794,31 @@ export default function UserEditForm({ initialData }) {
 
   // Update the edit mode toggle to handle avatar controls animation
   const toggleEditMode = () => {
-    setIsEditMode(prev => {
-      if (!prev) {
-        // When enabling edit mode, show avatar controls with a delay
-        setTimeout(() => {
-          setShowAvatarControls(true);
-        }, 100);
-      } else {
-        // When disabling edit mode, hide avatar controls immediately
-        setShowAvatarControls(false);
-      }
-      return !prev;
-    });
+    if (isEditMode) {
+      // Start closing animation
+      setIsClosing(true);
+      setShowAvatarControls(false);
+      
+      // Wait for animation to complete before actually closing
+      setTimeout(() => {
+        setIsEditMode(false);
+        setIsClosing(false);
+      }, 300); // Match this with the CSS animation duration
+    } else {
+      // Enable edit mode immediately
+      setIsEditMode(true);
+      // Show avatar controls with a delay
+      setTimeout(() => {
+        setShowAvatarControls(true);
+      }, 100);
+    }
+  };
+
+  // Update section content class based on state
+  const getSectionContentClass = (section) => {
+    if (!isEditMode) return '';
+    if (isClosing) return 'collapsing';
+    return expandedSections[section] ? 'expanded' : '';
   };
 
   return (
@@ -819,19 +833,19 @@ export default function UserEditForm({ initialData }) {
         ) : (
           <div className="pet-image-preview empty-avatar" />
         )}
-        <div className={`avatar-controls ${showAvatarControls ? 'visible' : ''}`}>
+        <div className={`avatar-controls ${showAvatarControls ? 'visible' : ''} ${isClosing ? 'hiding' : ''}`}>
           {isEditMode && (
             <>
               <input
                 type="file"
                 accept="image/*"
                 capture="environment"
-                className="file-input"
+                className={`file-input ${isClosing ? 'hiding' : ''}`}
                 onChange={handleFileChange}
                 id="photo-upload"
                 style={{ display: 'none' }}
               />
-              <label htmlFor="photo-upload" className="file-input">
+              <label htmlFor="photo-upload" className={`file-input ${isClosing ? 'hiding' : ''}`}>
                 <FiCamera /> {t.uploadPhoto}
               </label>
             </>
@@ -874,7 +888,7 @@ export default function UserEditForm({ initialData }) {
               <FiPlus />
             </button>
           </div>
-          <div className={`section-content ${expandedSections.petInfo && isEditMode ? 'expanded' : ''}`}>
+          <div className={`section-content ${getSectionContentClass('petInfo')}`}>
             <div className="field-group">
               <label htmlFor="name">{t.petName}</label>
               <input
@@ -921,7 +935,7 @@ export default function UserEditForm({ initialData }) {
               <FiPlus />
             </button>
           </div>
-          <div className={`section-content ${expandedSections.ownerInfo && isEditMode ? 'expanded' : ''}`}>
+          <div className={`section-content ${getSectionContentClass('ownerInfo')}`}>
             <div className="field-group">
               <label htmlFor="owner-name">{t.ownerName}</label>
               <input
@@ -973,7 +987,7 @@ export default function UserEditForm({ initialData }) {
               <FiPlus />
             </button>
           </div>
-          <div className={`section-content ${expandedSections.vaccinations && isEditMode ? 'expanded' : ''}`}>
+          <div className={`section-content ${getSectionContentClass('vaccinations')}`}>
             {form.vaccinations.length === 0 && <p>{t.noVax}</p>}
             {form.vaccinations.map((v, i) => (
               <div key={i} className="vax-item">
@@ -1021,7 +1035,7 @@ export default function UserEditForm({ initialData }) {
               <FiPlus />
             </button>
           </div>
-          <div className={`section-content ${expandedSections.reExaminations && isEditMode ? 'expanded' : ''}`}>
+          <div className={`section-content ${getSectionContentClass('reExaminations')}`}>
             {form.reExaminations.length === 0 && <p>{t.noReExam}</p>}
             {form.reExaminations.map((r, i) => (
               <div key={i} className="vax-item">
@@ -1070,7 +1084,7 @@ export default function UserEditForm({ initialData }) {
               <FiPlus />
             </button>
           </div>
-          <div className={`section-content ${expandedSections.allergicInfo && isEditMode ? 'expanded' : ''}`}>
+          <div className={`section-content ${getSectionContentClass('allergicInfo')}`}>
             <div className="allergic-fields">
               <div className="field-group">
                 <label htmlFor="substances">{t.allergicSubstances}</label>
