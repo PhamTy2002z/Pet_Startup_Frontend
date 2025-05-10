@@ -400,7 +400,7 @@ const toastStyles = {
   }
 };
 
-export default function UserEditForm() {
+export default function UserEditForm({ initialData }) {
   const { id } = useParams();
   const [lang, setLang] = useState('vi');
   const t = labels[lang];
@@ -456,41 +456,64 @@ export default function UserEditForm() {
 
   // Load pet data
   useEffect(() => {
-    getPetById(id).then(pet => {
-      setForm({
-        info: {
-          name: pet.info.name || '',
-          species: pet.info.species || '',
-          birthDate: pet.info.birthDate
-            ? new Date(pet.info.birthDate).toISOString().split('T')[0]
-            : ''
-        },
-        owner: {
-          name: pet.owner.name || '',
-          phone: pet.owner.phone || '',
-          email: pet.owner.email || ''
-        },
-        vaccinations: (pet.vaccinations || []).map(v => ({
-          name: v.name,
-          date: v.date
-            ? new Date(v.date).toISOString().split('T')[0]
-            : ''
-        })),
-        reExaminations: (pet.reExaminations || []).map(r => ({
-          date: r.date ? new Date(r.date).toISOString().split('T')[0] : '',
-          note: r.note || ''
-        })),
-        allergicInfo: pet.allergicInfo || { substances: [], note: '' }
-      });
-      if (pet.avatarFileId) {
-        setAvatarUrl(getPetAvatarUrl(pet.avatarFileId));
+    const loadPetData = async () => {
+      try {
+        const pet = await getPetById(id);
+        
+        // If we have initial data from popup, use that instead
+        if (initialData) {
+          setForm(initialData);
+          setIsEditMode(true); // Automatically enable edit mode
+          setExpandedSections({
+            petInfo: true,
+            ownerInfo: true,
+            vaccinations: false,
+            reExaminations: false,
+            allergicInfo: false
+          });
+        } else {
+          setForm({
+            info: {
+              name: pet.info.name || '',
+              species: pet.info.species || '',
+              birthDate: pet.info.birthDate
+                ? new Date(pet.info.birthDate).toISOString().split('T')[0]
+                : ''
+            },
+            owner: {
+              name: pet.owner.name || '',
+              phone: pet.owner.phone || '',
+              email: pet.owner.email || ''
+            },
+            vaccinations: (pet.vaccinations || []).map(v => ({
+              name: v.name,
+              date: v.date
+                ? new Date(v.date).toISOString().split('T')[0]
+                : ''
+            })),
+            reExaminations: (pet.reExaminations || []).map(r => ({
+              date: r.date ? new Date(r.date).toISOString().split('T')[0] : '',
+              note: r.note || ''
+            })),
+            allergicInfo: pet.allergicInfo || { substances: [], note: '' }
+          });
+        }
+
+        if (pet.avatarFileId) {
+          setAvatarUrl(getPetAvatarUrl(pet.avatarFileId));
+        }
+        // Set existing email
+        if (pet.owner.email) {
+          setExistingEmail(pet.owner.email);
+        }
+      } catch (error) {
+        console.error('Error loading pet data:', error);
+        toast.error(t.error);
       }
-      // Set existing email
-      if (pet.owner.email) {
-        setExistingEmail(pet.owner.email);
-      }
-    });
-  }, [id]);
+    };
+
+    loadPetData();
+  }, [id, initialData]);
 
   // Preview file uploads
   useEffect(() => {
