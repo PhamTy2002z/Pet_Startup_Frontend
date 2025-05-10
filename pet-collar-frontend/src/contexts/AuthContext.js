@@ -13,10 +13,15 @@ export function AuthProvider({ children }) {
 
   // Hàm login: gọi API, lưu token, set state, điều hướng
   const login = async (username, password) => {
-    const t = await apiLoginAdmin({ username, password });
-    localStorage.setItem('token', t);
-    setToken(t);
-    navigate('/admin', { replace: true });
+    try {
+      const t = await apiLoginAdmin({ username, password });
+      localStorage.setItem('token', t);  // Lưu token vào localStorage
+      setToken(t); // Cập nhật token vào state
+      navigate('/admin', { replace: true });
+    } catch (err) {
+      console.error('Login error:', err);
+      // Xử lý lỗi nếu login thất bại
+    }
   };
 
   // Hàm logout: xóa token và điều hướng về login
