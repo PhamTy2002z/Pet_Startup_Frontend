@@ -15,10 +15,15 @@ export function AuthProvider({ children }) {
   // Kiểm tra token khi load lại app và set token nếu hết hạn
   const checkTokenExpiration = (token) => {
     if (token) {
-      const decoded = JSON.parse(atob(token.split('.')[1]));  // Decode JWT token
-      const expirationTime = decoded.exp * 1000;
-      if (Date.now() > expirationTime) {
-        // Token hết hạn
+      try {
+        const decoded = JSON.parse(atob(token.split('.')[1]));  // Decode JWT token
+        const expirationTime = decoded.exp * 1000;
+        if (Date.now() > expirationTime) {
+          // Token hết hạn
+          logout();
+        }
+      } catch (err) {
+        console.error('Error decoding token:', err);
         logout();
       }
     }
@@ -57,6 +62,7 @@ export function AuthProvider({ children }) {
       },
       (err) => Promise.reject(err)
     );
+
     return () => axios.interceptors.request.eject(id);
   }, []);
 

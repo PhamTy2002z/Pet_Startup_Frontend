@@ -12,8 +12,8 @@ export default function App() {
     <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/user/edit/:id" element={<UserEditPage />} /> {/* Không bảo vệ */}
-
+      <Route path="/user/edit/:id" element={<UserEditPage />} /> {/* Không cần bảo vệ */}
+      
       {/* Protected Admin Routes */}
       <Route element={<PrivateRoute />}>
         <Route path="/admin" element={<AdminPage />} />
