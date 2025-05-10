@@ -104,6 +104,25 @@ export default function AdminDashboard() {
       const result = await searchPets(searchParams);
       setPets(result.pets);
       setPage(1);
+      
+      // Show status counts if available
+      if (result.statusCounts) {
+        toast.info(
+          <div>
+            <div>Tổng số: {result.statusCounts.total}</div>
+            <div>Đang sử dụng: {result.statusCounts.active}</div>
+            <div>Chưa sử dụng: {result.statusCounts.unused}</div>
+          </div>,
+          {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
+        );
+      }
     } catch (err) {
       console.error('Error searching pets:', err);
       toast.error('Lỗi khi tìm kiếm');
@@ -364,9 +383,8 @@ export default function AdminDashboard() {
                 onChange={(e) => setSearchParams({...searchParams, status: e.target.value})}
               >
                 <option value="">Tất cả</option>
-                <option value="unused">Chưa sử dụng</option>
-                <option value="scanned">Đã quét</option>
                 <option value="active">Đang sử dụng</option>
+                <option value="unused">Chưa sử dụng</option>
               </select>
             </div>
             <div className="search-field">
