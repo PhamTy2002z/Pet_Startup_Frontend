@@ -77,7 +77,7 @@ export default function PetCard({ breed, name, age, description, imageUrl }) {
         ) : (
           <div className="placeholder">
             <CameraIcon />
-            <span className="upload-text">Upload</span>
+            <span className="upload-text">Upload On Profile</span>
           </div>
         )}
       </div>
