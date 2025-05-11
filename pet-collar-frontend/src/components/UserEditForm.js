@@ -50,6 +50,8 @@ const labels = {
     uploadPhoto: 'Tải ảnh lên',
     takePhoto: 'Chụp ảnh',
     chooseFromGallery: 'Chọn từ thư viện',
+    descriptionTooLong: 'Mô tả giới hạn đến 40 ký tự (không bao gồm khoảng trắng)',
+    charactersLeft: 'ký tự còn lại',
   },
   en: {
     edit: 'Edit',
@@ -84,6 +86,8 @@ const labels = {
     uploadPhoto: 'Upload Photo',
     takePhoto: 'Take Photo',
     chooseFromGallery: 'Choose from Gallery',
+    descriptionTooLong: 'Description limited to 40 characters (excluding spaces)',
+    charactersLeft: 'characters left',
   }
 };
 
@@ -421,6 +425,7 @@ export default function UserEditForm({ initialData }) {
   const [preview, setPreview] = useState('');
   const [existingEmail, setExistingEmail] = useState('');
   const [showAllergicFields, setShowAllergicFields] = useState(false);
+  const [descriptionExceeded, setDescriptionExceeded] = useState(false);
 
   // Add new state for mobile detection
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -535,6 +540,26 @@ export default function UserEditForm({ initialData }) {
       setForm(f => ({
         ...f,
         [section]: { ...f[section], [name]: phoneNumber }
+      }));
+      return;
+    }
+
+    // Description validation - limit to 40 characters excluding spaces
+    if (name === 'description') {
+      const descWithoutSpaces = value.replace(/\s/g, '');
+      
+      // Show warning only when crossing the threshold from below 40 to above 40
+      if (descWithoutSpaces.length > 40 && !descriptionExceeded) {
+        toast.warning(t.descriptionTooLong || 'Description limited to 40 characters (excluding spaces)');
+        setDescriptionExceeded(true);
+      } else if (descWithoutSpaces.length <= 40 && descriptionExceeded) {
+        // Reset the flag when back under the limit
+        setDescriptionExceeded(false);
+      }
+      
+      setForm(f => ({
+        ...f,
+        [section]: { ...f[section], [name]: value }
       }));
       return;
     }
@@ -930,7 +955,15 @@ export default function UserEditForm({ initialData }) {
                 readOnly={!isEditMode}
                 placeholder={lang === 'vi' ? "Mô tả về bé" : "Pet description"}
                 rows="3"
+                maxLength={form.info.description.replace(/\s/g, '').length >= 40 ? form.info.description.length : 200}
               />
+              {isEditMode && (
+                <div className="character-counter">
+                  <span className={form.info.description.replace(/\s/g, '').length > 40 ? 'error' : ''}>
+                    {Math.max(0, 40 - (form.info.description || '').replace(/\s/g, '').length)} {t.charactersLeft}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

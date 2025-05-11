@@ -445,6 +445,20 @@
   opacity: 0.8;
 }
 
+/* Character counter for description */
+.character-counter {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 12px;
+  color: #718096;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.character-counter .error {
+  color: #e53e3e;
+}
+
 /* Section Content Animation */
 .section-content {
   overflow: hidden;

@@ -31,12 +31,34 @@ function CameraIcon() {
 export default function PetCard({ breed, name, age, description, imageUrl }) {
   // Format the description based on age
   const formattedDescription = description || '';
+  
+  // Limit description to 40 chars excluding spaces
+  const limitDescription = (text) => {
+    if (!text) return '';
+    // Remove spaces for counting
+    const textWithoutSpaces = text.replace(/\s/g, '');
+    if (textWithoutSpaces.length <= 40) return text;
+    
+    // If we need to truncate, we'll do it with the original text (with spaces)
+    let charCount = 0;
+    let truncatedText = '';
+    
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] !== ' ') charCount++;
+      truncatedText += text[i];
+      if (charCount >= 40) break;
+    }
+    
+    return truncatedText + '...';
+  };
+  
+  const truncatedDescription = limitDescription(formattedDescription);
   const ageText = typeof age === 'number' && age > 0 ? `${age} tuổi` : '';
   
   // Combine age and description if both exist
-  const displayText = ageText && formattedDescription 
-    ? `${ageText}, ${formattedDescription}`
-    : ageText || formattedDescription;
+  const displayText = ageText && truncatedDescription 
+    ? `${ageText}, ${truncatedDescription}`
+    : ageText || truncatedDescription;
 
   return (
     <div className="pet-card">
@@ -62,7 +84,7 @@ export default function PetCard({ breed, name, age, description, imageUrl }) {
       <div className="pet-card-name-bg">
         <span className="pet-card-name">{name}</span>
       </div>
-      <div className="pet-card-desc" title={displayText}>
+      <div className="pet-card-desc" title={formattedDescription}>
         {displayText}
       </div>
       <div className="pet-card-badge">
