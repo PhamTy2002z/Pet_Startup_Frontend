@@ -9,6 +9,7 @@ import {
 } from '../api/petService';
 import { FiPlus, FiTrash2, FiEdit2, FiCamera } from 'react-icons/fi';
 import './UserEditForm.css';
+import PetCard from './PetCard';
 
 // Import react-toastify
 import { toast, ToastContainer } from 'react-toastify';
@@ -799,6 +800,20 @@ export default function UserEditForm({ initialData }) {
 
   return (
     <form className="form-container" onSubmit={handleSubmit}>
+      {/* PetCard Preview */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+        <PetCard
+          breed={form.info.species || 'Chưa rõ'}
+          name={form.info.name || 'Tên bé'}
+          age={form.info.birthDate ? (new Date().getFullYear() - new Date(form.info.birthDate).getFullYear()) : '?'}
+          description={
+            lang === 'vi'
+              ? (form.allergicInfo.note || 'Chưa có mô tả')
+              : (form.allergicInfo.note || 'No description')
+          }
+          imageUrl={preview || avatarUrl || 'https://placekitten.com/300/200'}
+        />
+      </div>
       {/* Avatar Section */}
       <div className="section avatar-section">
         <h3 className="section-title">📷 {t.petPhoto}</h3>
