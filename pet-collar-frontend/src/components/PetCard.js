@@ -29,6 +29,15 @@ function CameraIcon() {
 }
 
 export default function PetCard({ breed, name, age, description, imageUrl }) {
+  // Format the description based on age
+  const formattedDescription = description || '';
+  const ageText = typeof age === 'number' && age > 0 ? `${age} tuổi` : '';
+  
+  // Combine age and description if both exist
+  const displayText = ageText && formattedDescription 
+    ? `${ageText}, ${formattedDescription}`
+    : ageText || formattedDescription;
+
   return (
     <div className="pet-card">
       <div className="pet-card-inner" />
@@ -46,15 +55,15 @@ export default function PetCard({ breed, name, age, description, imageUrl }) {
         ) : (
           <div className="placeholder">
             <CameraIcon />
-            <span className="upload-text">Upload On Profile</span>
+            <span className="upload-text">Upload</span>
           </div>
         )}
       </div>
       <div className="pet-card-name-bg">
         <span className="pet-card-name">{name}</span>
       </div>
-      <div className="pet-card-desc" title={`${age} tuổi, ${description}`}>
-        {age} tuổi, {description}
+      <div className="pet-card-desc" title={displayText}>
+        {displayText}
       </div>
       <div className="pet-card-badge">
         <KiwiBadge />

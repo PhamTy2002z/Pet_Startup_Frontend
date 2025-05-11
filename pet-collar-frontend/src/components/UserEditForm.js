@@ -25,6 +25,7 @@ const labels = {
     petName: 'Tên Pet',
     species: 'Loài',
     birthDate: 'Ngày Sinh',
+    description: 'Mô tả',
     revisitDate: 'Ngày tái khám',
     ownerInfoTitle: 'Thông tin Của Sen',
     ownerName: 'Tên Chủ',
@@ -58,6 +59,7 @@ const labels = {
     petName: 'Name',
     species: 'Species',
     birthDate: 'Birth Date',
+    description: 'Description',
     revisitDate: 'Revisit Date',
     ownerInfoTitle: "Owner's Information",
     ownerName: 'Owner Name',
@@ -408,7 +410,7 @@ export default function UserEditForm({ initialData }) {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [form, setForm] = useState({
-    info: { name: '', species: '', birthDate: '' },
+    info: { name: '', species: '', birthDate: '', description: '' },
     owner: { name: '', phone: '', email: '' },
     vaccinations: [],
     reExaminations: [],
@@ -460,7 +462,8 @@ export default function UserEditForm({ initialData }) {
               species: pet.info.species || '',
               birthDate: pet.info.birthDate
                 ? new Date(pet.info.birthDate).toISOString().split('T')[0]
-                : ''
+                : '',
+              description: pet.info.description || ''
             },
             owner: {
               name: pet.owner.name || '',
@@ -649,7 +652,8 @@ export default function UserEditForm({ initialData }) {
         info: {
           name: form.info.name,
           species: form.info.species,
-          birthDate: form.info.birthDate ? new Date(form.info.birthDate).toISOString() : null
+          birthDate: form.info.birthDate ? new Date(form.info.birthDate).toISOString() : null,
+          description: form.info.description || ''
         },
         owner: {
           name: form.owner.name,
@@ -714,7 +718,8 @@ export default function UserEditForm({ initialData }) {
           species: refreshedPet.info.species || '',
           birthDate: refreshedPet.info.birthDate
             ? new Date(refreshedPet.info.birthDate).toISOString().split('T')[0]
-            : ''
+            : '',
+          description: refreshedPet.info.description || ''
         },
         owner: {
           name: refreshedPet.owner.name || '',
@@ -808,8 +813,8 @@ export default function UserEditForm({ initialData }) {
           age={form.info.birthDate ? (new Date().getFullYear() - new Date(form.info.birthDate).getFullYear()) : '?'}
           description={
             lang === 'vi'
-              ? (form.allergicInfo.note || 'Chưa có mô tả')
-              : (form.allergicInfo.note || 'No description')
+              ? (form.info.description || 'Chưa có mô tả')
+              : (form.info.description || 'No description')
           }
           imageUrl={preview || avatarUrl}
         />
@@ -912,6 +917,19 @@ export default function UserEditForm({ initialData }) {
                 onChange={e => handleChange(e, 'info')}
                 disabled={!isEditMode}
                 readOnly={!isEditMode}
+              />
+            </div>
+            <div className="field-group">
+              <label htmlFor="description">{t.description}</label>
+              <textarea
+                id="description"
+                name="description"
+                value={form.info.description || ''}
+                onChange={e => handleChange(e, 'info')}
+                disabled={!isEditMode}
+                readOnly={!isEditMode}
+                placeholder={lang === 'vi' ? "Mô tả về bé" : "Pet description"}
+                rows="3"
               />
             </div>
           </div>
