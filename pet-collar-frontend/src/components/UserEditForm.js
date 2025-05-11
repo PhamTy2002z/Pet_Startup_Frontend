@@ -811,7 +811,7 @@ export default function UserEditForm({ initialData }) {
               ? (form.allergicInfo.note || 'Chưa có mô tả')
               : (form.allergicInfo.note || 'No description')
           }
-          imageUrl={preview || avatarUrl || 'https://placekitten.com/300/200'}
+          imageUrl={preview || avatarUrl}
         />
       </div>
       {/* Avatar Section */}
