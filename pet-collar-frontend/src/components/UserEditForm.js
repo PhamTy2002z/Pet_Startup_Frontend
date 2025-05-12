@@ -7,7 +7,7 @@ import {
   getPetAvatarUrl,
   updatePetOwnerEmail
 } from '../api/petService';
-import { FiPlus, FiTrash2, FiEdit2, FiCamera } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiEdit2, FiCamera, FiImage } from 'react-icons/fi';
 import './UserEditForm.css';
 import PetCard from './PetCard';
 import PetCard2 from './PetCard-2';
@@ -53,6 +53,8 @@ const labels = {
     chooseFromGallery: 'Chọn từ thư viện',
     descriptionTooLong: 'Mô tả giới hạn đến 40 ký tự (không bao gồm khoảng trắng)',
     charactersLeft: 'ký tự còn lại',
+    camera: 'Máy ảnh',
+    gallery: 'Thư viện',
   },
   en: {
     edit: 'Edit',
@@ -89,6 +91,8 @@ const labels = {
     chooseFromGallery: 'Choose from Gallery',
     descriptionTooLong: 'Description limited to 40 characters (excluding spaces)',
     charactersLeft: 'characters left',
+    camera: 'Camera',
+    gallery: 'Gallery',
   }
 };
 
@@ -249,18 +253,46 @@ const customStyles = `
 
   .camera-btn {
     background: #4ECDC4;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
   }
 
   .camera-btn:hover {
     background: #45B7AF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
   }
 
   .gallery-btn {
     background: #FF9EBB;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(255, 158, 187, 0.2);
   }
 
   .gallery-btn:hover {
     background: #FF7BA4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 158, 187, 0.3);
   }
 
   @media (max-width: 768px) {
@@ -268,10 +300,11 @@ const customStyles = `
       padding: 0 16px;
     }
 
-    .file-input {
+    .camera-btn,
+    .gallery-btn {
       width: 100%;
-      justify-content: center;
-      gap: 8px;
+      padding: 14px 24px;
+      font-size: 15px;
     }
   }
 
@@ -926,15 +959,27 @@ export default function UserEditForm({ initialData }) {
               <input
                 type="file"
                 accept="image/*"
-                capture="environment"
                 className={`file-input ${isClosing ? 'hiding' : ''}`}
                 onChange={handleFileChange}
                 id="photo-upload"
                 style={{ display: 'none' }}
               />
-              <label htmlFor="photo-upload" className={`file-input ${isClosing ? 'hiding' : ''}`}>
-                <FiCamera /> {t.uploadPhoto}
-              </label>
+              <div className="mobile-upload-buttons">
+                <button
+                  type="button"
+                  className="camera-btn"
+                  onClick={() => document.getElementById('photo-upload').click()}
+                >
+                  <FiCamera /> {t.camera}
+                </button>
+                <button
+                  type="button"
+                  className="gallery-btn"
+                  onClick={() => document.getElementById('photo-upload').click()}
+                >
+                  <FiImage /> {t.gallery}
+                </button>
+              </div>
             </>
           )}
         </div>
