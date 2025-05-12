@@ -10,6 +10,7 @@ import {
 import { FiPlus, FiTrash2, FiEdit2, FiCamera } from 'react-icons/fi';
 import './UserEditForm.css';
 import PetCard from './PetCard';
+import PetCard2 from './PetCard-2';
 
 // Import react-toastify
 import { toast, ToastContainer } from 'react-toastify';
@@ -426,6 +427,7 @@ export default function UserEditForm({ initialData }) {
   const [existingEmail, setExistingEmail] = useState('');
   const [showAllergicFields, setShowAllergicFields] = useState(false);
   const [descriptionExceeded, setDescriptionExceeded] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState('default');
 
   // Add new state for mobile detection
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -442,6 +444,30 @@ export default function UserEditForm({ initialData }) {
   // Add new state for avatar controls visibility
   const [showAvatarControls, setShowAvatarControls] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  
+  // Add a new state to track card type
+  const [cardType, setCardType] = useState('petcard');
+  
+  // Modified theme options with new labels for different card types
+  const themeOptions = [
+    { value: 'petcard-default', label: lang === 'vi' ? 'Thẻ thú cưng - Mặc định' : 'Pet Card - Default' },
+    { value: 'petcard-blue', label: lang === 'vi' ? 'Thẻ thú cưng - Xanh Dương' : 'Pet Card - Blue' },
+    { value: 'petcard-green', label: lang === 'vi' ? 'Thẻ thú cưng - Xanh Lá' : 'Pet Card - Green' },
+    { value: 'petcard-dark', label: lang === 'vi' ? 'Thẻ thú cưng - Tối' : 'Pet Card - Dark' },
+    { value: 'rachel-default', label: lang === 'vi' ? 'Rachel' : 'Rachel' }
+  ];
+
+  // Handle theme change
+  const handleThemeChange = (e) => {
+    const value = e.target.value;
+    if (value.startsWith('petcard-')) {
+      setCardType('petcard');
+      setSelectedTheme(value.replace('petcard-', ''));
+    } else if (value.startsWith('rachel-')) {
+      setCardType('rachel');
+      setSelectedTheme(value.replace('rachel-', ''));
+    }
+  };
 
   // Load pet data
   useEffect(() => {
@@ -830,19 +856,60 @@ export default function UserEditForm({ initialData }) {
 
   return (
     <form className="form-container" onSubmit={handleSubmit}>
-      {/* PetCard Preview */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
-        <PetCard
-          breed={form.info.species || 'Chưa rõ'}
-          name={form.info.name || 'Tên bé'}
-          age={form.info.birthDate ? (new Date().getFullYear() - new Date(form.info.birthDate).getFullYear()) : '?'}
-          description={
-            lang === 'vi'
-              ? (form.info.description || 'Chưa có mô tả')
-              : (form.info.description || 'No description')
-          }
-          imageUrl={preview || avatarUrl}
-        />
+      {/* Theme Selection Dropdown */}
+      <div className="theme-selection">
+        <label htmlFor="theme-select">{lang === 'vi' ? 'Chủ đề thẻ thú cưng' : 'Pet Card Theme'}</label>
+        <select 
+          id="theme-select" 
+          value={cardType === 'petcard' ? `petcard-${selectedTheme}` : `rachel-${selectedTheme}`} 
+          onChange={handleThemeChange}
+          className="theme-dropdown"
+        >
+          {themeOptions.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      
+      {/* Card Preview */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        margin: '0 auto 20px',
+        maxWidth: '100%',
+        height: cardType === 'rachel' ? 'calc(100vh - 150px)' : 'auto',
+        overflow: 'hidden'
+      }}>
+        {cardType === 'petcard' ? (
+          <PetCard
+            breed={form.info.species || 'Chưa rõ'}
+            name={form.info.name || 'Tên bé'}
+            age={form.info.birthDate ? (new Date().getFullYear() - new Date(form.info.birthDate).getFullYear()) : '?'}
+            description={
+              lang === 'vi'
+                ? (form.info.description || 'Chưa có mô tả')
+                : (form.info.description || 'No description')
+            }
+            imageUrl={preview || avatarUrl}
+            theme={selectedTheme}
+          />
+        ) : (
+          <PetCard2
+            firstName="Rachel"
+            lastName={form.owner.name || 'Coltrane'}
+            imageUrl={preview || avatarUrl}
+            bio={form.info.description || (lang === 'vi' ? 'Chưa có mô tả' : 'No description')}
+            funFact={lang === 'vi' ? 
+              `${form.info.species || 'Chưa rõ'}, ${form.info.birthDate ? (new Date().getFullYear() - new Date(form.info.birthDate).getFullYear()) : '?'} tuổi` : 
+              `${form.info.species || 'Unknown'}, ${form.info.birthDate ? (new Date().getFullYear() - new Date(form.info.birthDate).getFullYear()) : '?'} years old`
+            }
+            superpowers={['Volleyball', 'Coffee', 'Dog', 'Music1']}
+            personalityEmoji="🌸"
+            theme={selectedTheme}
+          />
+        )}
       </div>
       {/* Avatar Section */}
       <div className="section avatar-section">

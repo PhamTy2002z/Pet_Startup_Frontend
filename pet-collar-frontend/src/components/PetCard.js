@@ -28,7 +28,59 @@ function CameraIcon() {
   );
 }
 
-export default function PetCard({ breed, name, age, description, imageUrl }) {
+// Define theme styles
+const themeStyles = {
+  default: {
+    cardClass: 'pet-card',
+    innerClass: 'pet-card-inner',
+    headerClass: 'pet-card-header',
+    breedClass: 'pet-card-breed',
+    dotsClass: 'pet-card-dots',
+    imageWrapperClass: 'pet-card-image-wrapper',
+    nameClass: 'pet-card-name',
+    nameBgClass: 'pet-card-name-bg',
+    descClass: 'pet-card-desc',
+    badgeClass: 'pet-card-badge'
+  },
+  blue: {
+    cardClass: 'pet-card pet-card-blue',
+    innerClass: 'pet-card-inner pet-card-inner-blue',
+    headerClass: 'pet-card-header pet-card-header-blue',
+    breedClass: 'pet-card-breed',
+    dotsClass: 'pet-card-dots pet-card-dots-blue',
+    imageWrapperClass: 'pet-card-image-wrapper pet-card-image-wrapper-blue',
+    nameClass: 'pet-card-name',
+    nameBgClass: 'pet-card-name-bg pet-card-name-bg-blue',
+    descClass: 'pet-card-desc pet-card-desc-blue',
+    badgeClass: 'pet-card-badge'
+  },
+  green: {
+    cardClass: 'pet-card pet-card-green',
+    innerClass: 'pet-card-inner pet-card-inner-green',
+    headerClass: 'pet-card-header pet-card-header-green',
+    breedClass: 'pet-card-breed',
+    dotsClass: 'pet-card-dots pet-card-dots-green',
+    imageWrapperClass: 'pet-card-image-wrapper pet-card-image-wrapper-green',
+    nameClass: 'pet-card-name',
+    nameBgClass: 'pet-card-name-bg pet-card-name-bg-green',
+    descClass: 'pet-card-desc pet-card-desc-green',
+    badgeClass: 'pet-card-badge'
+  },
+  dark: {
+    cardClass: 'pet-card pet-card-dark',
+    innerClass: 'pet-card-inner pet-card-inner-dark',
+    headerClass: 'pet-card-header pet-card-header-dark',
+    breedClass: 'pet-card-breed',
+    dotsClass: 'pet-card-dots pet-card-dots-dark',
+    imageWrapperClass: 'pet-card-image-wrapper pet-card-image-wrapper-dark',
+    nameClass: 'pet-card-name',
+    nameBgClass: 'pet-card-name-bg pet-card-name-bg-dark',
+    descClass: 'pet-card-desc pet-card-desc-dark',
+    badgeClass: 'pet-card-badge'
+  }
+};
+
+export default function PetCard({ breed, name, age, description, imageUrl, theme = 'default' }) {
   // Format the description based on age
   const formattedDescription = description || '';
   
@@ -60,18 +112,21 @@ export default function PetCard({ breed, name, age, description, imageUrl }) {
     ? `${ageText}, ${truncatedDescription}`
     : ageText || truncatedDescription;
 
+  // Get the appropriate theme styles
+  const currentTheme = themeStyles[theme] || themeStyles.default;
+
   return (
-    <div className="pet-card">
-      <div className="pet-card-inner" />
-      <div className="pet-card-header">
-        <span className="pet-card-breed">{breed}</span>
-        <span className="pet-card-dots">
+    <div className={currentTheme.cardClass}>
+      <div className={currentTheme.innerClass} />
+      <div className={currentTheme.headerClass}>
+        <span className={currentTheme.breedClass}>{breed}</span>
+        <span className={currentTheme.dotsClass}>
           <span className="dot" />
           <span className="dot" />
           <span className="dot" />
         </span>
       </div>
-      <div className="pet-card-image-wrapper">
+      <div className={currentTheme.imageWrapperClass}>
         {imageUrl ? (
           <img src={imageUrl} alt={name} className="pet-card-image" />
         ) : (
@@ -81,13 +136,13 @@ export default function PetCard({ breed, name, age, description, imageUrl }) {
           </div>
         )}
       </div>
-      <div className="pet-card-name-bg">
-        <span className="pet-card-name">{name}</span>
+      <div className={currentTheme.nameBgClass}>
+        <span className={currentTheme.nameClass}>{name}</span>
       </div>
-      <div className="pet-card-desc" title={formattedDescription}>
+      <div className={currentTheme.descClass} title={formattedDescription}>
         {displayText}
       </div>
-      <div className="pet-card-badge">
+      <div className={currentTheme.badgeClass}>
         <KiwiBadge />
       </div>
     </div>

@@ -224,6 +224,104 @@
   transform: translateX(-50%) rotate(15deg);
 }
 
+/* Blue Theme */
+.pet-card-blue {
+  background: #4A80F0;
+  border: 4px solid #3A6AD0;
+}
+
+.pet-card-inner-blue {
+  background: #C7D8FF;
+}
+
+.pet-card-header-blue {
+  background: #1A3C8A;
+}
+
+.pet-card-dots-blue .dot:nth-child(1),
+.pet-card-dots-blue .dot:nth-child(2),
+.pet-card-dots-blue .dot:nth-child(3) {
+  background: #50E3C2;
+}
+
+.pet-card-image-wrapper-blue {
+  box-shadow: 0 4px 12px rgba(26, 60, 138, 0.2);
+}
+
+.pet-card-name-bg-blue {
+  background: #1A3C8A;
+}
+
+.pet-card-desc-blue {
+  color: #1A3C8A;
+}
+
+/* Green Theme */
+.pet-card-green {
+  background: #4ECDC4;
+  border: 4px solid #3DAFA7;
+}
+
+.pet-card-inner-green {
+  background: #C8F7F4;
+}
+
+.pet-card-header-green {
+  background: #1E796E;
+}
+
+.pet-card-dots-green .dot:nth-child(1),
+.pet-card-dots-green .dot:nth-child(2),
+.pet-card-dots-green .dot:nth-child(3) {
+  background: #FFD166;
+}
+
+.pet-card-image-wrapper-green {
+  box-shadow: 0 4px 12px rgba(30, 121, 110, 0.2);
+}
+
+.pet-card-name-bg-green {
+  background: #1E796E;
+}
+
+.pet-card-desc-green {
+  color: #1E796E;
+}
+
+/* Dark Theme */
+.pet-card-dark {
+  background: #2C3E50;
+  border: 4px solid #1A2530;
+}
+
+.pet-card-inner-dark {
+  background: #34495E;
+}
+
+.pet-card-header-dark {
+  background: #1C2833;
+}
+
+.pet-card-dots-dark .dot:nth-child(1),
+.pet-card-dots-dark .dot:nth-child(2),
+.pet-card-dots-dark .dot:nth-child(3) {
+  background: #F39C12;
+}
+
+.pet-card-image-wrapper-dark {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: #1C2833;
+}
+
+.pet-card-name-bg-dark {
+  background: #1C2833;
+  border-color: #1C2833;
+}
+
+.pet-card-desc-dark {
+  color: #ECF0F1;
+}
+
 /* Responsive adjustments */
 @media (max-width: 500px) {
   .pet-card {
