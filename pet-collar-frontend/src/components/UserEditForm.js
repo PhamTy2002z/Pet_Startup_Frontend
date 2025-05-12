@@ -7,7 +7,7 @@ import {
   getPetAvatarUrl,
   updatePetOwnerEmail
 } from '../api/petService';
-import { FiPlus, FiTrash2, FiEdit2, FiCamera, FiImage } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiEdit2, FiCamera } from 'react-icons/fi';
 import './UserEditForm.css';
 import PetCard from './PetCard';
 import PetCard2 from './PetCard-2';
@@ -273,35 +273,12 @@ const customStyles = `
     box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
   }
 
-  .gallery-btn {
-    background: #FF9EBB;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 8px rgba(255, 158, 187, 0.2);
-  }
-
-  .gallery-btn:hover {
-    background: #FF7BA4;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 158, 187, 0.3);
-  }
-
   @media (max-width: 768px) {
     .mobile-upload-buttons {
       padding: 0 16px;
     }
 
-    .camera-btn,
-    .gallery-btn {
+    .camera-btn {
       width: 100%;
       padding: 14px 24px;
       font-size: 15px;
@@ -970,14 +947,7 @@ export default function UserEditForm({ initialData }) {
                   className="camera-btn"
                   onClick={() => document.getElementById('photo-upload').click()}
                 >
-                  <FiCamera /> {t.camera}
-                </button>
-                <button
-                  type="button"
-                  className="gallery-btn"
-                  onClick={() => document.getElementById('photo-upload').click()}
-                >
-                  <FiImage /> {t.gallery}
+                  <FiCamera /> {t.uploadPhoto}
                 </button>
               </div>
             </>
