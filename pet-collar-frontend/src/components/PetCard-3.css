@@ -1,0 +1,591 @@
+@import url('https://fonts.googleapis.com/css2?family=Righteous&family=Bungee&family=Open+Sans:wght@600&family=Inter:wght@700&display=swap');
+
+/* Main container */
+.pc3-card-container {
+  width: 450px;
+  height: 780px;
+  background-color: #FF84C5;
+  border-radius: 64px;
+  padding: 48px 64px 64px 56px;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Theme variations */
+.pc3-card-blue {
+  background-color: #4A80F0;
+}
+
+.pc3-card-green {
+  background-color: #4ECDC4;
+}
+
+.pc3-card-dark {
+  background-color: #2C3E50;
+}
+
+/* Background icons */
+.pc3-background-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.pc3-bg-flower {
+  position: absolute;
+  top: -158px;
+  left: 139px;
+  width: 220px;
+  height: 220px;
+  opacity: 0.2;
+  color: #FFA5D4;
+  font-size: 180px;
+}
+
+.pc3-bg-planet {
+  position: absolute;
+  bottom: 60px;
+  left: 33px;
+  width: 180px;
+  height: 180px;
+  opacity: 0.2;
+  color: #FFA5D4;
+  font-size: 120px;
+}
+
+.pc3-bg-caring {
+  position: absolute;
+  bottom: -49px;
+  right: 36px;
+  width: 200px;
+  height: 200px;
+  opacity: 0.2;
+  color: #FFA5D4;
+  font-size: 120px;
+}
+
+/* Superpower bubbles */
+.pc3-superpowers {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+}
+
+.pc3-superpower-bubble {
+  background-color: #F1DD02;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #000000;
+  padding: 10px;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease;
+  font-size: 24px;
+  text-align: center;
+  line-height: 1;
+}
+
+.pc3-superpower-icon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Main content area */
+.pc3-main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  position: relative;
+  z-index: 1;
+  flex-grow: 1;
+  align-self: stretch;
+}
+
+/* Photo and name section */
+.pc3-photo-name-section {
+  position: relative;
+  width: 100%;
+  height: 488px;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 8px;
+  padding: 64px;
+}
+
+.pc3-photo-section {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.pc3-photo-frame-shadow {
+  position: absolute;
+  width: 240px;
+  height: 300px;
+  background-color: #3A78FF;
+  border: 1px solid #000000;
+  border-radius: 24px;
+  top: 24px;
+  left: 24px;
+  z-index: 1;
+}
+
+.pc3-photo-frame {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background-color: #6D9BFF;
+  border: 1px solid #000000;
+  border-radius: 24px;
+  padding: 24px 24px 64px;
+  box-sizing: border-box;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pc3-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 1px solid #000000;
+  transition: background-color 0.3s ease;
+}
+
+.pc3-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: #D4FF4E;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #000000;
+  transition: background-color 0.3s ease;
+  color: #564EB3;
+}
+
+/* Decorative elements */
+.pc3-sparkle-filled {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  width: 40px;
+  height: 40px;
+  z-index: 4;
+}
+
+.pc3-sparkle {
+  position: absolute;
+  top: 0;
+  right: -13px; 
+  width: 40px;
+  height: 40px;
+  z-index: 4;
+}
+
+.pc3-star-filled {
+  position: absolute;
+  bottom: 121px;
+  left: -53px;
+  width: 40px;
+  height: 40px;
+  z-index: 4;
+}
+
+/* Name styling */
+.pc3-name-container {
+  position: absolute;
+  bottom: -48px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pc3-first-name {
+  font-family: 'Bungee', cursive;
+  font-size: 64px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  line-height: 1.1;
+  text-align: center;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  display: block;
+  width: 100%;
+}
+
+.pc3-last-name {
+  font-family: 'Bungee', cursive;
+  font-size: 64px;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  line-height: 1.1;
+  text-align: center;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  display: block;
+  width: 100%;
+}
+
+/* Bottom content section */
+.pc3-bottom-section {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 64px;
+}
+
+/* Bio section */
+.pc3-bio-section {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+}
+
+.pc3-bio-title-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+  z-index: 3;
+  position: relative;
+}
+
+.pc3-bio-pill {
+  background-color: #D4FF4E;
+  padding: 4px 24px;
+  border-radius: 100px;
+  font-family: 'Bungee', cursive;
+  font-size: 40px;
+  line-height: 1.2;
+  color: #564EB3;
+  border: 1px solid #000000;
+  display: inline-block;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.pc3-bio-description {
+  background-color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 16px;
+  padding: 64px 16px 24px;
+  width: 100%;
+  max-width: 250px;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #000000;
+  box-sizing: border-box;
+  margin-top: -50px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Fun fact section */
+.pc3-fun-slider-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pc3-slider-personality {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 32px;
+  height: 136px;
+}
+
+.pc3-slider-emojis {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+.pc3-slider-emojis span {
+  font-size: 48px;
+  line-height: 1.1;
+}
+
+.pc3-slider-track-container {
+  position: relative;
+  height: 40px;
+  background-color: #F1DD02;
+  border: 1px solid #000000;
+  border-radius: 40px;
+}
+
+.pc3-slider-thumb {
+  position: absolute;
+  top: -25%;
+  left: 42%;
+  transform: translateX(-50%);
+  font-size: 48px;
+  line-height: 1.1;
+  transition: left 0.3s ease;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.pc3-slider-thumb span {
+  transform: scale(1);
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.pc3-slider-thumb:hover span {
+  transform: scale(1.1);
+}
+
+/* Fun fact */
+.pc3-fun-fact {
+  background-color: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 16px;
+  padding: 16px;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.pc3-fun-fact-title {
+  font-family: 'Righteous', cursive;
+  font-size: 16px;
+  color: #FF84C5;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.pc3-fun-fact-text {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #000000;
+}
+
+/* Theme color variations */
+.pc3-card-blue .pc3-fun-fact-title {
+  color: #4A80F0;
+}
+
+.pc3-card-green .pc3-fun-fact-title {
+  color: #4ECDC4;
+}
+
+.pc3-card-dark .pc3-fun-fact-title {
+  color: #2C3E50;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 470px) {
+  .pc3-card-container {
+    width: 100%;
+    height: auto;
+    min-height: 780px;
+    padding: 32px 24px 40px;
+    border-radius: 40px;
+  }
+  
+  .pc3-main-content {
+    gap: 60px; /* Increase gap between photo and bottom section */
+  }
+  
+  /* Ensure proper text wrapping for potential long names */
+  .pc3-first-name, .pc3-last-name {
+    max-width: 100%;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  .pc3-photo-name-section {
+    padding: 20px;
+    height: auto;
+  }
+
+  .pc3-photo-frame {
+    height: 300px;
+  }
+
+  .pc3-photo-frame-shadow {
+    width: 80%;
+    height: 75%;
+    top: 15px;
+    left: 15px;
+  }
+
+  .pc3-bio-section {
+    width: 100%;
+  }
+
+  .pc3-bio-title-wrapper {
+    transform: translateY(20px);
+  }
+
+  .pc3-bio-description {
+    max-width: 100%;
+    padding: 50px 16px 20px;
+    margin-top: -40px;
+  }
+
+  .pc3-bio-pill {
+    font-size: 28px;
+    padding: 4px 16px;
+    padding-bottom: 20px;
+  }
+
+  .pc3-slider-personality {
+    height: 100px;
+    padding-bottom: 20px;
+  }
+
+  .pc3-slider-emojis span {
+    font-size: 36px;
+  }
+
+  .pc3-slider-thumb {
+    font-size: 36px;
+  }
+
+  .pc3-fun-fact {
+    padding: 12px;
+    margin-top: 10px;
+  }
+
+  .pc3-fun-fact-title {
+    font-size: 14px;
+  }
+
+  .pc3-fun-fact-text {
+    font-size: 14px;
+  }
+
+  .pc3-superpowers {
+    gap: 16px;
+  }
+
+  .pc3-superpower-bubble {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+  }
+
+  .pc3-superpower-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .pc3-bg-flower, .pc3-bg-planet, .pc3-bg-caring {
+    font-size: 80px;
+  }
+  
+  .pc3-sparkle-filled, .pc3-sparkle, .pc3-star-filled {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .pc3-sparkle-filled {
+    top: 15px;
+    right: 15px;
+  }
+  
+  .pc3-sparkle {
+    top: 0;
+    right: -5px;
+  }
+  
+  .pc3-star-filled {
+    bottom: 80px;
+    left: -20px;
+  }
+
+  .pc3-first-name {
+    font-size: 40px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .pc3-last-name {
+    font-size: 40px;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 350px) {
+  .pc3-card-container {
+    padding: 24px 16px 32px;
+    border-radius: 32px;
+  }
+
+  .pc3-photo-frame {
+    height: 240px;
+  }
+
+  .pc3-photo-frame-shadow {
+    width: 80%;
+    height: 75%;
+  }
+
+  .pc3-first-name, .pc3-last-name {
+    font-size: 32px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .pc3-bio-pill {
+    font-size: 24px;
+  }
+
+  .pc3-bio-description, .pc3-fun-fact-text {
+    font-size: 12px;
+  }
+
+  .pc3-bottom-section {
+    gap: 16px;
+  }
+
+  .pc3-superpower-bubble {
+    width: 28px;
+    height: 28px;
+    padding: 5px;
+  }
+
+  .pc3-superpower-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .pc3-star-filled {
+    bottom: 70px;
+    left: -15px;
+  }
+}

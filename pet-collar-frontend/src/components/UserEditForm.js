@@ -11,6 +11,7 @@ import { FiPlus, FiTrash2, FiEdit2, FiCamera } from 'react-icons/fi';
 import './UserEditForm.css';
 import PetCard from './PetCard';
 import PetCard2 from './PetCard-2';
+import PetCard3 from './PetCard-3';
 
 // Import react-toastify
 import { toast, ToastContainer } from 'react-toastify';
@@ -458,25 +459,28 @@ export default function UserEditForm({ initialData }) {
   // Add a new state to track card type
   const [cardType, setCardType] = useState('petcard');
   
-  // Modified theme options with new labels for different card types
-  const themeOptions = [
-    { value: 'petcard-default', label: lang === 'vi' ? 'Thẻ thú cưng - Mặc định' : 'Pet Card - Default' },
-    { value: 'petcard-blue', label: lang === 'vi' ? 'Thẻ thú cưng - Xanh Dương' : 'Pet Card - Blue' },
-    { value: 'petcard-green', label: lang === 'vi' ? 'Thẻ thú cưng - Xanh Lá' : 'Pet Card - Green' },
-    { value: 'petcard-dark', label: lang === 'vi' ? 'Thẻ thú cưng - Tối' : 'Pet Card - Dark' },
-    { value: 'rachel-default', label: lang === 'vi' ? 'Rachel' : 'Rachel' }
+  // Theme options separated into two categories
+  const themeTypeOptions = [
+    { value: 'petcard', label: lang === 'vi' ? 'Thẻ thú cưng' : 'Pet Card' },
+    { value: 'rachel', label: lang === 'vi' ? 'Rachel' : 'Rachel' },
+    { value: 'personal', label: lang === 'vi' ? 'Thẻ cá nhân' : 'Personal Card' }
+  ];
+  
+  const presetOptions = [
+    { value: 'default', label: lang === 'vi' ? 'Mặc định' : 'Default' },
+    { value: 'blue', label: lang === 'vi' ? 'Xanh Dương' : 'Blue' },
+    { value: 'green', label: lang === 'vi' ? 'Xanh Lá' : 'Green' },
+    { value: 'dark', label: lang === 'vi' ? 'Tối' : 'Dark' }
   ];
 
-  // Handle theme change
-  const handleThemeChange = (e) => {
-    const value = e.target.value;
-    if (value.startsWith('petcard-')) {
-      setCardType('petcard');
-      setSelectedTheme(value.replace('petcard-', ''));
-    } else if (value.startsWith('rachel-')) {
-      setCardType('rachel');
-      setSelectedTheme(value.replace('rachel-', ''));
-    }
+  // Updated handler for theme type change
+  const handleThemeTypeChange = (e) => {
+    setCardType(e.target.value);
+  };
+  
+  // Updated handler for preset change
+  const handlePresetChange = (e) => {
+    setSelectedTheme(e.target.value);
   };
 
   // Load pet data
@@ -866,30 +870,13 @@ export default function UserEditForm({ initialData }) {
 
   return (
     <form className="form-container" onSubmit={handleSubmit}>
-      {/* Theme Selection Dropdown */}
-      <div className="theme-selection">
-        <label htmlFor="theme-select">{lang === 'vi' ? 'Chủ đề thẻ thú cưng' : 'Pet Card Theme'}</label>
-        <select 
-          id="theme-select" 
-          value={cardType === 'petcard' ? `petcard-${selectedTheme}` : `rachel-${selectedTheme}`} 
-          onChange={handleThemeChange}
-          className="theme-dropdown"
-        >
-          {themeOptions.map(option => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      
-      {/* Card Preview */}
+      {/* Card Preview - Moved theme selection to after this */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'center', 
         margin: '0 auto 20px',
         maxWidth: '100%',
-        height: cardType === 'rachel' ? 'calc(100vh - 150px)' : 'auto',
+        height: cardType === 'rachel' || cardType === 'personal' ? 'calc(100vh - 150px)' : 'auto',
         overflow: 'hidden'
       }}>
         {cardType === 'petcard' ? (
@@ -905,7 +892,7 @@ export default function UserEditForm({ initialData }) {
             imageUrl={preview || avatarUrl}
             theme={selectedTheme}
           />
-        ) : (
+        ) : cardType === 'rachel' ? (
           <PetCard2
             petName={form.info.name || 'Tên bé'}
             imageUrl={preview || avatarUrl}
@@ -918,8 +905,57 @@ export default function UserEditForm({ initialData }) {
             personalityEmoji="🌸"
             theme={selectedTheme}
           />
+        ) : (
+          <PetCard3
+            firstName={lang === 'vi' ? 'BÉ TÔN' : (form.info.name?.toUpperCase() || 'ROGER')}
+            lastName={lang === 'vi' ? 'MÈO ANH LÔNG NGẮN' : (form.info.species?.toLowerCase() || 'radcliffe')}
+            imageUrl={preview || avatarUrl || null}
+            bio={form.info.description || (lang === 'vi' ? 'Chưa có mô tả' : "I'm a passionate filmmaker and a fan of many classic franchises (total geek about them, tbh). May the force be with you!")}
+            funFact={lang === 'vi' ? 
+              `${form.info.birthDate ? (new Date().getFullYear() - new Date(form.info.birthDate).getFullYear()) : '?'} tuổi` : 
+              `${form.info.birthDate ? (new Date().getFullYear() - new Date(form.info.birthDate).getFullYear()) : '?'} years old`
+            }
+            personalityEmoji="👌🏽"
+            theme={selectedTheme}
+          />
         )}
       </div>
+      
+      {/* Theme Selection Dropdown - Now positioned below card and split into two parts */}
+      <div className="theme-selection">
+        <div className="theme-dropdown-container">
+          <label htmlFor="theme-type-select">{lang === 'vi' ? 'Chủ đề' : 'Theme'}</label>
+          <select 
+            id="theme-type-select" 
+            value={cardType}
+            onChange={handleThemeTypeChange}
+            className="theme-dropdown"
+          >
+            {themeTypeOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div className="theme-dropdown-container">
+          <label htmlFor="preset-select">{lang === 'vi' ? 'Màu sắc' : 'Preset'}</label>
+          <select 
+            id="preset-select" 
+            value={selectedTheme}
+            onChange={handlePresetChange}
+            className="theme-dropdown"
+          >
+            {presetOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      
       {/* Avatar Section */}
       <div className="section avatar-section">
         <h3 className="section-title">📷 {t.petPhoto}</h3>
