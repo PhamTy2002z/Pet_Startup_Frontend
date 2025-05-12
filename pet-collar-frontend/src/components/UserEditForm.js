@@ -897,8 +897,7 @@ export default function UserEditForm({ initialData }) {
           />
         ) : (
           <PetCard2
-            firstName="Rachel"
-            lastName={form.owner.name || 'Coltrane'}
+            petName={form.info.name || 'Tên bé'}
             imageUrl={preview || avatarUrl}
             bio={form.info.description || (lang === 'vi' ? 'Chưa có mô tả' : 'No description')}
             funFact={lang === 'vi' ? 
