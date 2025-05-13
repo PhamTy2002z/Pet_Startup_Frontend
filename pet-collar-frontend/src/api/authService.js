@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Lấy endpoint backend từ biến môi trường, fallback localhost
 const API_BASE =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+  process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 /* ------------------------------------------------------------------ */
 /* 1.  PUBLIC API – KHÔNG tự gắn Authorization (dùng cho người quét QR) */

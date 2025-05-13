@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 // 🟢 public – KHÔNG gắn token
 export const publicApi = axios.create({
