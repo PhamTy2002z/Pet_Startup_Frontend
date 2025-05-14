@@ -39,6 +39,7 @@ const UserEditPage = () => {
   const [refreshData, setRefreshData] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [language, setLanguage] = useState('vi'); // Default language is Vietnamese
+  const [darkMode, setDarkMode] = useState(false);
 
   // Labels for both languages
   const labels = {
@@ -457,7 +458,7 @@ const UserEditPage = () => {
   const reportCards = generateReportCards();
 
   return (
-    <div className="profile-page">
+    <div className={`profile-page${darkMode ? ' dark' : ''}`}>
       <header className="profile-header">
         <button className="icon-button">
           <FiMenu size={24} />
@@ -597,7 +598,10 @@ const UserEditPage = () => {
         </button>
         <button 
           className={`nav-button ${activeTab === 'night' ? 'active' : ''}`}
-          onClick={() => setActiveTab('night')}
+          onClick={() => {
+            setActiveTab('night');
+            setDarkMode(dm => !dm);
+          }}
         >
           <FiMoon size={22} />
           <span className="nav-label">{t.night}</span>

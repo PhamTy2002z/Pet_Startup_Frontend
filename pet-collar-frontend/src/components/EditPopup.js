@@ -6,6 +6,7 @@ import './EditPopup.css';
 
 const EditPopup = ({ isOpen, section, petData, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({});
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (isOpen && petData) {
@@ -135,8 +136,19 @@ const EditPopup = ({ isOpen, section, petData, onClose, onSubmit }) => {
     setFormData(prev => ({ ...prev, reExaminations: updatedReExaminations }));
   };
 
+  const validateAllergens = (substances) => {
+    return substances.every(s => typeof s === 'string' && /^[\p{L} ]{1,10}$/u.test(s));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (section === 'allergicInfo') {
+      if (!validateAllergens(formData.substances)) {
+        setError('Each allergy name must be up to 10 characters and can only contain letters and spaces.');
+        return;
+      }
+    }
+    setError('');
     onSubmit(formData);
   };
 
@@ -427,6 +439,9 @@ const EditPopup = ({ isOpen, section, petData, onClose, onSubmit }) => {
         </button>
         <form onSubmit={handleSubmit}>
           {renderForm()}
+          {error && (
+            <div className="form-error" style={{ color: 'red', marginBottom: 8 }}>{error}</div>
+          )}
           <div className="button-group">
             <button type="button" className="cancel-button" onClick={onClose}>
               Cancel
