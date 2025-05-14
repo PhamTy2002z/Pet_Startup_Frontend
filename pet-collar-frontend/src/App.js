@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import UserEditPage from './pages/UserEditPage';
 import PrivateRoute from './components/PrivateRoute';
+import ThemeStorePage from './pages/ThemeStorePage';
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
       {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/user/edit/:id" element={<UserEditPage />} /> {/* Không cần bảo vệ */}
+      <Route path="/theme-store" element={<ThemeStorePage />} />
       
       {/* Protected Admin Routes */}
       <Route element={<PrivateRoute />}>
