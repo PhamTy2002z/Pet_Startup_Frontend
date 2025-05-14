@@ -59,8 +59,33 @@ export const getPetById = (id) =>
   publicApi.get(`/user/pet/${id}`).then((r) => r.data);
 
 // Cập nhật info / owner / vaccinations / reExaminations / allergicInfo
-export const updatePet = (id, payload) =>
-  publicApi.put(`/user/pet/${id}`, payload).then((r) => r.data);
+export const updatePet = async (id, payload) => {
+  try {
+    // First get the current pet data to ensure we're not losing any data
+    const currentPet = await getPetById(id);
+    
+    // Merge the current data with the new payload
+    const mergedPayload = {
+      info: {
+        ...currentPet.info,
+        ...(payload.info || {})
+      },
+      owner: {
+        ...currentPet.owner,
+        ...(payload.owner || {})
+      },
+      vaccinations: payload.vaccinations || currentPet.vaccinations || [],
+      reExaminations: payload.reExaminations || currentPet.reExaminations || [],
+      allergicInfo: payload.allergicInfo || currentPet.allergicInfo || { substances: [], note: '' }
+    };
+    
+    // Send the merged payload to the API
+    return publicApi.put(`/user/pet/${id}`, mergedPayload).then((r) => r.data);
+  } catch (error) {
+    console.error('Error in updatePet:', error);
+    throw error;
+  }
+};
 
 // Cập nhật email chủ Pet
 export const updatePetOwnerEmail = (id, email) =>
@@ -69,16 +94,46 @@ export const updatePetOwnerEmail = (id, email) =>
     .then((r) => r.data);
 
 // Cập nhật thông tin dị ứng của pet
-export const updateAllergicInfo = (id, allergicInfo) =>
-  publicApi
-    .put(`/user/pet/${id}/allergic-info`, allergicInfo)
-    .then((r) => r.data);
+export const updateAllergicInfo = async (id, allergicInfo) => {
+  try {
+    // Get current pet to ensure we have the complete allergicInfo
+    const currentPet = await getPetById(id);
+    
+    // Merge current allergicInfo with new data
+    const mergedAllergicInfo = {
+      ...currentPet.allergicInfo,
+      ...allergicInfo
+    };
+    
+    return publicApi
+      .put(`/user/pet/${id}/allergic-info`, mergedAllergicInfo)
+      .then((r) => r.data);
+  } catch (error) {
+    console.error('Error in updateAllergicInfo:', error);
+    throw error;
+  }
+};
 
 // Cập nhật mô tả của pet
-export const updatePetDescription = (id, description) =>
-  publicApi
-    .put(`/user/pet/${id}/description`, description)
-    .then((r) => r.data);
+export const updatePetDescription = async (id, descriptionData) => {
+  try {
+    // First get the current pet data
+    const currentPet = await getPetById(id);
+    
+    // Make sure we're preserving any fields that might exist in the API
+    const mergedDescription = {
+      ...currentPet.info.description,
+      ...descriptionData
+    };
+    
+    return publicApi
+      .put(`/user/pet/${id}/description`, mergedDescription)
+      .then((r) => r.data);
+  } catch (error) {
+    console.error('Error in updatePetDescription:', error);
+    throw error;
+  }
+};
 
 // Upload avatar (dùng route user để khỏi yêu cầu token)
 export const uploadPetAvatar = (id, formData) => {

@@ -386,6 +386,20 @@
   gap: 16px;
 }
 
+/* Make sure cards display nicely on smaller screens */
+@media (max-width: 400px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* For devices with more width, display the cards in a better layout */
+@media (min-width: 768px) {
+  .cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .card {
   background-color: #fff;
   border-radius: 16px;
@@ -449,6 +463,10 @@
 
 .warning .card-ribbon {
   background-color: #e93c3c;
+}
+
+.info .card-ribbon {
+  background-color: #38bdf8;
 }
 
 .success .card-ribbon {

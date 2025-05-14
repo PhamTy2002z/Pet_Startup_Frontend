@@ -42,6 +42,16 @@ const EditPopup = ({ isOpen, section, petData, onClose, onSubmit }) => {
               : [{ name: '', date: null }]
           });
           break;
+        case 'reExaminations':
+          setFormData({
+            reExaminations: petData.reExaminations?.length 
+              ? [...petData.reExaminations.map(r => ({
+                  note: r.note || '',
+                  date: r.date ? new Date(r.date) : null
+                }))]
+              : [{ note: '', date: null }]
+          });
+          break;
         case 'allergicInfo':
           setFormData({
             substances: petData.allergicInfo?.substances || [],
@@ -100,6 +110,28 @@ const EditPopup = ({ isOpen, section, petData, onClose, onSubmit }) => {
     const updatedSubstances = [...formData.substances];
     updatedSubstances.splice(index, 1);
     setFormData(prev => ({ ...prev, substances: updatedSubstances }));
+  };
+
+  const handleReExaminationChange = (index, field, value) => {
+    const updatedReExaminations = [...formData.reExaminations];
+    updatedReExaminations[index] = {
+      ...updatedReExaminations[index],
+      [field]: value
+    };
+    setFormData(prev => ({ ...prev, reExaminations: updatedReExaminations }));
+  };
+
+  const addReExamination = () => {
+    setFormData(prev => ({
+      ...prev,
+      reExaminations: [...prev.reExaminations, { note: '', date: null }]
+    }));
+  };
+
+  const removeReExamination = (index) => {
+    const updatedReExaminations = [...formData.reExaminations];
+    updatedReExaminations.splice(index, 1);
+    setFormData(prev => ({ ...prev, reExaminations: updatedReExaminations }));
   };
 
   const handleSubmit = (e) => {
@@ -271,6 +303,51 @@ const EditPopup = ({ isOpen, section, petData, onClose, onSubmit }) => {
             ))}
             <button type="button" className="add-button" onClick={addVaccination}>
               <FiPlus /> Add Vaccination
+            </button>
+          </>
+        );
+      
+      case 'reExaminations':
+        return (
+          <>
+            <h2>Edit Re-examination Schedule</h2>
+            {formData.reExaminations?.map((reExam, index) => (
+              <div key={index} className="vaccination-item">
+                <div className="form-group">
+                  <label>Note</label>
+                  <input
+                    type="text"
+                    value={reExam.note || ''}
+                    onChange={(e) => handleReExaminationChange(index, 'note', e.target.value)}
+                    placeholder="Examination Description"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Date</label>
+                  <div className="date-picker-container">
+                    <DatePicker
+                      selected={reExam.date}
+                      onChange={(date) => handleReExaminationChange(index, 'date', date)}
+                      dateFormat="MM/dd/yyyy"
+                      placeholderText="Select date"
+                      className="date-picker"
+                    />
+                    <FiCalendar className="calendar-icon" />
+                  </div>
+                </div>
+                {formData.reExaminations.length > 1 && (
+                  <button 
+                    type="button" 
+                    className="remove-button"
+                    onClick={() => removeReExamination(index)}
+                  >
+                    <FiTrash2 />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button type="button" className="add-button" onClick={addReExamination}>
+              <FiPlus /> Add Re-examination
             </button>
           </>
         );

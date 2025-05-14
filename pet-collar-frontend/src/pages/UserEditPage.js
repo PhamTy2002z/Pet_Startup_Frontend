@@ -54,7 +54,14 @@ const UserEditPage = () => {
       changeLanguage: 'English',
       noSchedules: 'Không có lịch hẹn',
       noAllergies: 'Không có thông tin dị ứng',
-      loading: 'Đang tải...'
+      loading: 'Đang tải...',
+      petInformation: 'Thông tin thú cưng',
+      ownerInformation: 'Thông tin chủ nuôi',
+      vaccinationSchedule: 'Lịch tiêm chủng',
+      reExaminationSchedule: 'Lịch tái khám',
+      allergicInformation: 'Thông tin dị ứng',
+      noVaccinations: 'Không có lịch tiêm chủng',
+      noReExaminations: 'Không có lịch tái khám'
     },
     en: {
       profile: 'Profile',
@@ -68,7 +75,14 @@ const UserEditPage = () => {
       changeLanguage: 'Tiếng Việt',
       noSchedules: 'No scheduled appointments',
       noAllergies: 'No allergies recorded',
-      loading: 'Loading...'
+      loading: 'Loading...',
+      petInformation: 'Pet Information',
+      ownerInformation: 'Owner Information',
+      vaccinationSchedule: 'Vaccination Schedule',
+      reExaminationSchedule: 'Re-examination Schedule',
+      allergicInformation: 'Allergic Information',
+      noVaccinations: 'No upcoming vaccinations',
+      noReExaminations: 'No upcoming re-examinations'
     }
   };
 
@@ -161,28 +175,35 @@ const UserEditPage = () => {
   const generateReportCards = () => {
     return [
       {
-        title: 'Pet Information',
+        title: t.petInformation,
         description: `${petData.info.species || 'Species unknown'}, ${formatAge(petData.info.birthDate)}`,
         iconName: 'info',
         colorClass: 'primary',
         section: 'petInfo'
       },
       {
-        title: 'Owner Information',
+        title: t.ownerInformation,
         description: petData.owner.name || 'No owner information',
         iconName: 'phone',
         colorClass: 'accent',
         section: 'ownerInfo'
       },
       {
-        title: 'Vaccination Schedule',
+        title: t.vaccinationSchedule,
         description: getNextVaccination(),
         iconName: 'calendar',
         colorClass: 'warning',
         section: 'vaccinations'
       },
       {
-        title: 'Allergic Information',
+        title: t.reExaminationSchedule,
+        description: getNextReExamination(),
+        iconName: 'calendar',
+        colorClass: 'info',
+        section: 'reExaminations'
+      },
+      {
+        title: t.allergicInformation,
         description: getAllergySummary(),
         iconName: 'alert',
         colorClass: 'success',
@@ -212,7 +233,7 @@ const UserEditPage = () => {
 
   const getNextVaccination = () => {
     if (!petData.vaccinations || petData.vaccinations.length === 0) {
-      return 'No upcoming vaccinations';
+      return t.noVaccinations;
     }
 
     // Sort by date, get the next one
@@ -221,12 +242,31 @@ const UserEditPage = () => {
       .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     if (futureVaccinations.length === 0) {
-      return 'No upcoming vaccinations';
+      return t.noVaccinations;
     }
 
     const nextVaccination = futureVaccinations[0];
     const date = new Date(nextVaccination.date);
     return `${nextVaccination.name}: ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+  };
+
+  const getNextReExamination = () => {
+    if (!petData.reExaminations || petData.reExaminations.length === 0) {
+      return t.noReExaminations;
+    }
+
+    // Sort by date, get the next one
+    const futureReExaminations = petData.reExaminations
+      .filter(reExam => reExam.date && new Date(reExam.date) > new Date())
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (futureReExaminations.length === 0) {
+      return t.noReExaminations;
+    }
+
+    const nextReExam = futureReExaminations[0];
+    const date = new Date(nextReExam.date);
+    return `${nextReExam.note || 'Check-up'}: ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
   };
 
   const getAllergySummary = () => {
@@ -300,43 +340,72 @@ const UserEditPage = () => {
         case 'profile':
           await updatePet(id, {
             info: {
+              ...petData.info,  // Preserve all existing info fields
               name: formData.name,
               species: formData.species,
               birthDate: formData.birthDate,
-              description: petData.info.description
-            }
+            },
+            owner: petData.owner,  // Preserve owner data
+            vaccinations: petData.vaccinations,  // Preserve vaccinations
+            reExaminations: petData.reExaminations,  // Preserve reExaminations
+            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
           });
           break;
         case 'petInfo':
           await updatePet(id, {
             info: {
-              ...petData.info,
+              ...petData.info,  // Preserve all existing info fields
               species: formData.species,
-              birthDate: formData.birthDate
-            }
+              birthDate: formData.birthDate,
+              description: formData.description
+            },
+            owner: petData.owner,  // Preserve owner data
+            vaccinations: petData.vaccinations,  // Preserve vaccinations
+            reExaminations: petData.reExaminations,  // Preserve reExaminations
+            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
           });
           break;
         case 'ownerInfo':
           await updatePet(id, {
+            info: petData.info,  // Preserve info data
             owner: {
+              ...petData.owner,  // Preserve all existing owner fields
               name: formData.ownerName,
               phone: formData.phone,
               email: formData.email
-            }
+            },
+            vaccinations: petData.vaccinations,  // Preserve vaccinations
+            reExaminations: petData.reExaminations,  // Preserve reExaminations
+            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
           });
           break;
         case 'vaccinations':
           await updatePet(id, {
-            vaccinations: formData.vaccinations
+            info: petData.info,  // Preserve info data
+            owner: petData.owner,  // Preserve owner data
+            vaccinations: formData.vaccinations,
+            reExaminations: petData.reExaminations,  // Preserve reExaminations
+            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
+          });
+          break;
+        case 'reExaminations':
+          await updatePet(id, {
+            info: petData.info,  // Preserve info data
+            owner: petData.owner,  // Preserve owner data
+            vaccinations: petData.vaccinations,  // Preserve vaccinations
+            reExaminations: formData.reExaminations,
+            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
           });
           break;
         case 'allergicInfo':
+          // Use the specific API for allergic info
           await updateAllergicInfo(id, {
             substances: formData.substances,
             note: formData.note
           });
           break;
         case 'description':
+          // Use the specific API for description
           await updatePetDescription(id, {
             description: formData.description
           });
