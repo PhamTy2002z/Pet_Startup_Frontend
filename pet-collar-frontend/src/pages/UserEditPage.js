@@ -4,7 +4,7 @@ import UserEditForm from '../components/UserEditForm';
 import FirstTimeScanPopup from '../components/FirstTimeScanPopup';
 import EditPopup from '../components/EditPopup';
 import { getPetById, getPetAvatarUrl, updatePet, updateAllergicInfo, updatePetOwnerEmail, updatePetDescription, uploadPetAvatar } from '../api/petService';
-import { FiMenu, FiSettings, FiHome, FiUser, FiMessageSquare, FiBook, FiMoon, FiInfo, FiPhone, FiCalendar, FiAlertTriangle, FiEdit, FiGlobe } from 'react-icons/fi';
+import { FiMenu, FiSettings, FiHome, FiUser, FiMessageSquare, FiBook, FiMoon, FiInfo, FiPhone, FiCalendar, FiAlertTriangle, FiEdit, FiGlobe, FiShoppingBag } from 'react-icons/fi';
 import './UserEditPage.css';
 
 const UserEditPage = () => {
@@ -45,6 +45,7 @@ const UserEditPage = () => {
     vi: {
       profile: 'Hồ sơ',
       home: 'Trang chủ',
+      themeStore: 'Theme Store',
       chat: 'Trò chuyện',
       books: 'Sách',
       night: 'Ban đêm',
@@ -66,6 +67,7 @@ const UserEditPage = () => {
     en: {
       profile: 'Profile',
       home: 'Home',
+      themeStore: 'Theme Store',
       chat: 'Chat',
       books: 'Books',
       night: 'Night',
@@ -476,11 +478,17 @@ const UserEditPage = () => {
       <main className="profile-content">
         <div className="profile-info">
           <div className="avatar-container">
-            <img 
-              src={petData.avatarUrl || "https://via.placeholder.com/80"} 
-              alt="Pet avatar" 
-              className="profile-avatar" 
-            />
+            {petData.avatarUrl ? (
+              <img 
+                src={petData.avatarUrl} 
+                alt="Pet avatar" 
+                className="profile-avatar" 
+              />
+            ) : (
+              <div className="profile-avatar avatar-placeholder" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0', color: '#aaa', fontSize: '1.2rem', fontWeight: 500}}>
+                Photo
+              </div>
+            )}
             <div 
               className="avatar-badge"
               onClick={() => document.getElementById('avatar-upload').click()}
@@ -581,18 +589,11 @@ const UserEditPage = () => {
           <span className="nav-label">{t.profile}</span>
         </button>
         <button 
-          className={`nav-button ${activeTab === 'messages' ? 'active' : ''}`}
-          onClick={() => setActiveTab('messages')}
+          className={`nav-button ${activeTab === 'themeStore' ? 'active' : ''}`}
+          onClick={() => setActiveTab('themeStore')}
         >
-          <FiMessageSquare size={22} />
-          <span className="nav-label">{t.chat}</span>
-        </button>
-        <button 
-          className={`nav-button ${activeTab === 'books' ? 'active' : ''}`}
-          onClick={() => setActiveTab('books')}
-        >
-          <FiBook size={22} />
-          <span className="nav-label">{t.books}</span>
+          <FiShoppingBag size={22} />
+          <span className="nav-label">{t.themeStore}</span>
         </button>
         <button 
           className={`nav-button ${activeTab === 'night' ? 'active' : ''}`}
