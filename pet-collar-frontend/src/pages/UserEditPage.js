@@ -591,10 +591,7 @@ const UserEditPage = () => {
         </button>
         <button 
           className={`nav-button ${activeTab === 'themeStore' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveTab('themeStore');
-            navigate('/theme-store');
-          }}
+          onClick={() => setActiveTab('themeStore')}
         >
           <FiShoppingBag size={22} />
           <span className="nav-label">{t.themeStore}</span>
