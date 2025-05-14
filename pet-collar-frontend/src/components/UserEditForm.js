@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
   getPetById,
-  updatePetById,
+  updatePet,
   uploadPetAvatar,
   getPetAvatarUrl,
   updatePetOwnerEmail
@@ -743,7 +743,7 @@ export default function UserEditForm({ initialData }) {
       console.log('Submitting payload:', payload);
 
       // Update the pet information
-      const updatedPet = await updatePetById(id, payload);
+      const updatedPet = await updatePet(id, payload);
       console.log('Update response:', updatedPet);
 
       // Upload avatar if it exists

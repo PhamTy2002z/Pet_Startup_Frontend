@@ -58,8 +58,8 @@ export const getAllPets = () =>
 export const getPetById = (id) =>
   publicApi.get(`/user/pet/${id}`).then((r) => r.data);
 
-// Cập nhật info / owner / vaccinations
-export const updatePetById = (id, payload) =>
+// Cập nhật info / owner / vaccinations / reExaminations / allergicInfo
+export const updatePet = (id, payload) =>
   publicApi.put(`/user/pet/${id}`, payload).then((r) => r.data);
 
 // Cập nhật email chủ Pet
@@ -68,16 +68,32 @@ export const updatePetOwnerEmail = (id, email) =>
     .put(`/user/pet/${id}/owner-email`, { email })
     .then((r) => r.data);
 
+// Cập nhật thông tin dị ứng của pet
+export const updateAllergicInfo = (id, allergicInfo) =>
+  publicApi
+    .put(`/user/pet/${id}/allergic-info`, allergicInfo)
+    .then((r) => r.data);
+
+// Cập nhật mô tả của pet
+export const updatePetDescription = (id, description) =>
+  publicApi
+    .put(`/user/pet/${id}/description`, description)
+    .then((r) => r.data);
+
 // Upload avatar (dùng route user để khỏi yêu cầu token)
-export const uploadPetAvatar = (id, file) => {
-  const formData = new FormData();
-  formData.append('avatar', file);
+export const uploadPetAvatar = (id, formData) => {
   return publicApi
     .post(`/user/pet/${id}/avatar`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     .then((r) => r.data);
 };
+
+// Gửi email nhắc lịch tái khám
+export const sendReminderEmail = (petId, { to, petName, appointmentDate, note }) =>
+  publicApi
+    .post(`/user/pet/${petId}/send-reminder`, { to, petName, appointmentDate, note })
+    .then((r) => r.data);
 
 /* ===================== TIỆN ÍCH KHÁC ============================= */
 
