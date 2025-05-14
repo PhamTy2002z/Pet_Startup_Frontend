@@ -20,6 +20,7 @@ const EditPopup = ({ isOpen, section, petData, onClose, onSubmit }) => {
           break;
         case 'petInfo':
           setFormData({
+            name: petData.info.name || '',
             species: petData.info.species || '',
             birthDate: petData.info.birthDate ? new Date(petData.info.birthDate) : null,
             description: petData.info.description || ''
@@ -188,6 +189,16 @@ const EditPopup = ({ isOpen, section, petData, onClose, onSubmit }) => {
         return (
           <>
             <h2>Edit Pet Information</h2>
+            <div className="form-group">
+              <label>Pet Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name || ''}
+                onChange={handleChange}
+                placeholder="Pet Name"
+              />
+            </div>
             <div className="form-group">
               <label>Species/Breed</label>
               <input

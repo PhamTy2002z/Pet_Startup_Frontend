@@ -355,6 +355,7 @@ const UserEditPage = () => {
           await updatePet(id, {
             info: {
               ...petData.info,  // Preserve all existing info fields
+              name: formData.name,
               species: formData.species,
               birthDate: formData.birthDate,
               description: formData.description
