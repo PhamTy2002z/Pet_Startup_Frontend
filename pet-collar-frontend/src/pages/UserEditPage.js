@@ -542,7 +542,6 @@ const UserEditPage = () => {
                 <div className={`card-ribbon ${card.colorClass}`}></div>
                 {renderIcon(card.iconName)}
                 <h4 className="card-title">{card.title}</h4>
-                <p className="card-description">{card.description}</p>
               </article>
             ))}
           </div>
