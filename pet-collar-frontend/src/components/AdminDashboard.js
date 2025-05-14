@@ -208,39 +208,22 @@ export default function AdminDashboard() {
   const getStatusText = (status, hasInfo) => {
     if (status === 'scanned' || (status === 'unused' && hasInfo)) {
       return (
-        <div className="status-checkbox">
-          <input 
-            type="checkbox" 
-            className="status-input checked" 
-            checked 
-            readOnly 
-          />
-          <span className="status-label">Đã quét</span>
-        </div>
+        <span className="status-badge warning">
+          <FiCheck style={{ marginRight: 4 }} /> Đã quét
+        </span>
       );
     }
     if (status === 'active') {
       return (
-        <div className="status-checkbox">
-          <input 
-            type="checkbox" 
-            className="status-input" 
-            checked 
-            readOnly 
-          />
-          <span className="status-label">Đang sử dụng</span>
-        </div>
+        <span className="status-badge success">
+          <FiCheck style={{ marginRight: 4 }} /> Đang sử dụng
+        </span>
       );
     }
     return (
-      <div className="status-checkbox">
-        <input 
-          type="checkbox" 
-          className="status-input" 
-          readOnly 
-        />
-        <span className="status-label">Chưa sử dụng</span>
-      </div>
+      <span className="status-badge secondary">
+        <FiX style={{ marginRight: 4 }} /> Chưa sử dụng
+      </span>
     );
   };
 
@@ -524,15 +507,7 @@ export default function AdminDashboard() {
                           {getStatusText(p.status, hasInfo)}
                         </span>
                         <div className="status-actions">
-                          {p.status === 'active' && (
-                            <button
-                              onClick={() => handleStatusChange(p._id, 'unused')}
-                              className="status-button deactivate"
-                              title="Hủy kích hoạt"
-                            >
-                              <FiXCircle size={16} />
-                            </button>
-                          )}
+                          {/* Deactivate button removed as per request */}
                         </div>
                       </div>
                     </td>
