@@ -549,33 +549,7 @@ export default function ThemeManagement() {
                       </span>
                     </div>
                     <div className="theme-actions">
-                      <div className="order-actions">
-                        <button 
-                          onClick={() => moveTheme(theme._id, 'up')}
-                          disabled={index === 0}
-                          className="action-btn move-btn"
-                          title="Di chuyển lên"
-                        >
-                          <FiArrowUp size={14} />
-                        </button>
-                        <button 
-                          onClick={() => moveTheme(theme._id, 'down')}
-                          disabled={index === paginatedThemes.length - 1}
-                          className="action-btn move-btn"
-                          title="Di chuyển xuống"
-                        >
-                          <FiArrowDown size={14} />
-                        </button>
-                      </div>
-                      <div className="main-actions">
-                        <button 
-                          onClick={() => handleToggleActive(theme)}
-                          className={`action-btn ${theme.isActive ? 'deactivate-btn' : 'activate-btn'}`}
-                          title={theme.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
-                        >
-                          {theme.isActive ? <FiX size={14} /> : <FiCheck size={14} />}
-                          {theme.isActive ? 'Vô hiệu' : 'Kích hoạt'}
-                        </button>
+                                            <div className="main-actions">
                         <button 
                           onClick={() => openEditForm(theme)}
                           className="action-btn edit-btn"
