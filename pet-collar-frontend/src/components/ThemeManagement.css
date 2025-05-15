@@ -503,7 +503,7 @@
   flex: 1;
   transition: max-height 0.3s ease-in-out, opacity 0.3s ease;
   overflow: hidden;
-  max-height: 2000px;
+  max-height: 500px;
   opacity: 1;
 }
 
@@ -575,7 +575,7 @@
 }
 
 .theme-image {
-  height: 160px;
+  height: 240px;
   overflow: hidden;
   position: relative;
   background-color: #f5f5f5;
@@ -584,7 +584,9 @@
 .theme-card .theme-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  max-height: 240px;
+  object-fit: contain;
+  background-color: #f5f5f5;
   transition: transform 0.3s ease;
 }
 
@@ -770,14 +772,16 @@
 
 .theme-item .theme-image {
   width: 120px;
-  height: 120px;
+  height: 180px;
   flex-shrink: 0;
 }
 
 .theme-item .theme-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  max-height: 180px;
+  object-fit: contain;
+  background-color: #f5f5f5;
 }
 
 .theme-item .theme-info {

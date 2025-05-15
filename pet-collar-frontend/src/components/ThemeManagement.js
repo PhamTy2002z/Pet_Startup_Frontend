@@ -513,6 +513,9 @@ export default function ThemeManagement() {
             <div className={`theme-grid ${isCollapsed ? 'collapsed' : ''}`}>
               {paginatedThemes.map((theme, index) => {
                 const fullImageUrl = getFullImageUrl(theme.imageUrl);
+                // Truncate name and description
+                const truncatedName = theme.name.length > 18 ? theme.name.slice(0, 18) + '…' : theme.name;
+                const truncatedDescription = theme.description && theme.description.length > 40 ? theme.description.slice(0, 40) + '…' : theme.description;
                 
                 return (
                   <div 
@@ -539,8 +542,8 @@ export default function ThemeManagement() {
                       )}
                     </div>
                     <div className="theme-info">
-                      <h3 title={theme.name}>{theme.name}</h3>
-                      <p>{theme.description}</p>
+                      <h3 title={theme.name}>{truncatedName}</h3>
+                      <p>{truncatedDescription}</p>
                       <span className={`status-badge ${theme.isActive ? 'active' : 'inactive'}`}>
                         {theme.isActive ? 'Đang hoạt động' : 'Đã vô hiệu hóa'}
                       </span>
@@ -597,6 +600,9 @@ export default function ThemeManagement() {
             <div className={`${isCollapsed ? 'collapsed' : ''}`}>
               {paginatedThemes.map((theme, index) => {
                 const fullImageUrl = getFullImageUrl(theme.imageUrl);
+                // Truncate name and description
+                const truncatedName = theme.name.length > 18 ? theme.name.slice(0, 18) + '…' : theme.name;
+                const truncatedDescription = theme.description && theme.description.length > 40 ? theme.description.slice(0, 40) + '…' : theme.description;
                 
                 return (
                   <div 
@@ -627,8 +633,8 @@ export default function ThemeManagement() {
                       )}
                     </div>
                     <div className="theme-info">
-                      <h3>{theme.name}</h3>
-                      <p>{theme.description}</p>
+                      <h3>{truncatedName}</h3>
+                      <p>{truncatedDescription}</p>
                       <span className={`status-badge ${theme.isActive ? 'active' : 'inactive'}`}>
                         {theme.isActive ? 'Đang hoạt động' : 'Đã vô hiệu hóa'}
                       </span>
