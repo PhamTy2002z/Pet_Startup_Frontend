@@ -267,7 +267,7 @@ export default function AdminDashboard() {
         <div className="sidebar-header">
           <div className="logo-container">
             <FiCircle className="logo-icon" />
-            {!sidebarCollapsed && <h2 className="company-name">PetCollar</h2>}
+            {!sidebarCollapsed && <h2 className="company-name">VNIPET</h2>}
           </div>
           <button className="collapse-btn" onClick={toggleSidebar}>
             {sidebarCollapsed ? <FiChevronRight /> : <FiMenu />}
