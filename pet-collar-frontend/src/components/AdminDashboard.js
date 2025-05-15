@@ -1,6 +1,9 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
-import { FiPlus, FiCircle, FiSearch, FiX, FiClock, FiCheck, FiXCircle } from 'react-icons/fi';
+import { 
+  FiPlus, FiCircle, FiSearch, FiX, FiClock, FiCheck, FiXCircle, 
+  FiSettings, FiHome, FiTag, FiMenu, FiLogOut, FiChevronRight 
+} from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   getAllPets,
@@ -11,6 +14,7 @@ import {
 } from '../api/petService';
 import { toast, ToastContainer } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
+import ThemeManagement from './ThemeManagement';
 import 'react-toastify/dist/ReactToastify.css';
 import './AdminDashboard.css';
 
@@ -23,6 +27,7 @@ export default function AdminDashboard() {
   const [bulkQty, setBulkQty] = useState('');
   const [page, setPage] = useState(1);
   const [showSearch, setShowSearch] = useState(false);
+  const [activeTab, setActiveTab] = useState('pets'); // 'pets' or 'themes'
   const [searchParams, setSearchParams] = useState({
     id: '',
     petName: '',
@@ -38,6 +43,7 @@ export default function AdminDashboard() {
   });
   const [showOnlyRecent, setShowOnlyRecent] = useState(false);
   const [recentCount, setRecentCount] = useState(0);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const PAGE_SIZE = 20;  // Giới hạn 20 dòng mỗi trang
 
   const fetchPets = async () => {
@@ -135,8 +141,10 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetchPets();
-  }, [token]);
+    if (activeTab === 'pets') {
+      fetchPets();
+    }
+  }, [token, activeTab]);
 
   const downloadQR = pet => {
     const link = document.createElement('a');
@@ -201,6 +209,11 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   // pagination
   const pageCount = Math.ceil(pets.length / PAGE_SIZE);
   const pagedPets = pets.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -241,303 +254,358 @@ export default function AdminDashboard() {
     return pet.info.name || pet.owner.name || pet.owner.phone || pet.owner.email;
   };
 
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   return (
-    <div className="dashboard-container">
+    <div className={`app-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <ToastContainer position="top-right" autoClose={3000} />
-
-      <header className="dashboard-header">
-        <div className="header-left">
-          <FiCircle className="header-logo" />
-          <h1 className="header-title">PetCollar Admin</h1>
-        </div>
-        <div className="header-actions">
-          <button
-            onClick={() => setShowSearch(!showSearch)}
-            className="search-toggle-button"
-          >
-            <FiSearch size={20} /> Tìm kiếm
-          </button>
-          <button
-            onClick={handleCreate}
-            disabled={loading || bulkMode}
-            className="create-button"
-          >
-            <FiPlus size={20} /> {loading ? 'Đang...' : 'Tạo QR'}
-          </button>
-          <button
-            onClick={startBulk}
-            disabled={loading || bulkMode}
-            className="bulk-button"
-          >
-            <FiPlus size={20} /> QR hàng loạt
+      
+      {/* Sidebar Navigation */}
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <FiCircle className="logo-icon" />
+            {!sidebarCollapsed && <h2 className="company-name">PetCollar</h2>}
+          </div>
+          <button className="collapse-btn" onClick={toggleSidebar}>
+            {sidebarCollapsed ? <FiChevronRight /> : <FiMenu />}
           </button>
         </div>
-      </header>
-
-      {showSearch && (
-        <div className="search-form">
-          <div className="search-grid">
-            <div className="search-field">
-              <label>ID:</label>
-              <input
-                type="text"
-                value={searchParams.id}
-                onChange={(e) => setSearchParams({...searchParams, id: e.target.value})}
-                placeholder="Nhập ID"
-              />
-            </div>
-            <div className="search-field">
-              <label>Tên Pet:</label>
-              <input
-                type="text"
-                value={searchParams.petName}
-                onChange={(e) => setSearchParams({...searchParams, petName: e.target.value})}
-                placeholder="Nhập tên pet"
-              />
-            </div>
-            <div className="search-field">
-              <label>Tên Chủ:</label>
-              <input
-                type="text"
-                value={searchParams.ownerName}
-                onChange={(e) => setSearchParams({...searchParams, ownerName: e.target.value})}
-                placeholder="Nhập tên chủ"
-              />
-            </div>
-            <div className="search-field">
-              <label>Số điện thoại:</label>
-              <input
-                type="text"
-                value={searchParams.phone}
-                onChange={(e) => setSearchParams({...searchParams, phone: e.target.value})}
-                placeholder="Nhập số điện thoại"
-              />
-            </div>
-            <div className="search-field">
-              <label>Ngày tạo từ:</label>
-              <input
-                type="date"
-                value={searchParams.createdAtStart}
-                onChange={(e) => setSearchParams({...searchParams, createdAtStart: e.target.value})}
-              />
-            </div>
-            <div className="search-field">
-              <label>đến:</label>
-              <input
-                type="date"
-                value={searchParams.createdAtEnd}
-                onChange={(e) => setSearchParams({...searchParams, createdAtEnd: e.target.value})}
-              />
-            </div>
-            <div className="search-field">
-              <label>Cập nhật từ:</label>
-              <input
-                type="date"
-                value={searchParams.updatedAtStart}
-                onChange={(e) => setSearchParams({...searchParams, updatedAtStart: e.target.value})}
-              />
-            </div>
-            <div className="search-field">
-              <label>đến:</label>
-              <input
-                type="date"
-                value={searchParams.updatedAtEnd}
-                onChange={(e) => setSearchParams({...searchParams, updatedAtEnd: e.target.value})}
-              />
-            </div>
-            <div className="search-field">
-              <label>Trạng thái:</label>
-              <select
-                value={searchParams.status}
-                onChange={(e) => setSearchParams({...searchParams, status: e.target.value})}
-              >
-                <option value="">Tất cả</option>
-                <option value="active">Đang sử dụng</option>
-                <option value="unused">Chưa sử dụng</option>
-              </select>
-            </div>
-            <div className="search-field">
-              <label>Sắp xếp theo:</label>
-              <select
-                value={searchParams.sortBy}
-                onChange={(e) => setSearchParams({...searchParams, sortBy: e.target.value})}
-              >
-                <option value="createdAt">Ngày tạo</option>
-                <option value="petName">Tên Pet</option>
-                <option value="ownerName">Tên Chủ</option>
-                <option value="lastUpdated">Cập nhật gần nhất</option>
-              </select>
-            </div>
-            <div className="search-field">
-              <label>Thứ tự:</label>
-              <select
-                value={searchParams.sortOrder}
-                onChange={(e) => setSearchParams({...searchParams, sortOrder: e.target.value})}
-              >
-                <option value="desc">Giảm dần</option>
-                <option value="asc">Tăng dần</option>
-              </select>
-            </div>
-            <div className="search-field recent-toggle">
-              <label className="toggle-label">
-                <input
-                  type="checkbox"
-                  checked={showOnlyRecent}
-                  onChange={(e) => {
-                    setShowOnlyRecent(e.target.checked);
-                    if (e.target.checked) {
-                      setSearchParams(prev => ({
-                        ...prev,
-                        updatedAtStart: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-                      }));
-                      handleSearch();
-                    } else {
-                      // Clear the date filter and reset search
-                      setSearchParams(prev => ({
-                        ...prev,
-                        updatedAtStart: '',
-                        updatedAtEnd: ''
-                      }));
-                      fetchPets(); // Reset to show all pets
-                    }
-                  }}
-                />
-                <span className="toggle-text">
-                  <FiClock size={16} /> Chỉ xem cập nhật trong 24h
-                </span>
-              </label>
-            </div>
-          </div>
-          <div className="search-actions">
-            <button onClick={handleSearch} className="search-button">
-              <FiSearch size={20} /> Tìm kiếm
-            </button>
-            <button onClick={handleReset} className="reset-button">
-              <FiX size={20} /> Đặt lại
-            </button>
-          </div>
+        
+        <nav className="sidebar-nav">
+          <ul className="nav-list">
+            <li className={`nav-item ${activeTab === 'pets' ? 'active' : ''}`}>
+              <button onClick={() => setActiveTab('pets')}>
+                <FiTag className="nav-icon" />
+                {!sidebarCollapsed && <span className="nav-label">QR & Pets</span>}
+              </button>
+            </li>
+            <li className={`nav-item ${activeTab === 'themes' ? 'active' : ''}`}>
+              <button onClick={() => setActiveTab('themes')}>
+                <FiSettings className="nav-icon" />
+                {!sidebarCollapsed && <span className="nav-label">Themes</span>}
+              </button>
+            </li>
+          </ul>
+        </nav>
+        
+        <div className="sidebar-footer">
+          <button className="logout-btn" onClick={handleLogout}>
+            <FiLogOut className="nav-icon" />
+            {!sidebarCollapsed && <span className="nav-label">Đăng xuất</span>}
+          </button>
         </div>
-      )}
+      </aside>
 
-      {bulkMode && (
-        <div className="bulk-form">
-          <label className="bulk-label">
-            Số lượng:
-            <input
-              type="number"
-              min="1"
-              placeholder="Nhập số"
-              value={bulkQty}
-              onChange={e => setBulkQty(e.target.value)}
-            />
-          </label>
-          <div className="bulk-actions">
-            <button
-              onClick={confirmBulk}
-              disabled={loading}
-              className="confirm-button"
-            >Xác nhận</button>
-            <button
-              onClick={cancelBulk}
-              disabled={loading}
-              className="cancel-button"
-            >Hủy</button>
-          </div>
-        </div>
-      )}
-
-      {!loading && pets.length === 0 ? (
-        <p className="empty">Chưa có pet nào. Nhấn "Tạo QR mới" để khởi tạo.</p>
-      ) : (
-        <>
-          <table className="list-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>ID</th>
-                <th>QR</th>
-                <th>Tên Pet</th>
-                <th>Tên Chủ</th>
-                <th>Điện thoại</th>
-                <th>Ngày tạo</th>
-                <th>Cập nhật gần nhất</th>
-                <th>Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pagedPets.map((p, idx) => {
-                const hasInfo = hasPetInfo(p);
-                return (
-                  <tr 
-                    key={p._id} 
-                    className={`${idx % 2 === 0 ? 'even' : 'odd'} ${p.recentlyUpdated ? 'recently-updated' : ''}`}
-                  >
-                    <td>{(page - 1) * PAGE_SIZE + idx + 1}</td>
-                    <td>
-                      <Link
-                        to={`/user/edit/${p._id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="id-link"
-                      >
-                        {p._id}
-                      </Link>
-                    </td>
-                    <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
-                    <td>
-                      {p.info.name || '-'}
-                      {p.recentlyUpdated && (
-                        <span className="new-badge">NEW</span>
-                      )}
-                    </td>
-                    <td>{p.owner.name || '-'}</td>
-                    <td>{p.owner.phone || '-'}</td>
-                    <td>{new Date(p.createdAt).toLocaleString()}</td>
-                    <td>
-                      {p.updatedAt ? new Date(p.updatedAt).toLocaleString() : '-'}
-                      {p.recentlyUpdated && (
-                        <span className="update-badge">
-                          <FiClock size={14} /> 24h
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="status-cell">
-                        <span className={`status-badge ${getStatusColor(p.status, hasInfo)}`}>
-                          {getStatusText(p.status, hasInfo)}
-                        </span>
-                        <div className="status-actions">
-                          {/* Deactivate button removed as per request */}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          {pageCount > 1 && (
-            <div className="pagination">
+      <main className="main-content">
+        <header className="content-header">
+          <h1 className="page-title">
+            {activeTab === 'pets' ? 'QR & Pets Management' : 'Theme Management'}
+          </h1>
+          
+          {activeTab === 'pets' && (
+            <div className="header-actions">
               <button
-                onClick={() => setPage(page - 1)}
-                disabled={page === 1}
-              >‹</button>
-              {[...Array(pageCount)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i + 1)}
-                  className={page === i + 1 ? 'active' : ''}
-                >{i + 1}</button>
-              ))}
+                onClick={() => setShowSearch(!showSearch)}
+                className="search-toggle-button"
+              >
+                <FiSearch size={20} /> Tìm kiếm
+              </button>
               <button
-                onClick={() => setPage(page + 1)}
-                disabled={page === pageCount}
-              >›</button>
+                onClick={handleCreate}
+                disabled={loading || bulkMode}
+                className="create-button"
+              >
+                <FiPlus size={20} /> {loading ? 'Đang...' : 'Tạo QR'}
+              </button>
+              <button
+                onClick={startBulk}
+                disabled={loading || bulkMode}
+                className="bulk-button"
+              >
+                <FiPlus size={20} /> QR hàng loạt
+              </button>
             </div>
           )}
-        </>
-      )}
+        </header>
+
+        <div className="content-body">
+          {activeTab === 'themes' ? (
+            <ThemeManagement />
+          ) : (
+            <>
+              {showSearch && (
+                <div className="search-form">
+                  <div className="search-grid">
+                    <div className="search-field">
+                      <label>ID:</label>
+                      <input
+                        type="text"
+                        value={searchParams.id}
+                        onChange={(e) => setSearchParams({...searchParams, id: e.target.value})}
+                        placeholder="Nhập ID"
+                      />
+                    </div>
+                    <div className="search-field">
+                      <label>Tên Pet:</label>
+                      <input
+                        type="text"
+                        value={searchParams.petName}
+                        onChange={(e) => setSearchParams({...searchParams, petName: e.target.value})}
+                        placeholder="Nhập tên pet"
+                      />
+                    </div>
+                    <div className="search-field">
+                      <label>Tên Chủ:</label>
+                      <input
+                        type="text"
+                        value={searchParams.ownerName}
+                        onChange={(e) => setSearchParams({...searchParams, ownerName: e.target.value})}
+                        placeholder="Nhập tên chủ"
+                      />
+                    </div>
+                    <div className="search-field">
+                      <label>Số điện thoại:</label>
+                      <input
+                        type="text"
+                        value={searchParams.phone}
+                        onChange={(e) => setSearchParams({...searchParams, phone: e.target.value})}
+                        placeholder="Nhập số điện thoại"
+                      />
+                    </div>
+                    <div className="search-field">
+                      <label>Ngày tạo từ:</label>
+                      <input
+                        type="date"
+                        value={searchParams.createdAtStart}
+                        onChange={(e) => setSearchParams({...searchParams, createdAtStart: e.target.value})}
+                      />
+                    </div>
+                    <div className="search-field">
+                      <label>đến:</label>
+                      <input
+                        type="date"
+                        value={searchParams.createdAtEnd}
+                        onChange={(e) => setSearchParams({...searchParams, createdAtEnd: e.target.value})}
+                      />
+                    </div>
+                    <div className="search-field">
+                      <label>Cập nhật từ:</label>
+                      <input
+                        type="date"
+                        value={searchParams.updatedAtStart}
+                        onChange={(e) => setSearchParams({...searchParams, updatedAtStart: e.target.value})}
+                      />
+                    </div>
+                    <div className="search-field">
+                      <label>đến:</label>
+                      <input
+                        type="date"
+                        value={searchParams.updatedAtEnd}
+                        onChange={(e) => setSearchParams({...searchParams, updatedAtEnd: e.target.value})}
+                      />
+                    </div>
+                    <div className="search-field">
+                      <label>Trạng thái:</label>
+                      <select
+                        value={searchParams.status}
+                        onChange={(e) => setSearchParams({...searchParams, status: e.target.value})}
+                      >
+                        <option value="">Tất cả</option>
+                        <option value="active">Đang sử dụng</option>
+                        <option value="unused">Chưa sử dụng</option>
+                      </select>
+                    </div>
+                    <div className="search-field">
+                      <label>Sắp xếp theo:</label>
+                      <select
+                        value={searchParams.sortBy}
+                        onChange={(e) => setSearchParams({...searchParams, sortBy: e.target.value})}
+                      >
+                        <option value="createdAt">Ngày tạo</option>
+                        <option value="petName">Tên Pet</option>
+                        <option value="ownerName">Tên Chủ</option>
+                        <option value="lastUpdated">Cập nhật gần nhất</option>
+                      </select>
+                    </div>
+                    <div className="search-field">
+                      <label>Thứ tự:</label>
+                      <select
+                        value={searchParams.sortOrder}
+                        onChange={(e) => setSearchParams({...searchParams, sortOrder: e.target.value})}
+                      >
+                        <option value="desc">Giảm dần</option>
+                        <option value="asc">Tăng dần</option>
+                      </select>
+                    </div>
+                    <div className="search-field recent-toggle">
+                      <label className="toggle-label">
+                        <input
+                          type="checkbox"
+                          checked={showOnlyRecent}
+                          onChange={(e) => {
+                            setShowOnlyRecent(e.target.checked);
+                            if (e.target.checked) {
+                              setSearchParams(prev => ({
+                                ...prev,
+                                updatedAtStart: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                              }));
+                              handleSearch();
+                            } else {
+                              // Clear the date filter and reset search
+                              setSearchParams(prev => ({
+                                ...prev,
+                                updatedAtStart: '',
+                                updatedAtEnd: ''
+                              }));
+                              fetchPets(); // Reset to show all pets
+                            }
+                          }}
+                        />
+                        <span className="toggle-text">
+                          <FiClock size={16} /> Chỉ xem cập nhật trong 24h
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="search-actions">
+                    <button onClick={handleSearch} className="search-button">
+                      <FiSearch size={20} /> Tìm kiếm
+                    </button>
+                    <button onClick={handleReset} className="reset-button">
+                      <FiX size={20} /> Đặt lại
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {bulkMode && (
+                <div className="bulk-form">
+                  <label className="bulk-label">
+                    Số lượng:
+                    <input
+                      type="number"
+                      min="1"
+                      placeholder="Nhập số"
+                      value={bulkQty}
+                      onChange={e => setBulkQty(e.target.value)}
+                    />
+                  </label>
+                  <div className="bulk-actions">
+                    <button
+                      onClick={confirmBulk}
+                      disabled={loading}
+                      className="confirm-button"
+                    >Xác nhận</button>
+                    <button
+                      onClick={cancelBulk}
+                      disabled={loading}
+                      className="cancel-button"
+                    >Hủy</button>
+                  </div>
+                </div>
+              )}
+
+              {!loading && pets.length === 0 ? (
+                <p className="empty">Chưa có pet nào. Nhấn "Tạo QR mới" để khởi tạo.</p>
+              ) : (
+                <>
+                  <div className="table-container">
+                    <table className="list-table">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>ID</th>
+                          <th>QR</th>
+                          <th>Tên Pet</th>
+                          <th>Tên Chủ</th>
+                          <th>Điện thoại</th>
+                          <th>Ngày tạo</th>
+                          <th>Cập nhật gần nhất</th>
+                          <th>Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pagedPets.map((p, idx) => {
+                          const hasInfo = hasPetInfo(p);
+                          return (
+                            <tr 
+                              key={p._id} 
+                              className={`${idx % 2 === 0 ? 'even' : 'odd'} ${p.recentlyUpdated ? 'recently-updated' : ''}`}
+                            >
+                              <td>{(page - 1) * PAGE_SIZE + idx + 1}</td>
+                              <td>
+                                <Link
+                                  to={`/user/edit/${p._id}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="id-link"
+                                >
+                                  {p._id}
+                                </Link>
+                              </td>
+                              <td><img src={p.qrCodeUrl} alt="QR" className="qr-image" /></td>
+                              <td>
+                                {p.info.name || '-'}
+                                {p.recentlyUpdated && (
+                                  <span className="new-badge">NEW</span>
+                                )}
+                              </td>
+                              <td>{p.owner.name || '-'}</td>
+                              <td>{p.owner.phone || '-'}</td>
+                              <td>{new Date(p.createdAt).toLocaleString()}</td>
+                              <td>
+                                {p.updatedAt ? new Date(p.updatedAt).toLocaleString() : '-'}
+                                {p.recentlyUpdated && (
+                                  <span className="update-badge">
+                                    <FiClock size={14} /> 24h
+                                  </span>
+                                )}
+                              </td>
+                              <td>
+                                <div className="status-cell">
+                                  <span className={`status-badge ${getStatusColor(p.status, hasInfo)}`}>
+                                    {getStatusText(p.status, hasInfo)}
+                                  </span>
+                                  <div className="status-actions">
+                                    {/* Deactivate button removed as per request */}
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {pageCount > 1 && (
+                    <div className="pagination">
+                      <button
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 1}
+                      >‹</button>
+                      {[...Array(pageCount)].map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setPage(i + 1)}
+                          className={page === i + 1 ? 'active' : ''}
+                        >{i + 1}</button>
+                      ))}
+                      <button
+                        onClick={() => setPage(page + 1)}
+                        disabled={page === pageCount}
+                      >›</button>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
