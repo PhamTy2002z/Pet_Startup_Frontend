@@ -4,7 +4,7 @@ import UserEditForm from '../components/UserEditForm';
 import FirstTimeScanPopup from '../components/FirstTimeScanPopup';
 import EditPopup from '../components/EditPopup';
 import { getPetById, getPetAvatarUrl, updatePet, updateAllergicInfo, updatePetOwnerEmail, updatePetDescription, uploadPetAvatar } from '../api/petService';
-import { FiMenu, FiSettings, FiHome, FiUser, FiMessageSquare, FiBook, FiMoon, FiInfo, FiPhone, FiCalendar, FiAlertTriangle, FiEdit, FiGlobe, FiShoppingBag } from 'react-icons/fi';
+import { FiMenu, FiSettings, FiHome, FiUser, FiMessageSquare, FiBook, FiMoon, FiInfo, FiPhone, FiCalendar, FiAlertTriangle, FiEdit, FiGlobe, FiShoppingBag, FiChevronDown, FiCheck } from 'react-icons/fi';
 import './UserEditPage.css';
 
 const UserEditPage = () => {
@@ -40,7 +40,116 @@ const UserEditPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [language, setLanguage] = useState('vi'); // Default language is Vietnamese
   const [darkMode, setDarkMode] = useState(false);
+  const [showThemeDropdown, setShowThemeDropdown] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState('Default');
+  const [previewTheme, setPreviewTheme] = useState(null);
+  
+  // Mock themes data - in a real app, this would come from API or context
+  const availableThemes = [
+    { id: 1, name: 'Default', colors: ['#5b5b9f', '#e2e8f0', '#fff'] },
+    { id: 2, name: 'Pastel Paws', colors: ['#FFCAE9', '#B5EAEA', '#FFDCDC'] },
+    { id: 3, name: 'Forest Friends', colors: ['#C1F4C5', '#6ECEDA', '#FFF5BA'] },
+    { id: 4, name: 'Cosmic Cats', colors: ['#D4A5FF', '#FFB2E6', '#9381FF'] }
+  ];
+  
+  // Apply a theme
+  const applyTheme = (themeName) => {
+    setCurrentTheme(themeName);
+    setShowThemeDropdown(false);
+    
+    // Find the selected theme
+    const selectedTheme = availableThemes.find(theme => theme.name === themeName);
+    if (!selectedTheme) return;
+    
+    // Get the root element to update CSS variables
+    const root = document.documentElement;
+    
+    // Update CSS variables based on the theme
+    switch (themeName) {
+      case 'Pastel Paws':
+        root.style.setProperty('--color-primary', '#FFCAE9');
+        root.style.setProperty('--color-nav-active', '#FFCAE9');
+        root.style.setProperty('--color-bg-alt', '#FFF5F9');
+        root.style.setProperty('--color-tag-strong-bg', '#FFE0F5');
+        root.style.setProperty('--color-tag-strong-text', '#D16BB0');
+        break;
+      case 'Forest Friends':
+        root.style.setProperty('--color-primary', '#6ECEDA');
+        root.style.setProperty('--color-nav-active', '#6ECEDA');
+        root.style.setProperty('--color-bg-alt', '#F0FBF0');
+        root.style.setProperty('--color-tag-strong-bg', '#E0F5E0');
+        root.style.setProperty('--color-tag-strong-text', '#4A7B6B');
+        break;
+      case 'Cosmic Cats':
+        root.style.setProperty('--color-primary', '#9381FF');
+        root.style.setProperty('--color-nav-active', '#9381FF');
+        root.style.setProperty('--color-bg-alt', '#F5F0FF');
+        root.style.setProperty('--color-tag-strong-bg', '#E8E0FF');
+        root.style.setProperty('--color-tag-strong-text', '#6250B5');
+        break;
+      default: // Default theme
+        root.style.setProperty('--color-primary', '#5b5b9f');
+        root.style.setProperty('--color-nav-active', '#5b5b9f');
+        root.style.setProperty('--color-bg-alt', '#F5F9F9');
+        root.style.setProperty('--color-tag-strong-bg', '#e8f4ff');
+        root.style.setProperty('--color-tag-strong-text', '#2e7de9');
+        break;
+    }
+    
+    // In a real app, you would save the user's theme preference to the backend
+  };
 
+  // Preview a theme on hover
+  const previewThemeOnHover = (themeName) => {
+    if (!themeName) {
+      // Reset to current theme on mouse leave
+      setPreviewTheme(null);
+      applyTheme(currentTheme);
+      return;
+    }
+    
+    // Set the preview theme
+    setPreviewTheme(themeName);
+    
+    // Apply the theme temporarily
+    const selectedTheme = availableThemes.find(theme => theme.name === themeName);
+    if (!selectedTheme) return;
+    
+    const root = document.documentElement;
+    
+    // Update CSS variables based on the theme
+    switch (themeName) {
+      case 'Pastel Paws':
+        root.style.setProperty('--color-primary', '#FFCAE9');
+        root.style.setProperty('--color-nav-active', '#FFCAE9');
+        root.style.setProperty('--color-bg-alt', '#FFF5F9');
+        root.style.setProperty('--color-tag-strong-bg', '#FFE0F5');
+        root.style.setProperty('--color-tag-strong-text', '#D16BB0');
+        break;
+      case 'Forest Friends':
+        root.style.setProperty('--color-primary', '#6ECEDA');
+        root.style.setProperty('--color-nav-active', '#6ECEDA');
+        root.style.setProperty('--color-bg-alt', '#F0FBF0');
+        root.style.setProperty('--color-tag-strong-bg', '#E0F5E0');
+        root.style.setProperty('--color-tag-strong-text', '#4A7B6B');
+        break;
+      case 'Cosmic Cats':
+        root.style.setProperty('--color-primary', '#9381FF');
+        root.style.setProperty('--color-nav-active', '#9381FF');
+        root.style.setProperty('--color-bg-alt', '#F5F0FF');
+        root.style.setProperty('--color-tag-strong-bg', '#E8E0FF');
+        root.style.setProperty('--color-tag-strong-text', '#6250B5');
+        break;
+      default: // Default theme
+        root.style.setProperty('--color-primary', '#5b5b9f');
+        root.style.setProperty('--color-nav-active', '#5b5b9f');
+        root.style.setProperty('--color-bg-alt', '#F5F9F9');
+        root.style.setProperty('--color-tag-strong-bg', '#e8f4ff');
+        root.style.setProperty('--color-tag-strong-text', '#2e7de9');
+        break;
+    }
+  };
+  
   // Labels for both languages
   const labels = {
     vi: {
@@ -63,7 +172,9 @@ const UserEditPage = () => {
       reExaminationSchedule: 'Lịch tái khám',
       allergicInformation: 'Thông tin dị ứng',
       noVaccinations: 'Không có lịch tiêm chủng',
-      noReExaminations: 'Không có lịch tái khám'
+      noReExaminations: 'Không có lịch tái khám',
+      theme: 'Chủ đề:',
+      applyTheme: 'Áp dụng'
     },
     en: {
       profile: 'Profile',
@@ -85,7 +196,9 @@ const UserEditPage = () => {
       reExaminationSchedule: 'Re-examination Schedule',
       allergicInformation: 'Allergic Information',
       noVaccinations: 'No upcoming vaccinations',
-      noReExaminations: 'No upcoming re-examinations'
+      noReExaminations: 'No upcoming re-examinations',
+      theme: 'Theme:',
+      applyTheme: 'Apply'
     }
   };
 
@@ -507,10 +620,44 @@ const UserEditPage = () => {
           <div className="profile-details">
             <h2 className="profile-name">{petData.info.name}</h2>
             <p className="profile-role">{petData.info.species}</p>
-            <button className="language-toggle-btn" onClick={toggleLanguage}>
-              <FiGlobe size={14} />
-              <span>{t.changeLanguage}</span>
-            </button>
+            <div className="profile-actions">
+              <button className="language-toggle-btn" onClick={toggleLanguage}>
+                <FiGlobe size={14} />
+                <span>{t.changeLanguage}</span>
+              </button>
+              
+              <div className="theme-dropdown-container">
+                <button 
+                  className="theme-dropdown-btn"
+                  onClick={() => setShowThemeDropdown(!showThemeDropdown)}
+                >
+                  <span>{t.theme} {currentTheme}</span>
+                  <FiChevronDown size={14} />
+                </button>
+                
+                {showThemeDropdown && (
+                  <div className="theme-dropdown-menu">
+                    {availableThemes.map(theme => (
+                      <button 
+                        key={theme.id} 
+                        className={`theme-option ${currentTheme === theme.name ? 'active' : ''}`}
+                        onClick={() => applyTheme(theme.name)}
+                        onMouseEnter={() => previewThemeOnHover(theme.name)}
+                        onMouseLeave={() => previewThemeOnHover(null)}
+                      >
+                        <div className="theme-colors">
+                          {theme.colors.map((color, index) => (
+                            <span key={index} className="color-dot" style={{ backgroundColor: color }}></span>
+                          ))}
+                        </div>
+                        <span>{theme.name}</span>
+                        {currentTheme === theme.name && <FiCheck size={14} />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -591,7 +738,10 @@ const UserEditPage = () => {
         </button>
         <button 
           className={`nav-button ${activeTab === 'themeStore' ? 'active' : ''}`}
-          onClick={() => setActiveTab('themeStore')}
+          onClick={() => {
+            setActiveTab('themeStore');
+            navigate('/theme-store');
+          }}
         >
           <FiShoppingBag size={22} />
           <span className="nav-label">{t.themeStore}</span>
