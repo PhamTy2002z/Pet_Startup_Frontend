@@ -23,18 +23,23 @@ const ThemeCard = memo(({ theme, isFavorite, onToggleFavorite, onApplyTheme, onA
         >
           <FiHeart />
         </button>
+        {theme.price === 0 && (
+          <span className="free-badge">{t.free}</span>
+        )}
       </div>
       <div className="theme-info">
-        <h3 className="theme-name">{theme.name}</h3>
-        <div className="theme-colors">
-          {theme.colors.map((color, index) => (
-            <span 
-              key={index} 
-              className="color-dot" 
-              style={{ backgroundColor: color }}
-              aria-label={`Theme color ${index + 1}`}
-            ></span>
-          ))}
+        <div>
+          <h3 className="theme-name">{theme.name}</h3>
+          <div className="theme-colors">
+            {theme.colors.map((color, index) => (
+              <span 
+                key={index} 
+                className="color-dot" 
+                style={{ backgroundColor: color }}
+                aria-label={`Theme color ${index + 1}`}
+              ></span>
+            ))}
+          </div>
         </div>
         <div className="theme-actions">
           <span className="theme-price">
@@ -281,6 +286,16 @@ const ThemeStorePage = () => {
             <FiChevronLeft />
           </button>
           <h1 className="store-title">{t.title}</h1>
+          <div className="header-actions">
+            <button 
+              className="language-toggle-btn" 
+              onClick={toggleLanguage}
+              aria-label="Change language"
+            >
+              <FiGlobe size={14} />
+              <span>{language === 'vi' ? 'EN' : 'VI'}</span>
+            </button>
+          </div>
         </div>
         <div className="loading-container">
           <div className="loading-spinner"></div>
