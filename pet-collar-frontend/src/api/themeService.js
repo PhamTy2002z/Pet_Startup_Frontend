@@ -48,3 +48,33 @@ export const updateThemeOrder = async (themes) => {
   const { data } = await adminApi.put('/admin/themes/order', { themes });
   return data;
 };
+
+// Get store themes (active themes available in store)
+export const getStoreThemes = async () => {
+  const { data } = await adminApi.get('/admin/themes/store');
+  return data;
+};
+
+// Get purchased themes for a pet
+export const getPurchasedThemes = async (petId) => {
+  const { data } = await adminApi.get(`/admin/pets/${petId}/themes/purchased`);
+  return data;
+};
+
+// Purchase a theme for a pet
+export const purchaseTheme = async (petId, themeId) => {
+  const { data } = await adminApi.post('/admin/themes/purchase', { petId, themeId });
+  return data;
+};
+
+// Apply a purchased theme to a pet
+export const applyTheme = async (petId, themeId) => {
+  const { data } = await adminApi.post('/admin/pets/apply-theme', { petId, themeId });
+  return data;
+};
+
+// Get all active themes for a pet (free and purchased)
+export const getActiveThemes = async (petId) => {
+  const { data } = await adminApi.get(`/admin/themes/active?petId=${petId}`);
+  return data;
+};

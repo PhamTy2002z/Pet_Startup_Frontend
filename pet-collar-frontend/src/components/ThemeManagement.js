@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   FiPlus, FiTrash, FiEdit, FiCheck, FiX, FiArrowUp, 
   FiArrowDown, FiImage, FiGrid, FiList, FiLoader,
-  FiChevronLeft, FiChevronRight, FiChevronDown, FiChevronUp
+  FiChevronLeft, FiChevronRight, FiChevronDown, FiChevronUp,
+  FiDollarSign, FiShoppingBag
 } from 'react-icons/fi';
 import { 
   getAllThemes, 
@@ -27,6 +28,9 @@ export default function ThemeManagement() {
     name: '',
     description: '',
     isActive: true,
+    isPremium: false,
+    price: 0,
+    inStore: true,
     order: 0
   });
   const [image, setImage] = useState(null);
@@ -58,10 +62,20 @@ export default function ThemeManagement() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setCurrentTheme({
-      ...currentTheme,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    
+    if (name === 'isPremium' && !checked) {
+      // If isPremium is unchecked, reset price to 0
+      setCurrentTheme({
+        ...currentTheme,
+        [name]: checked,
+        price: 0
+      });
+    } else {
+      setCurrentTheme({
+        ...currentTheme,
+        [name]: type === 'checkbox' ? checked : (name === 'price' ? parseFloat(value) : value)
+      });
+    }
   };
 
   const handleImageChange = (e) => {
@@ -77,6 +91,9 @@ export default function ThemeManagement() {
       name: '',
       description: '',
       isActive: true,
+      isPremium: false,
+      price: 0,
+      inStore: true,
       order: themes.length
     });
     setImage(null);
@@ -95,6 +112,9 @@ export default function ThemeManagement() {
       name: theme.name,
       description: theme.description || '',
       isActive: theme.isActive,
+      isPremium: theme.isPremium || false,
+      price: theme.price || 0,
+      inStore: theme.inStore !== undefined ? theme.inStore : true,
       order: theme.order
     });
     // Set preview URL with API base URL if needed
@@ -130,6 +150,9 @@ export default function ThemeManagement() {
       formData.append('name', currentTheme.name);
       formData.append('description', currentTheme.description);
       formData.append('isActive', currentTheme.isActive);
+      formData.append('isPremium', currentTheme.isPremium);
+      formData.append('price', currentTheme.isPremium ? currentTheme.price : 0);
+      formData.append('inStore', currentTheme.inStore);
       formData.append('order', currentTheme.order);
       
       if (image) {
@@ -449,6 +472,48 @@ export default function ThemeManagement() {
                   </div>
                 </div>
 
+                <div className="form-row">
+                  <div className="form-group checkbox-group">
+                    <label className="checkbox-container">
+                      <input
+                        type="checkbox"
+                        name="isPremium"
+                        checked={currentTheme.isPremium}
+                        onChange={handleInputChange}
+                      />
+                      <span className="checkmark"></span>
+                      Theme Premium
+                    </label>
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="price">Giá (nếu là Premium)</label>
+                    <input
+                      type="number"
+                      id="price"
+                      name="price"
+                      value={currentTheme.price}
+                      onChange={handleInputChange}
+                      min="0"
+                      step="1000" 
+                      disabled={!currentTheme.isPremium}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group checkbox-group">
+                  <label className="checkbox-container">
+                    <input
+                      type="checkbox"
+                      name="inStore"
+                      checked={currentTheme.inStore}
+                      onChange={handleInputChange}
+                    />
+                    <span className="checkmark"></span>
+                    Hiển thị trong cửa hàng
+                  </label>
+                </div>
+
                 <div className="form-group">
                   <label htmlFor="image">Ảnh Theme {formMode === 'create' && <span className="required">*</span>}</label>
                   <div className="file-input-container">
@@ -520,9 +585,11 @@ export default function ThemeManagement() {
                 return (
                   <div 
                     key={theme._id} 
-                    className={`theme-card ${theme.isActive ? 'active' : 'inactive'}`}
+                    className={`theme-card ${theme.isActive ? 'active' : 'inactive'} ${theme.isPremium ? 'premium' : ''} ${theme.inStore ? '' : 'hidden'}`}
                   >
                     {theme.isActive && <div className="active-badge"><FiCheck size={14} /></div>}
+                    {theme.isPremium && <div className="premium-badge"><FiDollarSign size={14} /></div>}
+                    {!theme.inStore && <div className="hidden-badge"><FiX size={14} /></div>}
                     <div className="theme-image">
                       {fullImageUrl ? (
                         <img 
@@ -544,12 +611,24 @@ export default function ThemeManagement() {
                     <div className="theme-info">
                       <h3 title={theme.name}>{truncatedName}</h3>
                       <p>{truncatedDescription}</p>
-                      <span className={`status-badge ${theme.isActive ? 'active' : 'inactive'}`}>
-                        {theme.isActive ? 'Đang hoạt động' : 'Đã vô hiệu hóa'}
-                      </span>
+                      <div className="theme-status-row">
+                        <span className={`status-badge ${theme.isActive ? 'active' : 'inactive'}`}>
+                          {theme.isActive ? 'Đang hoạt động' : 'Đã vô hiệu hóa'}
+                        </span>
+                        {theme.isPremium && (
+                          <span className="price-badge">
+                            <FiDollarSign size={12} /> {theme.price.toLocaleString()}đ
+                          </span>
+                        )}
+                      </div>
+                      {!theme.inStore && (
+                        <span className="store-badge hidden">
+                          <FiShoppingBag size={12} /> Ẩn khỏi cửa hàng
+                        </span>
+                      )}
                     </div>
                     <div className="theme-actions">
-                                            <div className="main-actions">
+                      <div className="main-actions">
                         <button 
                           onClick={() => openEditForm(theme)}
                           className="action-btn edit-btn"
@@ -581,7 +660,7 @@ export default function ThemeManagement() {
                 return (
                   <div 
                     key={theme._id} 
-                    className={`theme-item ${theme.isActive ? 'active' : 'inactive'}`}
+                    className={`theme-item ${theme.isActive ? 'active' : 'inactive'} ${theme.isPremium ? 'premium' : ''} ${theme.inStore ? '' : 'hidden'}`}
                   >
                     <div className="theme-image">
                       {fullImageUrl ? (
@@ -609,9 +688,19 @@ export default function ThemeManagement() {
                     <div className="theme-info">
                       <h3>{truncatedName}</h3>
                       <p>{truncatedDescription}</p>
-                      <span className={`status-badge ${theme.isActive ? 'active' : 'inactive'}`}>
-                        {theme.isActive ? 'Đang hoạt động' : 'Đã vô hiệu hóa'}
-                      </span>
+                      <div className="theme-attributes">
+                        <span className={`status-badge ${theme.isActive ? 'active' : 'inactive'}`}>
+                          {theme.isActive ? 'Đang hoạt động' : 'Đã vô hiệu hóa'}
+                        </span>
+                        {theme.isPremium && (
+                          <span className="price-badge">
+                            <FiDollarSign size={12} /> {theme.price.toLocaleString()}đ
+                          </span>
+                        )}
+                        <span className={`store-badge ${theme.inStore ? 'visible' : 'hidden'}`}>
+                          <FiShoppingBag size={12} /> {theme.inStore ? 'Hiển thị trong cửa hàng' : 'Ẩn khỏi cửa hàng'}
+                        </span>
+                      </div>
                     </div>
                     <div className="theme-actions-list">
                       <button 

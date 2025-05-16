@@ -560,18 +560,117 @@
 
 .active-badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background-color: #4CAF50;
-  color: white;
+  top: 10px;
+  right: 10px;
   width: 24px;
   height: 24px;
   border-radius: 50%;
+  background-color: #4CAF50;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.premium-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #ff9800;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hidden-badge {
+  position: absolute;
+  top: 10px;
+  left: 40px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #f44336;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Add to style theme cards that are premium */
+.theme-card.premium {
+  border-color: #ff9800;
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.15);
+}
+
+/* Add to style theme cards that are hidden from the store */
+.theme-card.hidden {
+  opacity: 0.7;
+}
+
+/* Add new rules to style list view items */
+.theme-item.premium {
+  border-left: 3px solid #ff9800;
+}
+
+.theme-item.hidden {
+  opacity: 0.7;
+}
+
+/* Add these rules after the status-badge classes, around line 665 */
+
+.theme-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.theme-attributes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.price-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.store-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.store-badge.visible {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+.store-badge.hidden {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
 }
 
 .theme-image {
