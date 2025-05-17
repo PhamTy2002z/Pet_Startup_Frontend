@@ -1,15 +1,39 @@
+// src/pages/UserEditPage.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import UserEditForm from '../components/UserEditForm';
 import FirstTimeScanPopup from '../components/FirstTimeScanPopup';
 import EditPopup from '../components/EditPopup';
-import { getPetById, getPetAvatarUrl, updatePet, updateAllergicInfo, updatePetOwnerEmail, updatePetDescription, uploadPetAvatar } from '../api/petService';
-import { FiMenu, FiSettings, FiHome, FiUser, FiMessageSquare, FiBook, FiMoon, FiInfo, FiPhone, FiCalendar, FiAlertTriangle, FiEdit, FiGlobe, FiShoppingBag, FiChevronDown, FiCheck } from 'react-icons/fi';
+import {
+  getPetById,
+  getPetAvatarUrl,
+  updatePet,
+  updateAllergicInfo,
+  updatePetDescription,
+  uploadPetAvatar
+} from '../api/petService';
+import {
+  FiMenu,
+  FiSettings,
+  FiHome,
+  FiUser,
+  FiMoon,
+  FiInfo,
+  FiPhone,
+  FiCalendar,
+  FiAlertTriangle,
+  FiEdit,
+  FiGlobe,
+  FiShoppingBag,
+  FiChevronDown,
+  FiCheck
+} from 'react-icons/fi';
 import './UserEditPage.css';
 
 const UserEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [showPopup, setShowPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [petData, setPetData] = useState({
@@ -26,46 +50,35 @@ const UserEditPage = () => {
     },
     vaccinations: [],
     reExaminations: [],
-    allergicInfo: { 
-      substances: [], 
-      note: '' 
-    },
+    allergicInfo: { substances: [], note: '' },
     avatarUrl: '',
     avatarFileId: null
   });
+
   const [activeTab, setActiveTab] = useState('profile');
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [editSection, setEditSection] = useState(null);
   const [refreshData, setRefreshData] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [language, setLanguage] = useState('vi'); // Default language is Vietnamese
+  const [language, setLanguage] = useState('vi');
   const [darkMode, setDarkMode] = useState(false);
   const [showThemeDropdown, setShowThemeDropdown] = useState(false);
   const [currentTheme, setCurrentTheme] = useState('Default');
   const [previewTheme, setPreviewTheme] = useState(null);
-  
-  // Mock themes data - in a real app, this would come from API or context
+
   const availableThemes = [
     { id: 1, name: 'Default', colors: ['#5b5b9f', '#e2e8f0', '#fff'] },
     { id: 2, name: 'Pastel Paws', colors: ['#FFCAE9', '#B5EAEA', '#FFDCDC'] },
     { id: 3, name: 'Forest Friends', colors: ['#C1F4C5', '#6ECEDA', '#FFF5BA'] },
     { id: 4, name: 'Cosmic Cats', colors: ['#D4A5FF', '#FFB2E6', '#9381FF'] }
   ];
-  
-  // Apply a theme
+
   const applyTheme = (themeName) => {
     setCurrentTheme(themeName);
     setShowThemeDropdown(false);
-    
-    // Find the selected theme
-    const selectedTheme = availableThemes.find(theme => theme.name === themeName);
-    if (!selectedTheme) return;
-    
-    // Get the root element to update CSS variables
+    const selected = availableThemes.find(t => t.name === themeName) || availableThemes[0];
     const root = document.documentElement;
-    
-    // Update CSS variables based on the theme
-    switch (themeName) {
+    switch (selected.name) {
       case 'Pastel Paws':
         root.style.setProperty('--color-primary', '#FFCAE9');
         root.style.setProperty('--color-nav-active', '#FFCAE9');
@@ -87,7 +100,7 @@ const UserEditPage = () => {
         root.style.setProperty('--color-tag-strong-bg', '#E8E0FF');
         root.style.setProperty('--color-tag-strong-text', '#6250B5');
         break;
-      default: // Default theme
+      default:
         root.style.setProperty('--color-primary', '#5b5b9f');
         root.style.setProperty('--color-nav-active', '#5b5b9f');
         root.style.setProperty('--color-bg-alt', '#F5F9F9');
@@ -95,69 +108,23 @@ const UserEditPage = () => {
         root.style.setProperty('--color-tag-strong-text', '#2e7de9');
         break;
     }
-    
-    // In a real app, you would save the user's theme preference to the backend
   };
 
-  // Preview a theme on hover
   const previewThemeOnHover = (themeName) => {
     if (!themeName) {
-      // Reset to current theme on mouse leave
       setPreviewTheme(null);
       applyTheme(currentTheme);
       return;
     }
-    
-    // Set the preview theme
     setPreviewTheme(themeName);
-    
-    // Apply the theme temporarily
-    const selectedTheme = availableThemes.find(theme => theme.name === themeName);
-    if (!selectedTheme) return;
-    
-    const root = document.documentElement;
-    
-    // Update CSS variables based on the theme
-    switch (themeName) {
-      case 'Pastel Paws':
-        root.style.setProperty('--color-primary', '#FFCAE9');
-        root.style.setProperty('--color-nav-active', '#FFCAE9');
-        root.style.setProperty('--color-bg-alt', '#FFF5F9');
-        root.style.setProperty('--color-tag-strong-bg', '#FFE0F5');
-        root.style.setProperty('--color-tag-strong-text', '#D16BB0');
-        break;
-      case 'Forest Friends':
-        root.style.setProperty('--color-primary', '#6ECEDA');
-        root.style.setProperty('--color-nav-active', '#6ECEDA');
-        root.style.setProperty('--color-bg-alt', '#F0FBF0');
-        root.style.setProperty('--color-tag-strong-bg', '#E0F5E0');
-        root.style.setProperty('--color-tag-strong-text', '#4A7B6B');
-        break;
-      case 'Cosmic Cats':
-        root.style.setProperty('--color-primary', '#9381FF');
-        root.style.setProperty('--color-nav-active', '#9381FF');
-        root.style.setProperty('--color-bg-alt', '#F5F0FF');
-        root.style.setProperty('--color-tag-strong-bg', '#E8E0FF');
-        root.style.setProperty('--color-tag-strong-text', '#6250B5');
-        break;
-      default: // Default theme
-        root.style.setProperty('--color-primary', '#5b5b9f');
-        root.style.setProperty('--color-nav-active', '#5b5b9f');
-        root.style.setProperty('--color-bg-alt', '#F5F9F9');
-        root.style.setProperty('--color-tag-strong-bg', '#e8f4ff');
-        root.style.setProperty('--color-tag-strong-text', '#2e7de9');
-        break;
-    }
+    applyTheme(themeName);
   };
-  
-  // Labels for both languages
+
   const labels = {
     vi: {
       profile: 'Hồ sơ',
       home: 'Trang chủ',
       themeStore: 'Theme Store',
-      chat: 'Trò chuyện',
-      books: 'Sách',
       night: 'Ban đêm',
       upcomingSchedules: 'Lịch hẹn sắp tới:',
       allergies: 'Dị ứng:',
@@ -180,8 +147,6 @@ const UserEditPage = () => {
       profile: 'Profile',
       home: 'Home',
       themeStore: 'Theme Store',
-      chat: 'Chat',
-      books: 'Books',
       night: 'Night',
       upcomingSchedules: 'Upcoming Schedules:',
       allergies: 'Allergies:',
@@ -202,7 +167,6 @@ const UserEditPage = () => {
     }
   };
 
-  // Get current language labels
   const t = labels[language];
 
   useEffect(() => {
@@ -210,14 +174,9 @@ const UserEditPage = () => {
       try {
         setIsLoading(true);
         const pet = await getPetById(id);
-        
-        // Check if this is a first-time scan (no pet name or owner info)
-        const isFirstTime = !pet.info.name && !pet.owner.name && !pet.owner.phone;
-        
-        setShowPopup(isFirstTime);
-
-        // Process pet data
-        const petDataFormatted = {
+        const isFirst = !pet.info.name && !pet.owner.name && !pet.owner.phone;
+        setShowPopup(isFirst);
+        setPetData({
           info: {
             name: pet.info.name || 'Unnamed Pet',
             species: pet.info.species || 'Unknown Species',
@@ -234,213 +193,141 @@ const UserEditPage = () => {
           allergicInfo: pet.allergicInfo || { substances: [], note: '' },
           avatarUrl: pet.avatarFileId ? getPetAvatarUrl(pet.avatarFileId) : '',
           avatarFileId: pet.avatarFileId || null
-        };
-        
-        setPetData(petDataFormatted);
+        });
         setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching pet data:', error);
+        console.error(error);
         setErrorMessage('Failed to load pet profile. Please try again later.');
         setIsLoading(false);
       }
     };
-
     fetchPetData();
   }, [id, refreshData]);
 
-  // Format reExamination data for Strong side
   const formatReExamSchedule = () => {
-    if (!petData.reExaminations || petData.reExaminations.length === 0) {
-      return [{ label: t.noSchedules, date: '' }];
-    }
-
-    return petData.reExaminations.map(reExam => {
-      const date = reExam.date ? new Date(reExam.date) : null;
-      const formattedDate = date ? `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}` : '';
+    if (!petData.reExaminations.length) return [{ label: t.noSchedules, date: '' }];
+    return petData.reExaminations.map(r => {
+      const d = r.date ? new Date(r.date) : null;
       return {
-        label: reExam.note || 'Reexamination',
-        date: formattedDate
+        label: r.note || 'Reexamination',
+        date: d ? `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}` : ''
       };
     });
   };
 
-  // Format allergic info for Weak side
   const formatAllergicInfo = () => {
     const { substances, note } = petData.allergicInfo;
-    
-    if ((!substances || substances.length === 0) && !note) {
-      return [{ allergen: t.noAllergies, reaction: '' }];
+    if (!substances.length && !note) return [{ allergen: t.noAllergies, reaction: '' }];
+    if (substances.length) {
+      return substances.map(s => ({ allergen: s, reaction: note || '' }));
     }
-
-    if (substances && substances.length > 0) {
-      return substances.map(substance => ({
-        allergen: substance,
-        reaction: note || ''
-      }));
-    }
-
     return [{ allergen: 'Unknown allergen', reaction: note || '' }];
   };
 
-  // Toggle language
-  const toggleLanguage = () => {
-    setLanguage(prevLang => prevLang === 'vi' ? 'en' : 'vi');
-  };
+  const toggleLanguage = () => setLanguage(l => (l === 'vi' ? 'en' : 'vi'));
 
-  // Report cards based on pet data
-  const generateReportCards = () => {
-    return [
-      {
-        title: t.petInformation,
-        description: `${petData.info.species || 'Species unknown'}, ${formatAge(petData.info.birthDate)}`,
-        iconName: 'info',
-        colorClass: 'primary',
-        section: 'petInfo'
-      },
-      {
-        title: t.ownerInformation,
-        description: petData.owner.name || 'No owner information',
-        iconName: 'phone',
-        colorClass: 'accent',
-        section: 'ownerInfo'
-      },
-      {
-        title: t.vaccinationSchedule,
-        description: getNextVaccination(),
-        iconName: 'calendar',
-        colorClass: 'warning',
-        section: 'vaccinations'
-      },
-      {
-        title: t.reExaminationSchedule,
-        description: getNextReExamination(),
-        iconName: 'calendar',
-        colorClass: 'info',
-        section: 'reExaminations'
-      },
-      {
-        title: t.allergicInformation,
-        description: getAllergySummary(),
-        iconName: 'alert',
-        colorClass: 'success',
-        section: 'allergicInfo'
-      }
-    ];
-  };
+  const generateReportCards = () => [
+    {
+      title: t.petInformation,
+      description: `${petData.info.species || 'Species unknown'}, ${formatAge(petData.info.birthDate)}`,
+      iconName: 'info',
+      colorClass: 'primary',
+      section: 'petInfo'
+    },
+    {
+      title: t.ownerInformation,
+      description: petData.owner.name || 'No owner information',
+      iconName: 'phone',
+      colorClass: 'accent',
+      section: 'ownerInfo'
+    },
+    {
+      title: t.vaccinationSchedule,
+      description: getNextVaccination(),
+      iconName: 'calendar',
+      colorClass: 'warning',
+      section: 'vaccinations'
+    },
+    {
+      title: t.reExaminationSchedule,
+      description: getNextReExamination(),
+      iconName: 'calendar',
+      colorClass: 'info',
+      section: 'reExaminations'
+    },
+    {
+      title: t.allergicInformation,
+      description: getAllergySummary(),
+      iconName: 'alert',
+      colorClass: 'success',
+      section: 'allergicInfo'
+    }
+  ];
 
-  // Helper functions for report cards
   const formatAge = (birthDate) => {
     if (!birthDate) return 'Age unknown';
-    
-    const birthDateObj = new Date(birthDate);
+    const bd = new Date(birthDate);
     const today = new Date();
-    let age = today.getFullYear() - birthDateObj.getFullYear();
-    
-    // Adjust age if birthday hasn't occurred yet this year
+    let age = today.getFullYear() - bd.getFullYear();
     if (
-      today.getMonth() < birthDateObj.getMonth() ||
-      (today.getMonth() === birthDateObj.getMonth() && today.getDate() < birthDateObj.getDate())
-    ) {
-      age--;
-    }
-    
+      today.getMonth() < bd.getMonth() ||
+      (today.getMonth() === bd.getMonth() && today.getDate() < bd.getDate())
+    ) age--;
     return `${age} ${age === 1 ? 'year' : 'years'} old`;
   };
 
   const getNextVaccination = () => {
-    if (!petData.vaccinations || petData.vaccinations.length === 0) {
-      return t.noVaccinations;
-    }
-
-    // Sort by date, get the next one
-    const futureVaccinations = petData.vaccinations
-      .filter(vac => vac.date && new Date(vac.date) > new Date())
+    if (!petData.vaccinations.length) return t.noVaccinations;
+    const future = petData.vaccinations
+      .filter(v => v.date && new Date(v.date) > new Date())
       .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    if (futureVaccinations.length === 0) {
-      return t.noVaccinations;
-    }
-
-    const nextVaccination = futureVaccinations[0];
-    const date = new Date(nextVaccination.date);
-    return `${nextVaccination.name}: ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    if (!future.length) return t.noVaccinations;
+    const next = future[0];
+    const d = new Date(next.date);
+    return `${next.name}: ${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
   };
 
   const getNextReExamination = () => {
-    if (!petData.reExaminations || petData.reExaminations.length === 0) {
-      return t.noReExaminations;
-    }
-
-    // Sort by date, get the next one
-    const futureReExaminations = petData.reExaminations
-      .filter(reExam => reExam.date && new Date(reExam.date) > new Date())
+    if (!petData.reExaminations.length) return t.noReExaminations;
+    const future = petData.reExaminations
+      .filter(r => r.date && new Date(r.date) > new Date())
       .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    if (futureReExaminations.length === 0) {
-      return t.noReExaminations;
-    }
-
-    const nextReExam = futureReExaminations[0];
-    const date = new Date(nextReExam.date);
-    return `${nextReExam.note || 'Check-up'}: ${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    if (!future.length) return t.noReExaminations;
+    const next = future[0];
+    const d = new Date(next.date);
+    return `${next.note || 'Check-up'}: ${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
   };
 
   const getAllergySummary = () => {
     const { substances } = petData.allergicInfo;
-
-    if (!substances || substances.length === 0) {
-      return 'No allergies recorded';
-    }
-
-    if (substances.length === 1) {
-      return `Allergic to ${substances[0]}`;
-    }
-
+    if (!substances.length) return 'No allergies recorded';
+    if (substances.length === 1) return `Allergic to ${substances[0]}`;
     return `Allergic to ${substances.length} substances`;
   };
 
-  const handleFirstTimePopupSubmit = async (formData) => {
+  const handleFirstTimePopupSubmit = async (data) => {
     try {
-      // Format the data to match the API structure
-      const updateData = {
-        info: {
-          name: formData.petName,
-          species: '',
-          birthDate: ''
-        },
-        owner: {
-          name: formData.ownerName,
-          phone: formData.phoneNumber,
-          email: ''
-        }
-      };
-
-      // Update the pet with basic info
-      await updatePet(id, updateData);
+      await updatePet(id, {
+        info: { name: data.petName, species: '', birthDate: '' },
+        owner: { name: data.ownerName, phone: data.phoneNumber, email: '' }
+      });
       setShowPopup(false);
-      setRefreshData(prev => !prev); // Trigger refetch
+      setRefreshData(r => !r);
     } catch (error) {
-      console.error('Error updating pet:', error);
+      console.error(error);
       setErrorMessage('Failed to update pet information. Please try again.');
     }
   };
 
-  const handleEditProfile = () => {
-    setEditSection('profile');
-    setShowEditPopup(true);
-  };
-
   const handleAvatarUpload = async (file) => {
+    if (!file) return;
     try {
-      if (!file) return;
-      
-      const formData = new FormData();
-      formData.append('avatar', file);
-      
-      await uploadPetAvatar(id, formData);
-      setRefreshData(prev => !prev); // Trigger refetch
+      const fd = new FormData();
+      fd.append('avatar', file);
+      await uploadPetAvatar(id, fd);
+      setRefreshData(r => !r);
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      console.error(error);
       setErrorMessage('Failed to upload avatar. Please try again.');
     }
   };
@@ -456,93 +343,87 @@ const UserEditPage = () => {
         case 'profile':
           await updatePet(id, {
             info: {
-              ...petData.info,  // Preserve all existing info fields
+              ...petData.info,
               name: formData.name,
               species: formData.species,
-              birthDate: formData.birthDate,
+              birthDate: formData.birthDate
             },
-            owner: petData.owner,  // Preserve owner data
-            vaccinations: petData.vaccinations,  // Preserve vaccinations
-            reExaminations: petData.reExaminations,  // Preserve reExaminations
-            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
+            owner: petData.owner,
+            vaccinations: petData.vaccinations,
+            reExaminations: petData.reExaminations,
+            allergicInfo: petData.allergicInfo
           });
           break;
         case 'petInfo':
           await updatePet(id, {
             info: {
-              ...petData.info,  // Preserve all existing info fields
+              ...petData.info,
               name: formData.name,
               species: formData.species,
               birthDate: formData.birthDate,
               description: formData.description
             },
-            owner: petData.owner,  // Preserve owner data
-            vaccinations: petData.vaccinations,  // Preserve vaccinations
-            reExaminations: petData.reExaminations,  // Preserve reExaminations
-            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
+            owner: petData.owner,
+            vaccinations: petData.vaccinations,
+            reExaminations: petData.reExaminations,
+            allergicInfo: petData.allergicInfo
           });
           break;
         case 'ownerInfo':
           await updatePet(id, {
-            info: petData.info,  // Preserve info data
+            info: petData.info,
             owner: {
-              ...petData.owner,  // Preserve all existing owner fields
+              ...petData.owner,
               name: formData.ownerName,
               phone: formData.phone,
               email: formData.email
             },
-            vaccinations: petData.vaccinations,  // Preserve vaccinations
-            reExaminations: petData.reExaminations,  // Preserve reExaminations
-            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
+            vaccinations: petData.vaccinations,
+            reExaminations: petData.reExaminations,
+            allergicInfo: petData.allergicInfo
           });
           break;
         case 'vaccinations':
           await updatePet(id, {
-            info: petData.info,  // Preserve info data
-            owner: petData.owner,  // Preserve owner data
+            info: petData.info,
+            owner: petData.owner,
             vaccinations: formData.vaccinations,
-            reExaminations: petData.reExaminations,  // Preserve reExaminations
-            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
+            reExaminations: petData.reExaminations,
+            allergicInfo: petData.allergicInfo
           });
           break;
         case 'reExaminations':
           await updatePet(id, {
-            info: petData.info,  // Preserve info data
-            owner: petData.owner,  // Preserve owner data
-            vaccinations: petData.vaccinations,  // Preserve vaccinations
+            info: petData.info,
+            owner: petData.owner,
+            vaccinations: petData.vaccinations,
             reExaminations: formData.reExaminations,
-            allergicInfo: petData.allergicInfo  // Preserve allergicInfo
+            allergicInfo: petData.allergicInfo
           });
           break;
         case 'allergicInfo':
-          // Use the specific API for allergic info
           await updateAllergicInfo(id, {
             substances: formData.substances,
             note: formData.note
           });
           break;
         case 'description':
-          // Use the specific API for description
-          await updatePetDescription(id, {
-            description: formData.description
-          });
+          await updatePetDescription(id, { description: formData.description });
           break;
         default:
           console.error('Unknown section:', editSection);
           return;
       }
-      
       setShowEditPopup(false);
-      setRefreshData(prev => !prev); // Trigger refetch
+      setRefreshData(r => !r);
     } catch (error) {
-      console.error('Error updating pet data:', error);
+      console.error(error);
       setErrorMessage('Failed to update. Please try again.');
     }
   };
 
-  // Function to render icon based on name
-  const renderIcon = (iconName) => {
-    switch(iconName) {
+  const renderIcon = (name) => {
+    switch (name) {
       case 'info':
         return <FiInfo className="card-icon" />;
       case 'phone':
@@ -565,7 +446,6 @@ const UserEditPage = () => {
     );
   }
 
-  // Prepare schedules, allergies and report cards
   const schedules = formatReExamSchedule();
   const allergies = formatAllergicInfo();
   const reportCards = generateReportCards();
@@ -593,25 +473,19 @@ const UserEditPage = () => {
         <div className="profile-info">
           <div className="avatar-container">
             {petData.avatarUrl ? (
-              <img 
-                src={petData.avatarUrl} 
-                alt="Pet avatar" 
-                className="profile-avatar" 
-              />
+              <img src={petData.avatarUrl} alt="Pet avatar" className="profile-avatar" />
             ) : (
-              <div className="profile-avatar avatar-placeholder" style={{display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0', color: '#aaa', fontSize: '1.2rem', fontWeight: 500}}>
-                Photo
-              </div>
+              <div className="profile-avatar avatar-placeholder">Photo</div>
             )}
-            <div 
+            <div
               className="avatar-badge"
               onClick={() => document.getElementById('avatar-upload').click()}
             >
               <FiEdit size={16} color="#fff" />
-              <input 
-                id="avatar-upload" 
-                type="file" 
-                accept="image/*" 
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
                 style={{ display: 'none' }}
                 onChange={(e) => handleAvatarUpload(e.target.files[0])}
               />
@@ -625,33 +499,33 @@ const UserEditPage = () => {
                 <FiGlobe size={14} />
                 <span>{t.changeLanguage}</span>
               </button>
-              
+
               <div className="theme-dropdown-container">
-                <button 
+                <button
                   className="theme-dropdown-btn"
                   onClick={() => setShowThemeDropdown(!showThemeDropdown)}
                 >
                   <span>{t.theme} {currentTheme}</span>
                   <FiChevronDown size={14} />
                 </button>
-                
+
                 {showThemeDropdown && (
                   <div className="theme-dropdown-menu">
-                    {availableThemes.map(theme => (
-                      <button 
-                        key={theme.id} 
-                        className={`theme-option ${currentTheme === theme.name ? 'active' : ''}`}
-                        onClick={() => applyTheme(theme.name)}
-                        onMouseEnter={() => previewThemeOnHover(theme.name)}
+                    {availableThemes.map(th => (
+                      <button
+                        key={th.id}
+                        className={`theme-option ${currentTheme === th.name ? 'active' : ''}`}
+                        onClick={() => applyTheme(th.name)}
+                        onMouseEnter={() => previewThemeOnHover(th.name)}
                         onMouseLeave={() => previewThemeOnHover(null)}
                       >
                         <div className="theme-colors">
-                          {theme.colors.map((color, index) => (
-                            <span key={index} className="color-dot" style={{ backgroundColor: color }}></span>
+                          {th.colors.map((c, i) => (
+                            <span key={i} className="color-dot" style={{ backgroundColor: c }}></span>
                           ))}
                         </div>
-                        <span>{theme.name}</span>
-                        {currentTheme === theme.name && <FiCheck size={14} />}
+                        <span>{th.name}</span>
+                        {currentTheme === th.name && <FiCheck size={14} />}
                       </button>
                     ))}
                   </div>
@@ -665,10 +539,9 @@ const UserEditPage = () => {
           <div className="tags-group">
             <h3 className="tags-title">{t.upcomingSchedules}</h3>
             <div className="tags-container">
-              {schedules.map((schedule, index) => (
-                <span key={`schedule-${index}`} className="tag strong-tag">
-                  {schedule.date && `${schedule.date} `}
-                  {schedule.label}
+              {schedules.map((s, i) => (
+                <span key={i} className="tag strong-tag">
+                  {s.date && `${s.date} `}{s.label}
                 </span>
               ))}
             </div>
@@ -677,10 +550,9 @@ const UserEditPage = () => {
           <div className="tags-group">
             <h3 className="tags-title">{t.allergies}</h3>
             <div className="tags-container">
-              {allergies.map((allergy, index) => (
-                <span key={`allergy-${index}`} className="tag weak-tag">
-                  {allergy.allergen}
-                  {allergy.reaction && ` (${allergy.reaction})`}
+              {allergies.map((a, i) => (
+                <span key={i} className="tag weak-tag">
+                  {a.allergen}{a.reaction && ` (${a.reaction})`}
                 </span>
               ))}
             </div>
@@ -690,28 +562,26 @@ const UserEditPage = () => {
         <div className="reports-section">
           <h3 className="section-title">{t.petDetails}</h3>
           <div className="cards-grid">
-            {reportCards.map((card, index) => (
-              <article 
-                key={index} 
-                className={`card ${card.colorClass}`}
-                onClick={() => handleCardClick(card.section)}
+            {reportCards.map((c, i) => (
+              <article
+                key={i}
+                className={`card ${c.colorClass}`}
+                onClick={() => handleCardClick(c.section)}
               >
-                <div className={`card-ribbon ${card.colorClass}`}></div>
-                {renderIcon(card.iconName)}
-                <h4 className="card-title">{card.title}</h4>
+                <div className={`card-ribbon ${c.colorClass}`}></div>
+                {renderIcon(c.iconName)}
+                <h4 className="card-title">{c.title}</h4>
               </article>
             ))}
           </div>
         </div>
 
-        {/* First Time Scan Popup */}
         <FirstTimeScanPopup
           isOpen={showPopup}
           onClose={() => setShowPopup(false)}
           onSubmit={handleFirstTimePopupSubmit}
         />
 
-        {/* Edit Popup for different sections */}
         <EditPopup
           isOpen={showEditPopup}
           section={editSection}
@@ -722,21 +592,24 @@ const UserEditPage = () => {
       </main>
 
       <nav className="bottom-nav">
-        <button 
+        <button
           className={`nav-button ${activeTab === 'home' ? 'active' : ''}`}
-          onClick={() => setActiveTab('home')}
+          onClick={() => {
+            setActiveTab('home');
+            navigate('/');
+          }}
         >
           <FiHome size={22} />
           <span className="nav-label">{t.home}</span>
         </button>
-        <button 
+        <button
           className={`nav-button ${activeTab === 'profile' ? 'active' : ''}`}
           onClick={() => setActiveTab('profile')}
         >
           <FiUser size={22} />
           <span className="nav-label">{t.profile}</span>
         </button>
-        <button 
+        <button
           className={`nav-button ${activeTab === 'themeStore' ? 'active' : ''}`}
           onClick={() => {
             setActiveTab('themeStore');
@@ -746,11 +619,11 @@ const UserEditPage = () => {
           <FiShoppingBag size={22} />
           <span className="nav-label">{t.themeStore}</span>
         </button>
-        <button 
+        <button
           className={`nav-button ${activeTab === 'night' ? 'active' : ''}`}
           onClick={() => {
             setActiveTab('night');
-            setDarkMode(dm => !dm);
+            setDarkMode(d => !d);
           }}
         >
           <FiMoon size={22} />

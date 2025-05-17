@@ -19,6 +19,8 @@ import './ThemeManagement.css';
 // Get API base URL from environment or use default
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
+const THEMES_PER_PAGE = 10;
+
 export default function ThemeManagement() {
   const [themes, setThemes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,7 +42,7 @@ export default function ThemeManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const THEMES_PER_PAGE = 10;
+  const [brokenImages, setBrokenImages] = useState({});   // {themeId:true}
 
   useEffect(() => {
     loadThemes();
@@ -347,6 +349,11 @@ export default function ThemeManagement() {
     return buttons;
   };
 
+  const handleImgError = (e, themeId) => {
+    e.target.onerror = null;          // ngăn loop
+    setBrokenImages(prev => ({ ...prev, [themeId]: true }));
+  };
+
   return (
     <div className="theme-management">
       <div className="dashboard-header">
@@ -591,21 +598,17 @@ export default function ThemeManagement() {
                     {theme.isPremium && <div className="premium-badge"><FiDollarSign size={14} /></div>}
                     {!theme.inStore && <div className="hidden-badge"><FiX size={14} /></div>}
                     <div className="theme-image">
-                      {fullImageUrl ? (
-                        <img 
-                          src={fullImageUrl} 
-                          alt={theme.name} 
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = '';
-                            e.target.className = 'image-error';
-                            e.target.parentNode.innerHTML = '<div class="image-error-icon"><FiImage size={48} /></div>';
-                          }} 
-                        />
-                      ) : (
+                      {brokenImages[theme._id] ? (
                         <div className="no-image">
                           <FiImage size={48} />
                         </div>
+                      ) : (
+                        <img
+                          src={fullImageUrl}
+                          alt={theme.name}
+                          onError={(e) => handleImgError(e, theme._id)}
+                          loading="lazy"
+                        />
                       )}
                     </div>
                     <div className="theme-info">
@@ -663,26 +666,17 @@ export default function ThemeManagement() {
                     className={`theme-item ${theme.isActive ? 'active' : 'inactive'} ${theme.isPremium ? 'premium' : ''} ${theme.inStore ? '' : 'hidden'}`}
                   >
                     <div className="theme-image">
-                      {fullImageUrl ? (
-                        <img 
-                          src={fullImageUrl} 
-                          alt={theme.name} 
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = '';
-                            e.target.className = 'image-error';
-                            const iconContainer = document.createElement('div');
-                            iconContainer.className = 'image-error-icon';
-                            e.target.parentNode.appendChild(iconContainer);
-                            const iconElement = document.createElement('span');
-                            iconElement.innerHTML = '<svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="48" width="48" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
-                            iconContainer.appendChild(iconElement);
-                          }} 
-                        />
-                      ) : (
+                      {brokenImages[theme._id] ? (
                         <div className="no-image">
                           <FiImage size={48} />
                         </div>
+                      ) : (
+                        <img
+                          src={fullImageUrl}
+                          alt={theme.name}
+                          onError={(e) => handleImgError(e, theme._id)}
+                          loading="lazy"
+                        />
                       )}
                     </div>
                     <div className="theme-info">

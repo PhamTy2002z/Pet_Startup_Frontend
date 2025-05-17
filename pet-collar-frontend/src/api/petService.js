@@ -1,157 +1,53 @@
-// src/api/petService.js
-import axios from 'axios';
+import { publicApi, adminApi } from './base';
 
-// -------------------------------------------------------------------
-// Lấy endpoint backend
-// -------------------------------------------------------------------
-const API_BASE =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+/* ========= ADMIN – PET CRUD ========= */
 
-/* ****************************************************************** */
-/* 1.  PUBLIC API  –  KHÔNG tự gắn token (người dùng quét QR)          */
-/* ****************************************************************** */
-const publicApi = axios.create({
-  baseURL: `${API_BASE}/api`,
-});
+/** Tạo 1 pet rỗng + QR */
+export const createPet = () => adminApi.post('/admin/pets').then(r => r.data);
 
-/* ****************************************************************** */
-/* 2.  ADMIN API  –  TỰ gắn token từ localStorage (màn quản trị)      */
-/* ****************************************************************** */
-const adminApi = axios.create({
-  baseURL: `${API_BASE}/api`,
-});
-
-adminApi.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-  },
-  (err) => Promise.reject(err),
-);
-
-/* ========================= ADMIN APIs ============================ */
-
-// Search pets with filters
-export const searchPets = (params) =>
-  adminApi.get('/admin/pets/search', { params }).then((r) => r.data);
-
-// Update pet status
-export const updatePetStatus = (id, status) =>
-  adminApi.put(`/admin/pet/${id}/status`, { status }).then((r) => r.data);
-
-// Tạo mới Pet (record rỗng + QR)
-export const createPet = () =>
-  adminApi.post('/admin/pet').then((r) => r.data);
-
-// Tạo hàng loạt pets
+/** Tạo hàng loạt pets */
 export const createBulkPets = (quantity) =>
-  adminApi.post('/admin/pets/bulk', { quantity }).then((r) => r.data);
+  adminApi.post('/admin/pets/bulk', { quantity }).then(r => r.data);
 
-// Lấy danh sách Pet
-export const getAllPets = () =>
-  adminApi.get('/admin/pets').then((r) => r.data);
+/** Danh sách / tìm kiếm */
+export const getAllPets = () => adminApi.get('/admin/pets').then(r => r.data);
+export const searchPets = (params) =>
+  adminApi.get('/admin/pets/search', { params }).then(r => r.data);
 
-/* ========================= USER APIs  ============================ */
+/** Upload avatar (admin) */
+export const uploadPetAvatarAdmin = (id, formData) =>
+  adminApi.post(`/admin/pets/${id}/avatar`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }).then(r => r.data);
 
-// Lấy thông tin Pet
+/* ========= USER – PET PROFILE ========= */
+
 export const getPetById = (id) =>
-  publicApi.get(`/user/pet/${id}`).then((r) => r.data);
+  publicApi.get(`/pets/${id}`).then(r => r.data);
 
-// Cập nhật info / owner / vaccinations / reExaminations / allergicInfo
-export const updatePet = async (id, payload) => {
-  try {
-    // First get the current pet data to ensure we're not losing any data
-    const currentPet = await getPetById(id);
-    
-    // Merge the current data with the new payload
-    const mergedPayload = {
-      info: {
-        ...currentPet.info,
-        ...(payload.info || {})
-      },
-      owner: {
-        ...currentPet.owner,
-        ...(payload.owner || {})
-      },
-      vaccinations: payload.vaccinations || currentPet.vaccinations || [],
-      reExaminations: payload.reExaminations || currentPet.reExaminations || [],
-      allergicInfo: payload.allergicInfo || currentPet.allergicInfo || { substances: [], note: '' }
-    };
-    
-    // Send the merged payload to the API
-    return publicApi.put(`/user/pet/${id}`, mergedPayload).then((r) => r.data);
-  } catch (error) {
-    console.error('Error in updatePet:', error);
-    throw error;
-  }
-};
+export const updatePet = (id, payload) =>
+  publicApi.put(`/pets/${id}`, payload).then(r => r.data);
 
-// Cập nhật email chủ Pet
 export const updatePetOwnerEmail = (id, email) =>
-  publicApi
-    .put(`/user/pet/${id}/owner-email`, { email })
-    .then((r) => r.data);
+  publicApi.post(`/pets/${id}/owner-email`, { email }).then(r => r.data);
 
-// Cập nhật thông tin dị ứng của pet
-export const updateAllergicInfo = async (id, allergicInfo) => {
-  try {
-    // Get current pet to ensure we have the complete allergicInfo
-    const currentPet = await getPetById(id);
-    
-    // Merge current allergicInfo with new data
-    const mergedAllergicInfo = {
-      ...currentPet.allergicInfo,
-      ...allergicInfo
-    };
-    
-    return publicApi
-      .put(`/user/pet/${id}/allergic-info`, mergedAllergicInfo)
-      .then((r) => r.data);
-  } catch (error) {
-    console.error('Error in updateAllergicInfo:', error);
-    throw error;
-  }
-};
+export const updateAllergicInfo = (id, allergicInfo) =>
+  publicApi.put(`/pets/${id}/allergic-info`, allergicInfo).then(r => r.data);
 
-// Cập nhật mô tả của pet
-export const updatePetDescription = async (id, descriptionData) => {
-  try {
-    // First get the current pet data
-    const currentPet = await getPetById(id);
-    
-    // Make sure we're preserving any fields that might exist in the API
-    const mergedDescription = {
-      ...currentPet.info.description,
-      ...descriptionData
-    };
-    
-    return publicApi
-      .put(`/user/pet/${id}/description`, mergedDescription)
-      .then((r) => r.data);
-  } catch (error) {
-    console.error('Error in updatePetDescription:', error);
-    throw error;
-  }
-};
+export const updatePetDescription = (id, description) =>
+  publicApi.put(`/pets/${id}/description`, { description }).then(r => r.data);
 
-// Upload avatar (dùng route user để khỏi yêu cầu token)
-export const uploadPetAvatar = (id, formData) => {
-  return publicApi
-    .post(`/user/pet/${id}/avatar`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    .then((r) => r.data);
-};
+export const uploadPetAvatar = (id, formData) =>
+  publicApi.post(`/pets/${id}/avatar`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }).then(r => r.data);
 
-// Gửi email nhắc lịch tái khám
-export const sendReminderEmail = (petId, { to, petName, appointmentDate, note }) =>
-  publicApi
-    .post(`/user/pet/${petId}/send-reminder`, { to, petName, appointmentDate, note })
-    .then((r) => r.data);
+/* ========= EMAIL REMINDER ========= */
 
-/* ===================== TIỆN ÍCH KHÁC ============================= */
+export const sendReminderEmail = (petId, payload) =>
+  publicApi.post(`/pets/${petId}/send-reminder`, payload).then(r => r.data);
 
-// URL trực tiếp tới file avatar (GridFS)
+/* ========= HELPER ========= */
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 export const getPetAvatarUrl = (fileId) =>
-  `${API_BASE}/api/avatar/${fileId}`;
+  `${API_BASE}/api/v1/avatar/${fileId}`;

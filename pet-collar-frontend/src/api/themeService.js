@@ -1,80 +1,35 @@
-// src/api/themeService.js
-import { adminApi } from './base';
+import { adminApi, publicApi } from './base';
 
-// Get all themes
-export const getAllThemes = async () => {
-  const { data } = await adminApi.get('/admin/themes');
-  return data;
-};
+/* ========= ADMIN – THEME MANAGEMENT ========= */
 
-// Get a theme by ID
-export const getThemeById = async (id) => {
-  const { data } = await adminApi.get(`/admin/themes/${id}`);
-  return data;
-};
+export const createTheme = (formData) =>
+  adminApi.post('/admin/themes', formData).then(r => r.data);
 
-// Create a new theme
-export const createTheme = async (formData) => {
-  const { data } = await adminApi.post('/admin/themes', formData);
-  return data;
-};
+export const getAllThemes   = () => adminApi.get('/admin/themes').then(r => r.data);
+export const getThemeById   = (id) => adminApi.get(`/admin/themes/${id}`).then(r => r.data);
+export const updateTheme    = (id, formData) =>
+  adminApi.put(`/admin/themes/${id}`, formData).then(r => r.data);
+export const deleteTheme    = (id) => adminApi.delete(`/admin/themes/${id}`).then(r => r.data);
 
-// Update a theme
-export const updateTheme = async (id, formData) => {
-  const { data } = await adminApi.put(`/admin/themes/${id}`, formData);
-  return data;
-};
+export const batchUpdateThemeStatus = (themes) =>
+  adminApi.put('/admin/themes/batch-status', { themes }).then(r => r.data);
 
-// Delete a theme
-export const deleteTheme = async (id) => {
-  const { data } = await adminApi.delete(`/admin/themes/${id}`);
-  return data;
-};
+export const updateThemeOrder = (themes) =>
+  adminApi.put('/admin/themes/order', { themes }).then(r => r.data);
 
-// Assign theme to pet
-export const assignThemeToPet = async (petId, themeId) => {
-  const { data } = await adminApi.post('/admin/pets/theme', { petId, themeId });
-  return data;
-};
+/* ========= STORE – USER ========= */
 
-// Update theme status in batch
-export const batchUpdateThemeStatus = async (themes) => {
-  const { data } = await adminApi.put('/admin/themes/batch-status', { themes });
-  return data;
-};
+export const getStoreThemes = () =>
+  publicApi.get('/store/themes').then(r => r.data);
 
-// Update theme order
-export const updateThemeOrder = async (themes) => {
-  const { data } = await adminApi.put('/admin/themes/order', { themes });
-  return data;
-};
+export const getPurchasedThemes = (petId) =>
+  publicApi.get(`/purchased-themes/${petId}`).then(r => r.data);
 
-// Get store themes (active themes available in store)
-export const getStoreThemes = async () => {
-  const { data } = await adminApi.get('/admin/themes/store');
-  return data;
-};
+export const purchaseTheme = (petId, themeId) =>
+  publicApi.post('/purchase-theme', { petId, themeId }).then(r => r.data);
 
-// Get purchased themes for a pet
-export const getPurchasedThemes = async (petId) => {
-  const { data } = await adminApi.get(`/admin/pets/${petId}/themes/purchased`);
-  return data;
-};
+export const applyTheme = (petId, themeId) =>
+  publicApi.post('/apply-theme', { petId, themeId }).then(r => r.data);
 
-// Purchase a theme for a pet
-export const purchaseTheme = async (petId, themeId) => {
-  const { data } = await adminApi.post('/admin/themes/purchase', { petId, themeId });
-  return data;
-};
-
-// Apply a purchased theme to a pet
-export const applyTheme = async (petId, themeId) => {
-  const { data } = await adminApi.post('/admin/pets/apply-theme', { petId, themeId });
-  return data;
-};
-
-// Get all active themes for a pet (free and purchased)
-export const getActiveThemes = async (petId) => {
-  const { data } = await adminApi.get(`/admin/themes/active?petId=${petId}`);
-  return data;
-};
+export const getActiveThemes = (petId) =>
+  publicApi.get('/themes', { params: { petId } }).then(r => r.data);

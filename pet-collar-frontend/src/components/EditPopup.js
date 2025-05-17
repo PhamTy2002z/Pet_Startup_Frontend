@@ -1,3 +1,4 @@
+// src/components/EditPopup.js
 import React, { useState, useEffect } from 'react';
 import { FiX, FiCalendar, FiPlus, FiTrash2 } from 'react-icons/fi';
 import DatePicker from 'react-datepicker';

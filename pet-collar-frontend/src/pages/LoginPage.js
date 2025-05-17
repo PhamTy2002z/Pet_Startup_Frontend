@@ -1,56 +1,66 @@
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+//src/pages/LoginPage.js
+import React, { useState, useEffect } from 'react';
+import { useNavigate }           from 'react-router-dom';
+import { useAuth }               from '../contexts/AuthContext';
 import './LoginPage.css';
-import logo from '../assets/logo.jpg';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, token } = useAuth();
+  const navigate         = useNavigate();
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error,    setError]    = useState('');
 
-  const handleSubmit = async e => {
-    e.preventDefault();            // tránh reload
+  /* Đã có token → vào thẳng dashboard */
+  useEffect(() => {
+    if (token) navigate('/admin', { replace: true });
+  }, [token, navigate]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError('');
     try {
-      await login(username, password);
-      // navigate đã được gọi bên trong login()
+      await login(username.trim(), password);
+      /* navigate đã được gọi trong login() */
     } catch (err) {
-      setError(err.response?.data?.error || 'Đăng nhập thất bại.');
+      const msg = err?.response?.status === 401
+        ? 'Sai tài khoản hoặc mật khẩu'
+        : 'Đăng nhập thất bại.';
+      setError(msg);
     }
   };
 
   return (
     <div className="login-page">
       <div className="login-card">
-        <img src={logo} alt="Logo" className="login-logo" />
-        <h2>Xin chào!</h2>
+        <h2>Quản trị VNIPET</h2>
         <p>Đăng nhập để tiếp tục</p>
+
         {error && <div className="login-error">{error}</div>}
-        <form className="login-form" onSubmit={handleSubmit}>
+
+        <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
-            <label htmlFor="username">Tên đăng nhập</label>
+            <label>Tên đăng nhập</label>
             <input
-              id="username"
-              type="text"
               value={username}
-              onChange={e => setUsername(e.target.value)}
-              placeholder="Nhập username"
+              onChange={(e) => setUsername(e.target.value)}
+              autoFocus
               required
             />
           </div>
+
           <div className="input-group">
-            <label htmlFor="password">Mật khẩu</label>
+            <label>Mật khẩu</label>
             <input
-              id="password"
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-          <button type="submit" className="btn-login">
+
+          <button className="btn-login" type="submit">
             Đăng nhập
           </button>
         </form>

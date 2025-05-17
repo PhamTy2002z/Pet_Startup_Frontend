@@ -2,64 +2,41 @@ import React, { useState } from 'react';
 import { FiX, FiUser, FiPhone, FiHeart } from 'react-icons/fi';
 import './FirstTimeScanPopup.css';
 
-const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
-  const [formData, setFormData] = useState({
-    petName: '',
-    ownerName: '',
-    phoneNumber: ''
-  });
+export default function FirstTimeScanPopup({ isOpen, onClose, onSubmit }) {
+  const [form, setForm] = useState({ petName: '', ownerName: '', phone: '' });
+  const [phoneError, setPhoneError]   = useState('');
+  const [submitting, setSubmitting]   = useState(false);
 
-  const [phoneError, setPhoneError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    // Phone number validation
-    if (name === 'phoneNumber') {
-      // Remove any non-digit characters
-      const phoneNumber = value.replace(/\D/g, '');
-      
-      // Check if the input contains any letters
-      if (value !== phoneNumber) {
-        setPhoneError('Please enter numbers only');
-        return;
-      }
-      
-      // Limit to 10 digits
-      if (phoneNumber.length > 10) {
-        setPhoneError('Phone number must be 10 digits');
-        return;
-      }
-
+  /* ---------- Handle change ---------- */
+  const handleChange = ({ target: { name, value } }) => {
+    if (name === 'phone') {
+      const digits = value.replace(/\D/g, '');
+      if (digits.length > 11) return setPhoneError('Tối đa 11 số');        // simple VN rule
       setPhoneError('');
-      setFormData(prev => ({
-        ...prev,
-        [name]: phoneNumber
-      }));
-      return;
+      setForm((p) => ({ ...p, phone: digits }));
+    } else {
+      setForm((p) => ({ ...p, [name]: value }));
     }
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
   };
 
+  /* ---------- Submit ---------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate phone number before submission
-    if (formData.phoneNumber.length !== 10) {
-      setPhoneError('Phone number must be 10 digits');
+    if (form.phone.length < 9 || form.phone.length > 11) {
+      setPhoneError('Số điện thoại 9-11 chữ số');
       return;
     }
 
-    setIsSubmitting(true);
+    setSubmitting(true);
     try {
-      await onSubmit(formData);
+      /* Map sang payload backend */
+      const payload = {
+        info : { name: form.petName },
+        owner: { name: form.ownerName, phone: form.phone },
+      };
+      await onSubmit(payload);        // cha sẽ gọi updatePet()
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
@@ -68,77 +45,52 @@ const FirstTimeScanPopup = ({ isOpen, onClose, onSubmit }) => {
   return (
     <div className="popup-overlay">
       <div className="popup-content">
-        <button className="close-button" onClick={onClose}>
-          <FiX />
-        </button>
-        
+        <button className="close-button" onClick={onClose}><FiX /></button>
+
         <h2>Welcome! 👋</h2>
-        <p className="popup-subtitle">Let's get started with your pet's information</p>
+        <p className="popup-subtitle">Let’s start with basic info</p>
 
         <form onSubmit={handleSubmit} className="popup-form">
           <div className="form-group">
-            <label htmlFor="petName">
-              <FiHeart /> Pet Name
-            </label>
+            <label><FiHeart /> Pet Name</label>
             <input
-              type="text"
-              id="petName"
               name="petName"
-              value={formData.petName}
+              value={form.petName}
               onChange={handleChange}
-              placeholder="Enter your pet's name"
+              placeholder="Pet name"
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="ownerName">
-              <FiUser /> Owner Name
-            </label>
+            <label><FiUser /> Owner Name</label>
             <input
-              type="text"
-              id="ownerName"
               name="ownerName"
-              value={formData.ownerName}
+              value={form.ownerName}
               onChange={handleChange}
-              placeholder="Enter your name"
+              placeholder="Owner name"
               required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="phoneNumber">
-              <FiPhone /> Phone Number
-            </label>
+            <label><FiPhone /> Phone</label>
             <input
-              type="tel"
-              id="phoneNumber"
-              name="phoneNumber"
-              value={formData.phoneNumber}
+              name="phone"
+              value={form.phone}
               onChange={handleChange}
-              placeholder="Enter 10-digit phone number"
+              placeholder="9-11 digits"
               required
-              pattern="[0-9]{10}"
-              maxLength="10"
+              inputMode="numeric"
             />
-            {phoneError && (
-              <span className="error-message">
-                <span role="img" aria-label="error">⚠️</span> {phoneError}
-              </span>
-            )}
+            {phoneError && <span className="error-message">⚠️ {phoneError}</span>}
           </div>
 
-          <button 
-            type="submit" 
-            className="submit-button"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Getting Started...' : 'Get Started'}
+          <button className="submit-button" disabled={submitting}>
+            {submitting ? 'Saving…' : 'Get Started'}
           </button>
         </form>
       </div>
     </div>
   );
-};
-
-export default FirstTimeScanPopup; 
+}
