@@ -2,8 +2,15 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  FiChevronLeft, FiHeart, FiShoppingCart, FiHome, FiUser,
-  FiShoppingBag, FiMoon, FiGlobe, FiCheck
+  FiChevronLeft,
+  FiHeart,
+  FiShoppingCart,
+  FiHome,
+  FiUser,
+  FiShoppingBag,
+  FiMoon,
+  FiGlobe,
+  FiCheck,
 } from 'react-icons/fi';
 import {
   getStoreThemes,
@@ -13,7 +20,15 @@ import {
 import { toast } from 'react-toastify';
 import './ThemeStorePage.css';
 
-/* ---------- ThemeCard (memo) ---------- */
+/* ------------------------------------------------------------------ */
+/* 1.  CONSTANTS                                                       */
+/* ------------------------------------------------------------------ */
+const API_BASE =
+  process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+
+/* ------------------------------------------------------------------ */
+/* 2.  THEME CARD (memoised)                                           */
+/* ------------------------------------------------------------------ */
 const ThemeCard = memo(
   ({ theme, owned, onToggleFav, onApply, onBuy, isFav, t }) => (
     <div className="theme-card">
@@ -30,7 +45,11 @@ const ThemeCard = memo(
           <FiHeart />
         </button>
         {!theme.isPremium && <span className="free-badge">{t.free}</span>}
-        {owned && <span className="own-badge"><FiCheck /> {t.owned}</span>}
+        {owned && (
+          <span className="own-badge">
+            <FiCheck /> {t.owned}
+          </span>
+        )}
       </div>
 
       <div className="theme-info">
@@ -42,10 +61,7 @@ const ThemeCard = memo(
             {theme.isPremium ? `${theme.price.toLocaleString()} ₫` : t.free}
           </span>
           <div className="action-buttons">
-            <button
-              className="apply-button"
-              onClick={() => onApply(theme._id)}
-            >
+            <button className="apply-button" onClick={() => onApply(theme._id)}>
               {t.apply}
             </button>
             {theme.isPremium && !owned && (
@@ -64,50 +80,82 @@ const ThemeCard = memo(
         </div>
       </div>
     </div>
-  )
+  ),
 );
 
-/* ---------- PAGE ---------- */
+/* ------------------------------------------------------------------ */
+/* 3.  PAGE COMPONENT                                                  */
+/* ------------------------------------------------------------------ */
 export default function ThemeStorePage() {
-  const navigate             = useNavigate();
-  const { id: petId }        = useParams();          // URL /user/:id/store
-  const [themes, setThemes]  = useState([]);
-  const [fav, setFav]        = useState([]);
-  const [owned, setOwned]    = useState([]);
-  const [loading, setLoading]= useState(true);
-  const [lang, setLang]      = useState('vi');
-  const [search, setSearch]  = useState('');
-  const [dark, setDark]      = useState(false);
+  const navigate = useNavigate();
+  const { id: petId } = useParams(); // route /user/edit/:id/store
+  const [themes, setThemes] = useState([]);
+  const [fav, setFav] = useState([]);
+  const [owned, setOwned] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState('vi');
+  const [search, setSearch] = useState('');
+  const [dark, setDark] = useState(false);
 
   const t = {
-    vi: { title:'Cửa hàng Theme', free:'Miễn phí', apply:'Áp dụng',
-          owned:'Đã mua', buyOK:'Đã mua ✓', applyOK:'Áp dụng thành công',
-          search:'Tìm kiếm...', night:'Đêm', store:'Cửa hàng', profile:'Hồ sơ', home:'Trang chủ' },
-    en: { title:'Theme Store', free:'Free', apply:'Apply',
-          owned:'Owned', buyOK:'Purchased ✓', applyOK:'Applied',
-          search:'Search themes...', night:'Night', store:'Store', profile:'Profile', home:'Home' }
+    vi: {
+      title: 'Cửa hàng Theme',
+      free: 'Miễn phí',
+      apply: 'Áp dụng',
+      owned: 'Đã mua',
+      buyOK: 'Đã mua ✓',
+      applyOK: 'Áp dụng thành công',
+      search: 'Tìm kiếm...',
+      night: 'Đêm',
+      store: 'Cửa hàng',
+      profile: 'Hồ sơ',
+      home: 'Trang chủ',
+      loading: 'Đang tải...',
+    },
+    en: {
+      title: 'Theme Store',
+      free: 'Free',
+      apply: 'Apply',
+      owned: 'Owned',
+      buyOK: 'Purchased ✓',
+      applyOK: 'Applied',
+      search: 'Search...',
+      night: 'Night',
+      store: 'Store',
+      profile: 'Profile',
+      home: 'Home',
+      loading: 'Loading...',
+    },
   }[lang];
 
-  /* -------- fetch store themes -------- */
+  /* ---------------- FETCH THEMES ---------------- */
   useEffect(() => {
-    const fetch = async () => {
+    (async () => {
       setLoading(true);
       try {
-        const list = await getStoreThemes();        // public route /store/themes
-        setThemes(list);
-      } catch (e) {
-        console.error(e);
-      } finally { setLoading(false); }
-    };
-    fetch();
+        const list = await getStoreThemes(); // [{ imageUrl, ... }]
+        const mapped = list.map((th) => ({
+          ...th,
+          imageUrl: th.imageUrl.startsWith('http')
+            ? th.imageUrl
+            : `${API_BASE}${
+                th.imageUrl.startsWith('/') ? '' : '/'
+              }${th.imageUrl}`,
+        }));
+        setThemes(mapped);
+      } catch (err) {
+        console.error('Fetch store themes error:', err);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  /* -------- helper: toggle fav -------- */
+  /* ---------------- HANDLERS ---------------- */
   const toggleFav = useCallback((id) => {
-    setFav((f) => (f.includes(id) ? f.filter(i => i !== id) : [...f, id]));
+    setFav((f) => (f.includes(id) ? f.filter((i) => i !== id) : [...f, id]));
   }, []);
 
-  /* -------- buy theme -------- */
   const buy = async (themeId) => {
     try {
       await purchaseTheme(petId, themeId);
@@ -118,7 +166,6 @@ export default function ThemeStorePage() {
     }
   };
 
-  /* -------- apply theme -------- */
   const doApply = async (themeId) => {
     try {
       await applyTheme(petId, themeId);
@@ -128,47 +175,59 @@ export default function ThemeStorePage() {
     }
   };
 
-  /* -------- filter -------- */
-  const list = themes.filter(
+  /* ---------------- FILTERED LIST ---------------- */
+  const filtered = themes.filter(
     (th) =>
       th.name.toLowerCase().includes(search.toLowerCase()) ||
-      (th.description || '').toLowerCase().includes(search.toLowerCase())
+      (th.description || '').toLowerCase().includes(search.toLowerCase()),
   );
 
-  /* -------- render -------- */
-  if (loading) return <div className="loading">{t.loading || 'Loading...'}</div>;
+  /* ---------------- RENDER ---------------- */
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner" />
+        <p>{t.loading}</p>
+      </div>
+    );
+  }
 
   return (
     <div className={`theme-store-page${dark ? ' dark' : ''}`}>
-      {/* header */}
+      {/* Header */}
       <div className="store-header">
         <button className="back-button" onClick={() => navigate(-1)}>
           <FiChevronLeft />
         </button>
         <h1 className="store-title">{t.title}</h1>
         <div className="header-actions">
-          <button className="language-toggle-btn" onClick={() => setLang(l => l === 'vi' ? 'en': 'vi')}>
-            <FiGlobe /> {lang === 'vi' ? 'EN' : 'VI'}
+          <button
+            className="language-toggle-btn"
+            onClick={() => setLang((l) => (l === 'vi' ? 'en' : 'vi'))}
+          >
+            <FiGlobe size={14} />
+            <span>{lang === 'vi' ? 'EN' : 'VI'}</span>
           </button>
         </div>
       </div>
 
-      {/* search */}
+      {/* Search */}
       <div className="search-bar">
         <input
+          type="text"
           placeholder={t.search}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      {/* themes grid */}
+      {/* Themes grid */}
       <div className="themes-grid">
-        {list.map((th) => (
+        {filtered.map((th) => (
           <ThemeCard
             key={th._id}
             theme={th}
-            isFavorite={fav.includes(th._id)}
+            isFav={fav.includes(th._id)}
             owned={owned.includes(th._id) || !th.isPremium}
             onToggleFav={toggleFav}
             onApply={doApply}
@@ -176,15 +235,27 @@ export default function ThemeStorePage() {
             t={t}
           />
         ))}
-        {list.length === 0 && <p>No theme found.</p>}
+        {filtered.length === 0 && <p>No theme found.</p>}
       </div>
 
-      {/* bottom nav (rút gọn) */}
+      {/* Bottom nav */}
       <div className="bottom-nav">
-        <button onClick={() => navigate('/')}><FiHome /><span>{t.home}</span></button>
-        <button onClick={() => navigate(-1)}><FiUser /><span>{t.profile}</span></button>
-        <button className="active"><FiShoppingBag /><span>{t.store}</span></button>
-        <button onClick={() => setDark((d) => !d)}><FiMoon /><span>{t.night}</span></button>
+        <button onClick={() => navigate('/')}>
+          <FiHome />
+          <span className="nav-label">{t.home}</span>
+        </button>
+        <button onClick={() => navigate(-1)}>
+          <FiUser />
+          <span className="nav-label">{t.profile}</span>
+        </button>
+        <button className="active">
+          <FiShoppingBag />
+          <span className="nav-label">{t.store}</span>
+        </button>
+        <button onClick={() => setDark((d) => !d)}>
+          <FiMoon />
+          <span className="nav-label">{t.night}</span>
+        </button>
       </div>
     </div>
   );
