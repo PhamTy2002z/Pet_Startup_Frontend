@@ -174,8 +174,11 @@ const UserEditPage = () => {
       try {
         setIsLoading(true);
         const pet = await getPetById(id);
-        const isFirst = !pet.info.name && !pet.owner.name && !pet.owner.phone;
-        setShowPopup(isFirst);
+        
+        // Check if this is a first-time scan (no basic information set)
+        const isFirstTimeScan = !pet.info.name && !pet.owner.name && !pet.owner.phone;
+        setShowPopup(isFirstTimeScan);
+        
         setPetData({
           info: {
             name: pet.info.name || 'Unnamed Pet',
@@ -308,8 +311,8 @@ const UserEditPage = () => {
   const handleFirstTimePopupSubmit = async (data) => {
     try {
       await updatePet(id, {
-        info: { name: data.petName, species: '', birthDate: '' },
-        owner: { name: data.ownerName, phone: data.phoneNumber, email: '' }
+        info: { name: data.info.name, species: '', birthDate: '' },
+        owner: { name: data.owner.name, phone: data.owner.phone, email: '' }
       });
       setShowPopup(false);
       setRefreshData(r => !r);

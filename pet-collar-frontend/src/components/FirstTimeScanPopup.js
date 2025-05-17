@@ -31,7 +31,7 @@ export default function FirstTimeScanPopup({ isOpen, onClose, onSubmit }) {
     try {
       /* Map sang payload backend */
       const payload = {
-        info : { name: form.petName },
+        info: { name: form.petName },
         owner: { name: form.ownerName, phone: form.phone },
       };
       await onSubmit(payload);        // cha sẽ gọi updatePet()
@@ -47,8 +47,8 @@ export default function FirstTimeScanPopup({ isOpen, onClose, onSubmit }) {
       <div className="popup-content">
         <button className="close-button" onClick={onClose}><FiX /></button>
 
-        <h2>Welcome! 👋</h2>
-        <p className="popup-subtitle">Let’s start with basic info</p>
+        <h2>New Pet Profile! 👋</h2>
+        <p className="popup-subtitle">This appears to be your first time scanning this tag. Please enter the basic information to set up your pet's profile.</p>
 
         <form onSubmit={handleSubmit} className="popup-form">
           <div className="form-group">
@@ -87,7 +87,7 @@ export default function FirstTimeScanPopup({ isOpen, onClose, onSubmit }) {
           </div>
 
           <button className="submit-button" disabled={submitting}>
-            {submitting ? 'Saving…' : 'Get Started'}
+            {submitting ? 'Saving…' : 'Create Profile'}
           </button>
         </form>
       </div>
