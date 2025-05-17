@@ -9,8 +9,11 @@ import {
   FiUser,
   FiShoppingBag,
   FiMoon,
+  FiSun,
   FiGlobe,
   FiCheck,
+  FiFilter,
+  FiX,
 } from 'react-icons/fi';
 import {
   getStoreThemes,
@@ -31,9 +34,17 @@ const API_BASE =
 /* ------------------------------------------------------------------ */
 const ThemeCard = memo(
   ({ theme, owned, onToggleFav, onApply, onBuy, isFav, t }) => (
-    <div className="theme-card">
+    <div className="theme-card" data-testid={`theme-card-${theme._id}`}>
       <div className="theme-thumbnail">
-        <img src={theme.imageUrl} alt={theme.name} loading="lazy" />
+        <img 
+          src={theme.imageUrl} 
+          alt={theme.name} 
+          loading="lazy" 
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "https://via.placeholder.com/300x180?text=Theme+Preview";
+          }}
+        />
         <button
           className={`favorite-button ${isFav ? 'favorited' : ''}`}
           onClick={(e) => {
@@ -55,13 +66,20 @@ const ThemeCard = memo(
       <div className="theme-info">
         <div>
           <h3 className="theme-name">{theme.name}</h3>
+          {theme.description && (
+            <p className="theme-description">{theme.description}</p>
+          )}
         </div>
         <div className="theme-actions">
           <span className="theme-price">
             {theme.isPremium ? `${theme.price.toLocaleString()} ₫` : t.free}
           </span>
           <div className="action-buttons">
-            <button className="apply-button" onClick={() => onApply(theme._id)}>
+            <button 
+              className={`apply-button ${owned || !theme.isPremium ? '' : 'disabled-btn'}`}
+              onClick={() => onApply(theme._id)}
+              disabled={!owned && theme.isPremium}
+            >
               {t.apply}
             </button>
             {theme.isPremium && !owned && (
@@ -96,6 +114,8 @@ export default function ThemeStorePage() {
   const [lang, setLang] = useState('vi');
   const [search, setSearch] = useState('');
   const [dark, setDark] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filter, setFilter] = useState('all'); // 'all', 'free', 'premium', 'owned', 'favorite'
 
   const t = {
     vi: {
@@ -107,10 +127,19 @@ export default function ThemeStorePage() {
       applyOK: 'Áp dụng thành công',
       search: 'Tìm kiếm...',
       night: 'Đêm',
+      day: 'Ngày',
       store: 'Cửa hàng',
       profile: 'Hồ sơ',
       home: 'Trang chủ',
       loading: 'Đang tải...',
+      filters: 'Bộ lọc',
+      allThemes: 'Tất cả',
+      freeThemes: 'Miễn phí',
+      premiumThemes: 'Premium',
+      favoriteThemes: 'Yêu thích',
+      ownedThemes: 'Đã mua',
+      noResults: 'Không tìm thấy theme nào phù hợp.',
+      tryAdjust: 'Vui lòng thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.',
     },
     en: {
       title: 'Theme Store',
@@ -121,10 +150,19 @@ export default function ThemeStorePage() {
       applyOK: 'Applied',
       search: 'Search...',
       night: 'Night',
+      day: 'Day',
       store: 'Store',
       profile: 'Profile',
       home: 'Home',
       loading: 'Loading...',
+      filters: 'Filters',
+      allThemes: 'All',
+      freeThemes: 'Free',
+      premiumThemes: 'Premium',
+      favoriteThemes: 'Favorites',
+      ownedThemes: 'Owned',
+      noResults: 'No themes found.',
+      tryAdjust: 'Try adjusting your filters or search term.',
     },
   }[lang];
 
@@ -145,6 +183,7 @@ export default function ThemeStorePage() {
         setThemes(mapped);
       } catch (err) {
         console.error('Fetch store themes error:', err);
+        toast.error(err.response?.data?.error || 'Error loading themes');
       } finally {
         setLoading(false);
       }
@@ -175,19 +214,36 @@ export default function ThemeStorePage() {
     }
   };
 
+  const toggleDarkMode = () => {
+    setDark((prev) => !prev);
+  };
+
   /* ---------------- FILTERED LIST ---------------- */
-  const filtered = themes.filter(
+  let filtered = themes.filter(
     (th) =>
       th.name.toLowerCase().includes(search.toLowerCase()) ||
       (th.description || '').toLowerCase().includes(search.toLowerCase()),
   );
 
+  // Apply additional filtering
+  if (filter === 'free') {
+    filtered = filtered.filter(th => !th.isPremium);
+  } else if (filter === 'premium') {
+    filtered = filtered.filter(th => th.isPremium);
+  } else if (filter === 'favorite') {
+    filtered = filtered.filter(th => fav.includes(th._id));
+  } else if (filter === 'owned') {
+    filtered = filtered.filter(th => owned.includes(th._id) || !th.isPremium);
+  }
+
   /* ---------------- RENDER ---------------- */
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-spinner" />
-        <p>{t.loading}</p>
+      <div className={`theme-store-page${dark ? ' dark' : ''}`}>
+        <div className="loading-container">
+          <div className="loading-spinner" />
+          <p>{t.loading}</p>
+        </div>
       </div>
     );
   }
@@ -208,17 +264,112 @@ export default function ThemeStorePage() {
             <FiGlobe size={14} />
             <span>{lang === 'vi' ? 'EN' : 'VI'}</span>
           </button>
+          <button 
+            className="dark-mode-btn"
+            onClick={toggleDarkMode}
+            aria-label={dark ? t.day : t.night}
+          >
+            {dark ? <FiSun size={18} /> : <FiMoon size={18} />}
+          </button>
         </div>
       </div>
 
-      {/* Search */}
-      <div className="search-bar">
-        <input
-          type="text"
-          placeholder={t.search}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Search and Filters */}
+      <div className="search-and-filters">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder={t.search}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button 
+            className="filter-button" 
+            onClick={() => setFilterOpen(true)}
+            aria-label="Filter themes"
+          >
+            <FiFilter size={18} />
+          </button>
+        </div>
+
+        {/* Filter options */}
+        <div className={`filter-drawer ${filterOpen ? 'open' : ''}`}>
+          <div className="filter-header">
+            <h3>{t.filters}</h3>
+            <button 
+              className="close-filter"
+              onClick={() => setFilterOpen(false)}
+            >
+              <FiX size={20} />
+            </button>
+          </div>
+          <div className="filter-options">
+            <button 
+              className={`filter-option ${filter === 'all' ? 'active' : ''}`}
+              onClick={() => { setFilter('all'); setFilterOpen(false); }}
+            >
+              {t.allThemes}
+            </button>
+            <button 
+              className={`filter-option ${filter === 'free' ? 'active' : ''}`}
+              onClick={() => { setFilter('free'); setFilterOpen(false); }}
+            >
+              {t.freeThemes}
+            </button>
+            <button 
+              className={`filter-option ${filter === 'premium' ? 'active' : ''}`}
+              onClick={() => { setFilter('premium'); setFilterOpen(false); }}
+            >
+              {t.premiumThemes}
+            </button>
+            <button 
+              className={`filter-option ${filter === 'favorite' ? 'active' : ''}`}
+              onClick={() => { setFilter('favorite'); setFilterOpen(false); }}
+            >
+              {t.favoriteThemes}
+            </button>
+            <button 
+              className={`filter-option ${filter === 'owned' ? 'active' : ''}`}
+              onClick={() => { setFilter('owned'); setFilterOpen(false); }}
+            >
+              {t.ownedThemes}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter chips */}
+      <div className="filter-chips">
+        <button 
+          className={`filter-chip ${filter === 'all' ? 'active' : ''}`}
+          onClick={() => setFilter('all')}
+        >
+          {t.allThemes}
+        </button>
+        <button 
+          className={`filter-chip ${filter === 'free' ? 'active' : ''}`}
+          onClick={() => setFilter('free')}
+        >
+          {t.freeThemes}
+        </button>
+        <button 
+          className={`filter-chip ${filter === 'premium' ? 'active' : ''}`}
+          onClick={() => setFilter('premium')}
+        >
+          {t.premiumThemes}
+        </button>
+        <button 
+          className={`filter-chip ${filter === 'favorite' ? 'active' : ''}`}
+          onClick={() => setFilter('favorite')}
+        >
+          {t.favoriteThemes}
+        </button>
+        <button 
+          className={`filter-chip ${filter === 'owned' ? 'active' : ''}`}
+          onClick={() => setFilter('owned')}
+        >
+          {t.ownedThemes}
+        </button>
       </div>
 
       {/* Themes grid */}
@@ -235,7 +386,12 @@ export default function ThemeStorePage() {
             t={t}
           />
         ))}
-        {filtered.length === 0 && <p>No theme found.</p>}
+        {filtered.length === 0 && (
+          <div className="no-results">
+            <p>{t.noResults}</p>
+            <p>{t.tryAdjust}</p>
+          </div>
+        )}
       </div>
 
       {/* Bottom nav */}
@@ -252,11 +408,19 @@ export default function ThemeStorePage() {
           <FiShoppingBag />
           <span className="nav-label">{t.store}</span>
         </button>
-        <button onClick={() => setDark((d) => !d)}>
-          <FiMoon />
-          <span className="nav-label">{t.night}</span>
+        <button onClick={toggleDarkMode}>
+          {dark ? <FiSun /> : <FiMoon />}
+          <span className="nav-label">{dark ? t.day : t.night}</span>
         </button>
       </div>
+
+      {/* Overlay for filter drawer */}
+      {filterOpen && (
+        <div 
+          className="filter-overlay" 
+          onClick={() => setFilterOpen(false)}
+        />
+      )}
     </div>
   );
 }

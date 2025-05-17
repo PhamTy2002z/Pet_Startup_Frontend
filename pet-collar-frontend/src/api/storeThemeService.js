@@ -1,21 +1,15 @@
 // src/api/storeThemeService.js
-import { publicApi } from './base';   // <-- publicApi KHÔNG đính kèm token
+import { publicApi } from './base';
 
-/* Front-store = các route /api/v1/store/... do backend cung cấp   */
-/* ---------------------------------------------------------------- */
+/* ------------------------ STORE APIs (PUBLIC) ------------------------ */
+// Lấy danh sách theme đang mở bán
 export const getStoreThemes = () =>
   publicApi.get('/store/themes').then(r => r.data);
 
+// Mua theme premium
 export const purchaseTheme = (petId, themeId) =>
-  publicApi.post('/purchase-theme', { petId, themeId }).then(r => r.data);
+  publicApi.post('/store/purchase', { petId, themeId }).then(r => r.data);
 
+// Áp dụng theme (đã mua hoặc theme free)
 export const applyTheme = (petId, themeId) =>
-  publicApi.post('/apply-theme', { petId, themeId }).then(r => r.data);
-
-/* Lấy tất cả theme (free + đã mua) mà pet có thể dùng */
-export const getActiveThemes = (petId) =>
-  publicApi.get('/themes', { params: { petId } }).then(r => r.data);
-
-/* Lấy danh sách đã mua riêng */
-export const getPurchasedThemes = (petId) =>
-  publicApi.get(`/purchased-themes/${petId}`).then(r => r.data);
+  publicApi.post('/store/apply', { petId, themeId }).then(r => r.data);
