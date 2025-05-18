@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { FiX, FiUser, FiPhone, FiHeart } from 'react-icons/fi';
+import { FiX, FiUser, FiPhone, FiHeart, FiMail } from 'react-icons/fi';
 import './FirstTimeScanPopup.css';
 
 export default function FirstTimeScanPopup({ isOpen, onClose, onSubmit }) {
-  const [form, setForm] = useState({ petName: '', ownerName: '', phone: '' });
-  const [phoneError, setPhoneError]   = useState('');
-  const [submitting, setSubmitting]   = useState(false);
+  const [form, setForm] = useState({ petName: '', ownerName: '', phone: '', email: '' });
+  const [phoneError, setPhoneError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   /* ---------- Handle change ---------- */
   const handleChange = ({ target: { name, value } }) => {
@@ -14,6 +15,15 @@ export default function FirstTimeScanPopup({ isOpen, onClose, onSubmit }) {
       if (digits.length > 11) return setPhoneError('Tối đa 11 số');        // simple VN rule
       setPhoneError('');
       setForm((p) => ({ ...p, phone: digits }));
+    } else if (name === 'email') {
+      setForm((p) => ({ ...p, email: value }));
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value) && value.length > 0) {
+        setEmailError('Please enter a valid email address');
+      } else {
+        setEmailError('');
+      }
     } else {
       setForm((p) => ({ ...p, [name]: value }));
     }
@@ -27,12 +37,22 @@ export default function FirstTimeScanPopup({ isOpen, onClose, onSubmit }) {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+
     setSubmitting(true);
     try {
       /* Map sang payload backend */
       const payload = {
         info: { name: form.petName },
-        owner: { name: form.ownerName, phone: form.phone },
+        owner: { 
+          name: form.ownerName, 
+          phone: form.phone,
+          email: form.email 
+        },
       };
       await onSubmit(payload);        // cha sẽ gọi updatePet()
     } finally {
@@ -45,10 +65,10 @@ export default function FirstTimeScanPopup({ isOpen, onClose, onSubmit }) {
   return (
     <div className="popup-overlay">
       <div className="popup-content">
-        <button className="close-button" onClick={onClose}><FiX /></button>
-
+        {/* Removed close button */}
+        
         <h2>New Pet Profile! 👋</h2>
-        <p className="popup-subtitle">This appears to be your first time scanning this tag. Please enter the basic information to set up your pet's profile.</p>
+        <p className="popup-subtitle">Please enter the basic information to set up your pet's profile.</p>
 
         <form onSubmit={handleSubmit} className="popup-form">
           <div className="form-group">
@@ -71,6 +91,19 @@ export default function FirstTimeScanPopup({ isOpen, onClose, onSubmit }) {
               placeholder="Owner name"
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label><FiMail /> Email</label>
+            <input
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Email address"
+              required
+              type="email"
+            />
+            {emailError && <span className="error-message">⚠️ {emailError}</span>}
           </div>
 
           <div className="form-group">

@@ -312,7 +312,7 @@ const UserEditPage = () => {
     try {
       await updatePet(id, {
         info: { name: data.info.name, species: '', birthDate: '' },
-        owner: { name: data.owner.name, phone: data.owner.phone, email: '' }
+        owner: { name: data.owner.name, phone: data.owner.phone, email: data.owner.email }
       });
       setShowPopup(false);
       setRefreshData(r => !r);
