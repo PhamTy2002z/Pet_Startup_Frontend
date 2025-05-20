@@ -22,7 +22,7 @@ import './AdminDashboard.css';
 /* ---------- HẰNG SỐ ---------- */
 const PAGE_SIZE = 20;
 
-export default function AdminDashboard() {
+function AdminDashboard() {
   /* ---------- Context & Router ---------- */
   const { token, logout } = useAuth();
   const navigate = useNavigate();
@@ -36,6 +36,10 @@ export default function AdminDashboard() {
   const [showSearch, setShowSearch]   = useState(false);
   const [activeTab, setActiveTab]     = useState('pets'); // 'pets' | 'themes'
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  // Ref for auto-focus on search field
+  const searchIdRef = React.useRef(null);
 
   const [searchParams, setSearchParams] = useState({
     id             : '',
@@ -117,6 +121,7 @@ export default function AdminDashboard() {
 
   /* ---------- Search ---------- */
   const handleSearch = async () => {
+    setSearchLoading(true);
     setLoading(true);
     try {
       const params = { ...searchParams };
@@ -124,8 +129,15 @@ export default function AdminDashboard() {
       const res = await searchPets(params);
       setPets(res.pets);
       setPage(1);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
+      toast.success(`Tìm thấy ${res.pets.length} kết quả`);
+    } catch (e) { 
+      console.error(e); 
+      toast.error('Có lỗi xảy ra khi tìm kiếm');
+    }
+    finally { 
+      setLoading(false); 
+      setSearchLoading(false);
+    }
   };
 
   const handleReset = () => {
@@ -137,6 +149,16 @@ export default function AdminDashboard() {
     });
     setShowOnlyRecent(false);
     fetchPets();
+  };
+  
+  // Handle keyboard event for search fields
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    } else if (e.key === 'Escape') {
+      setShowSearch(false);
+    }
   };
 
   /* ---------- QR Create ---------- */
@@ -173,6 +195,27 @@ export default function AdminDashboard() {
       fetchPets();
     } catch { toast.error('Tạo hàng loạt thất bại'); }
     finally { setLoading(false); }
+  };
+
+  // Toggle search panel and focus on the first input
+  const toggleSearch = () => {
+    const newValue = !showSearch;
+    setShowSearch(newValue);
+    // Focus on search field when opening
+    if (newValue) {
+      setTimeout(() => {
+        if (searchIdRef.current) {
+          searchIdRef.current.focus();
+        }
+      }, 100);
+    }
+  };
+
+  // Check if any search filters are active
+  const hasActiveFilters = () => {
+    return Object.values(searchParams).some(val => 
+      typeof val === 'string' && val.trim() !== ''
+    ) || showOnlyRecent;
   };
 
   /* ---------- UI ---------- */
@@ -217,15 +260,15 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      {/* --- MAIN --- */}
+      {/* --- MAIN --- */
       <main className="main-content">
         <header className="content-header">
           <h1>{activeTab === 'pets' ? 'QR & Pets Management' : 'Theme Management'}</h1>
 
           {activeTab === 'pets' && (
             <div className="header-actions">
-              <button onClick={() => setShowSearch(!showSearch)} className="search-toggle-button">
-                <FiSearch /> Tìm kiếm
+              <button onClick={() => toggleSearch()} className={`search-toggle-button ${hasActiveFilters() ? 'has-filters' : ''}`}>
+                <FiSearch /> Tìm kiếm {hasActiveFilters() && <span className="filter-indicator"></span>}
               </button>
               <button onClick={handleCreate} disabled={loading || bulkMode} className="create-button">
                 <FiPlus /> {loading ? 'Đang...' : 'Tạo QR'}
@@ -245,12 +288,168 @@ export default function AdminDashboard() {
               {/* ---- SEARCH FORM ---- */}
               {showSearch && (
                 <div className="search-form">
-                  {/* (trích ngắn gọn: code form giữ nguyên, chỉ bỏ phần updatedAt checkbox vì showOnlyRecent xử lý ở state) */}
-                  {/* ...Giữ nguyên giao diện form ở trên... */}
+                  <div className="search-grid">
+                    <div className="search-field">
+                      <label htmlFor="search-id">ID</label>
+                      <input
+                        id="search-id"
+                        ref={searchIdRef}
+                        type="text"
+                        value={searchParams.id}
+                        onChange={(e) => setSearchParams({...searchParams, id: e.target.value})}
+                        placeholder="Nhập ID pet"
+                        onKeyDown={handleSearchKeyDown}
+                      />
+                    </div>
+                    
+                    <div className="search-field">
+                      <label htmlFor="search-pet-name">Tên Pet</label>
+                      <input
+                        id="search-pet-name"
+                        type="text"
+                        value={searchParams.petName}
+                        onChange={(e) => setSearchParams({...searchParams, petName: e.target.value})}
+                        placeholder="Nhập tên pet"
+                        onKeyDown={handleSearchKeyDown}
+                      />
+                    </div>
+                    
+                    <div className="search-field">
+                      <label htmlFor="search-owner-name">Tên chủ</label>
+                      <input
+                        id="search-owner-name"
+                        type="text"
+                        value={searchParams.ownerName}
+                        onChange={(e) => setSearchParams({...searchParams, ownerName: e.target.value})}
+                        placeholder="Nhập tên chủ"
+                        onKeyDown={handleSearchKeyDown}
+                      />
+                    </div>
+                    
+                    <div className="search-field">
+                      <label htmlFor="search-phone">Số điện thoại</label>
+                      <input
+                        id="search-phone"
+                        type="text"
+                        value={searchParams.phone}
+                        onChange={(e) => setSearchParams({...searchParams, phone: e.target.value})}
+                        placeholder="Nhập SĐT"
+                        onKeyDown={handleSearchKeyDown}
+                      />
+                    </div>
+                    
+                    <div className="search-field">
+                      <label htmlFor="search-status">Trạng thái</label>
+                      <select
+                        id="search-status"
+                        value={searchParams.status}
+                        onChange={(e) => setSearchParams({...searchParams, status: e.target.value})}
+                      >
+                        <option value="">Tất cả</option>
+                        <option value="active">Đang sử dụng</option>
+                        <option value="inactive">Chưa sử dụng</option>
+                        <option value="info">Đã nhập thông tin</option>
+                      </select>
+                    </div>
+                    
+                    <div className="search-field">
+                      <label htmlFor="search-sort-by">Sắp xếp theo</label>
+                      <select
+                        id="search-sort-by"
+                        value={searchParams.sortBy}
+                        onChange={(e) => setSearchParams({...searchParams, sortBy: e.target.value})}
+                      >
+                        <option value="createdAt">Ngày tạo</option>
+                        <option value="updatedAt">Ngày cập nhật</option>
+                        <option value="petName">Tên pet</option>
+                        <option value="ownerName">Tên chủ</option>
+                      </select>
+                    </div>
+                    
+                    <div className="search-field">
+                      <label htmlFor="search-sort-order">Thứ tự</label>
+                      <select
+                        id="search-sort-order"
+                        value={searchParams.sortOrder}
+                        onChange={(e) => setSearchParams({...searchParams, sortOrder: e.target.value})}
+                      >
+                        <option value="desc">Giảm dần</option>
+                        <option value="asc">Tăng dần</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="date-range-container">
+                    <div className="date-range-group">
+                      <h4 className="date-range-title">
+                        <FiClock className="date-icon" /> Ngày tạo
+                      </h4>
+                      <div className="date-inputs">
+                        <div className="search-field">
+                          <label htmlFor="created-start">Từ ngày</label>
+                          <input
+                            id="created-start"
+                            type="date"
+                            value={searchParams.createdAtStart}
+                            onChange={(e) => setSearchParams({...searchParams, createdAtStart: e.target.value})}
+                          />
+                        </div>
+                        <div className="search-field">
+                          <label htmlFor="created-end">Đến ngày</label>
+                          <input
+                            id="created-end"
+                            type="date"
+                            value={searchParams.createdAtEnd}
+                            onChange={(e) => setSearchParams({...searchParams, createdAtEnd: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="date-range-group">
+                      <h4 className="date-range-title">
+                        <FiClock className="date-icon" /> Cập nhật gần đây
+                      </h4>
+                      <div className="date-inputs">
+                        <div className="recent-checkbox">
+                          <input
+                            id="show-recent"
+                            type="checkbox"
+                            checked={showOnlyRecent}
+                            onChange={(e) => {
+                              setShowOnlyRecent(e.target.checked);
+                              if (e.target.checked) {
+                                setSearchParams({
+                                  ...searchParams,
+                                  updatedAtStart: new Date(Date.now() - 24 * 60 * 60 * 1000)
+                                    .toISOString()
+                                    .split('T')[0]
+                                });
+                              }
+                            }}
+                          />
+                          <label htmlFor="show-recent">
+                            Hiển thị pet cập nhật 24h qua {recentCount > 0 && <span className="recent-badge">{recentCount}</span>}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
                   {/* BUTTONS */}
                   <div className="search-actions">
-                    <button onClick={handleSearch}><FiSearch /> Tìm kiếm</button>
-                    <button onClick={handleReset}><FiX /> Đặt lại</button>
+                    <button onClick={handleSearch} disabled={searchLoading}>
+                      {searchLoading ? (
+                        <>
+                          <span className="loading-spinner-sm"></span> Đang tìm...
+                        </>
+                      ) : (
+                        <>
+                          <FiSearch /> Tìm kiếm
+                        </>
+                      )}
+                    </button>
+                    <button onClick={handleReset} disabled={searchLoading}><FiX /> Đặt lại</button>
                   </div>
                 </div>
               )}
@@ -323,6 +522,9 @@ export default function AdminDashboard() {
           )}
         </div>
       </main>
-    </div>
+}</div>
+    
   );
 }
+
+export default AdminDashboard; 

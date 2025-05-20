@@ -282,9 +282,32 @@
   color: var(--gray-dark);
 }
 
+.search-toggle-button.has-filters {
+  background-color: var(--secondary);
+  color: white;
+  font-weight: 600;
+  position: relative;
+}
+
+.filter-indicator {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  display: block;
+  box-shadow: 0 0 0 2px var(--secondary);
+}
+
 .search-toggle-button:hover {
   background-color: #e0e0e0;
   box-shadow: var(--shadow-sm);
+}
+
+.search-toggle-button.has-filters:hover {
+  background-color: var(--secondary-dark);
 }
 
 /* Bulk form */
@@ -368,6 +391,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
+  margin-bottom: 20px;
 }
 
 .search-field {
@@ -394,6 +418,92 @@
   border-color: var(--secondary);
   outline: none;
   box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+}
+
+/* Date range styling */
+.date-range-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 20px;
+  border-top: 1px solid var(--gray-light);
+  padding-top: 20px;
+}
+
+.date-range-group {
+  background-color: #f9f9f9;
+  border-radius: var(--border-radius);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.date-range-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px 0;
+  color: var(--gray-dark);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.date-icon {
+  color: var(--secondary);
+}
+
+.date-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 576px) {
+  .date-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+/* Recent checkbox */
+.recent-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: rgba(76, 175, 80, 0.05);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.recent-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.recent-checkbox label {
+  font-size: 14px;
+  color: var(--gray-dark);
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recent-badge {
+  background-color: var(--primary);
+  color: white;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 }
 
 .search-actions {
@@ -619,6 +729,18 @@
   margin-bottom: 15px;
 }
 
+.loading-spinner-sm {
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -681,6 +803,11 @@
     justify-content: center;
     padding: 12px 0;
   }
+  
+  .date-range-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -708,6 +835,14 @@
   .header-actions {
     width: 100%;
     justify-content: space-between;
+  }
+  
+  .search-form {
+    padding: 16px;
+  }
+  
+  .date-range-group {
+    padding: 12px;
   }
 }
 
@@ -769,5 +904,20 @@
   .create-button, .bulk-button, .search-toggle-button {
     padding: 8px 12px;
     font-size: 13px;
+  }
+  
+  .search-form {
+    padding: 12px;
+  }
+  
+  .search-grid {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .date-range-container {
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-top: 16px;
   }
 }
