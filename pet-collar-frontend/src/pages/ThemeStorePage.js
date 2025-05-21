@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   FiChevronLeft,
@@ -14,12 +14,14 @@ import {
   FiCheck,
   FiFilter,
   FiX,
+  FiLogOut,
 } from 'react-icons/fi';
 import {
   getStoreThemes,
   purchaseTheme,
   applyTheme,
 } from '../api/storeThemeService';
+import { useThemeStoreAuth } from '../contexts/ThemeStoreAuthContext';
 import { toast } from 'react-toastify';
 import './ThemeStorePage.css';
 
@@ -36,13 +38,14 @@ const ThemeCard = memo(
   ({ theme, owned, onToggleFav, onApply, onBuy, isFav, t }) => (
     <div className="theme-card" data-testid={`theme-card-${theme._id}`}>
       <div className="theme-thumbnail">
-        <img 
-          src={theme.imageUrl} 
-          alt={theme.name} 
-          loading="lazy" 
+        <img
+          src={theme.imageUrl}
+          alt={theme.name}
+          loading="lazy"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = "https://via.placeholder.com/300x180?text=Theme+Preview";
+            e.target.src =
+              'https://via.placeholder.com/300x180?text=Theme+Preview';
           }}
         />
         <button
@@ -70,18 +73,25 @@ const ThemeCard = memo(
             <p className="theme-description">{theme.description}</p>
           )}
         </div>
+
         <div className="theme-actions">
           <span className="theme-price">
-            {theme.isPremium ? `${theme.price.toLocaleString()} ₫` : t.free}
+            {theme.isPremium
+              ? `${theme.price.toLocaleString()} ₫`
+              : t.free}
           </span>
+
           <div className="action-buttons">
-            <button 
-              className={`apply-button ${owned || !theme.isPremium ? '' : 'disabled-btn'}`}
+            <button
+              className={`apply-button ${
+                owned || !theme.isPremium ? '' : 'disabled-btn'
+              }`}
               onClick={() => onApply(theme._id)}
               disabled={!owned && theme.isPremium}
             >
               {t.apply}
             </button>
+
             {theme.isPremium && !owned && (
               <button
                 className="cart-add-button"
@@ -106,7 +116,9 @@ const ThemeCard = memo(
 /* ------------------------------------------------------------------ */
 export default function ThemeStorePage() {
   const navigate = useNavigate();
-  const { id: petId } = useParams(); // route /user/edit/:id/store
+  const { id: petId } = useParams(); // /user/edit/:id/store
+  const { user, logout } = useThemeStoreAuth();
+
   const [themes, setThemes] = useState([]);
   const [fav, setFav] = useState([]);
   const [owned, setOwned] = useState([]);
@@ -115,8 +127,15 @@ export default function ThemeStorePage() {
   const [search, setSearch] = useState('');
   const [dark, setDark] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [filter, setFilter] = useState('all'); // 'all', 'free', 'premium', 'owned', 'favorite'
+  const [filter, setFilter] = useState('all');
+  const [profileOpen, setProfileOpen] = useState(false);
 
+  const profileRef = useRef(null);
+
+  /* ---------------- util ---------------- */
+  const toggleDarkMode = () => setDark((prev) => !prev);
+
+  /* ---------------- i18n ---------------- */
   const t = {
     vi: {
       title: 'Cửa hàng Theme',
@@ -140,6 +159,7 @@ export default function ThemeStorePage() {
       ownedThemes: 'Đã mua',
       noResults: 'Không tìm thấy theme nào phù hợp.',
       tryAdjust: 'Vui lòng thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.',
+      logout: 'Đăng xuất',
     },
     en: {
       title: 'Theme Store',
@@ -163,6 +183,7 @@ export default function ThemeStorePage() {
       ownedThemes: 'Owned',
       noResults: 'No themes found.',
       tryAdjust: 'Try adjusting your filters or search term.',
+      logout: 'Logout',
     },
   }[lang];
 
@@ -171,7 +192,7 @@ export default function ThemeStorePage() {
     (async () => {
       setLoading(true);
       try {
-        const list = await getStoreThemes(); // [{ imageUrl, ... }]
+        const list = await getStoreThemes();
         const mapped = list.map((th) => ({
           ...th,
           imageUrl: th.imageUrl.startsWith('http')
@@ -189,6 +210,17 @@ export default function ThemeStorePage() {
       }
     })();
   }, []);
+
+  /* ------------ outside-click for profile menu ------------ */
+  useEffect(() => {
+    const handler = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    if (profileOpen) window.addEventListener('mousedown', handler);
+    return () => window.removeEventListener('mousedown', handler);
+  }, [profileOpen]);
 
   /* ---------------- HANDLERS ---------------- */
   const toggleFav = useCallback((id) => {
@@ -214,27 +246,16 @@ export default function ThemeStorePage() {
     }
   };
 
-  const toggleDarkMode = () => {
-    setDark((prev) => !prev);
-  };
-
   /* ---------------- FILTERED LIST ---------------- */
   let filtered = themes.filter(
     (th) =>
       th.name.toLowerCase().includes(search.toLowerCase()) ||
       (th.description || '').toLowerCase().includes(search.toLowerCase()),
   );
-
-  // Apply additional filtering
-  if (filter === 'free') {
-    filtered = filtered.filter(th => !th.isPremium);
-  } else if (filter === 'premium') {
-    filtered = filtered.filter(th => th.isPremium);
-  } else if (filter === 'favorite') {
-    filtered = filtered.filter(th => fav.includes(th._id));
-  } else if (filter === 'owned') {
-    filtered = filtered.filter(th => owned.includes(th._id) || !th.isPremium);
-  }
+  if (filter === 'free')       filtered = filtered.filter(th => !th.isPremium);
+  else if (filter === 'premium') filtered = filtered.filter(th => th.isPremium);
+  else if (filter === 'favorite') filtered = filtered.filter(th => fav.includes(th._id));
+  else if (filter === 'owned') filtered = filtered.filter(th => owned.includes(th._id) || !th.isPremium);
 
   /* ---------------- RENDER ---------------- */
   if (loading) {
@@ -248,15 +269,49 @@ export default function ThemeStorePage() {
     );
   }
 
+  const initials = user
+    ? user.name
+        .split(' ')
+        .slice(0, 2)
+        .map((w) => w[0])
+        .join('')
+        .toUpperCase()
+    : '';
+
   return (
     <div className={`theme-store-page${dark ? ' dark' : ''}`}>
       {/* Header */}
-      <div className="store-header">
+      <header className="store-header">
         <button className="back-button" onClick={() => navigate(-1)}>
           <FiChevronLeft />
         </button>
+
         <h1 className="store-title">{t.title}</h1>
+
         <div className="header-actions">
+          {user && (
+            <div className="profile-wrapper" ref={profileRef}>
+              <button
+                className="profile-button"
+                onClick={() => setProfileOpen((v) => !v)}
+              >
+                <span className="profile-avatar">{initials}</span>
+                <span className="profile-name">
+                  {user.name.split(' ')[0]}
+                </span>
+              </button>
+
+              {profileOpen && (
+                <div className="profile-dropdown">
+                  <button onClick={logout}>
+                    <FiLogOut size={16} style={{ marginRight: 8 }} />
+                    {t.logout}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             className="language-toggle-btn"
             onClick={() => setLang((l) => (l === 'vi' ? 'en' : 'vi'))}
@@ -264,7 +319,8 @@ export default function ThemeStorePage() {
             <FiGlobe size={14} />
             <span>{lang === 'vi' ? 'EN' : 'VI'}</span>
           </button>
-          <button 
+
+          <button
             className="dark-mode-btn"
             onClick={toggleDarkMode}
             aria-label={dark ? t.day : t.night}
@@ -272,7 +328,7 @@ export default function ThemeStorePage() {
             {dark ? <FiSun size={18} /> : <FiMoon size={18} />}
           </button>
         </div>
-      </div>
+      </header>
 
       {/* Search and Filters */}
       <div className="search-and-filters">

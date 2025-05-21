@@ -1,20 +1,36 @@
-/* Login page with card design */
+/* ================================================== */
+/*  Theme-Store – Login / Register (card design)       */
+/*  Last update: smooth animations                    */
+/* ================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+:root {
+  --primary       : #4299e1;
+  --primary-dark  : #3182ce;
+  --primary-light : #c3dafe;
+  --error         : #e53e3e;
+  --bg-grad-start : #f5f7fa;
+  --bg-grad-end   : #c3cfe2;
+}
+
+/* ------------ layout -------------------------------- */
 .login-page {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  background: linear-gradient(135deg, var(--bg-grad-start), var(--bg-grad-end));
   padding: 20px;
+  overflow: hidden;
 }
 
 .login-container {
   width: 100%;
   max-width: 420px;
-  animation: fadeIn 0.5s ease-out;
+  animation: cardEnter 0.65s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* Card design with elevated appearance */
+/* ------------ card ---------------------------------- */
 .login-card {
   background: #ffffff;
   border-radius: 16px;
@@ -22,9 +38,27 @@
   padding: 2.5rem;
   overflow: hidden;
   position: relative;
+  isolation: isolate;
 }
 
-/* Header styles */
+/* floating gradient blob  */
+.login-card::before {
+  content: '';
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  top: -40px;
+  right: -40px;
+  background: radial-gradient(circle at center,
+              var(--primary-light) 0%, rgba(255,255,255,0) 70%);
+  opacity: 0.5;
+  transform: scale(0);
+  animation: blob 1.2s 0.3s forwards;
+  pointer-events: none;
+  filter: blur(4px);
+}
+
+/* ------------ header -------------------------------- */
 .login-header {
   text-align: center;
   margin-bottom: 1.8rem;
@@ -43,29 +77,25 @@
   margin: 0;
 }
 
-/* Error message */
+/* ------------ error box ----------------------------- */
 .login-error {
   background-color: #fff5f5;
-  color: #e53e3e;
-  border-left: 4px solid #e53e3e;
+  color: var(--error);
+  border-left: 4px solid var(--error);
   padding: 1rem;
   border-radius: 6px;
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
   display: flex;
   align-items: center;
-  animation: slideIn 0.3s ease-out;
+  gap: 8px;
+  animation: slideBounce 0.45s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* Form styling */
-.login-form {
-  width: 100%;
-}
+/* ------------ form ---------------------------------- */
+.login-form { width: 100%; }
 
-.input-group {
-  margin-bottom: 1.25rem;
-}
-
+.input-group       { margin-bottom: 1.25rem; }
 .input-group label {
   display: block;
   margin-bottom: 0.5rem;
@@ -94,38 +124,35 @@
   font-size: 1rem;
   color: #4a5568;
   background-color: #f8fafc;
-  transition: all 0.2s ease;
+  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.input-group input::placeholder {
-  color: #a0aec0;
-}
+.input-group input::placeholder { color: #a0aec0; }
 
 .input-group input:focus {
   outline: none;
-  border-color: #4299e1;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
   background-color: #fff;
 }
 
-/* Error state for inputs */
+/* error state */
 .input-group input.error {
-  border-color: #e53e3e;
+  border-color: var(--error);
   background-color: #fff5f5;
 }
-
 .input-group input.error:focus {
   box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.15);
 }
 
 .field-error {
-  color: #e53e3e;
+  color: var(--error);
   font-size: 0.8rem;
   margin-top: 0.4rem;
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.4s ease-out;
 }
 
-/* Password toggle button */
+/* ------------- password toggle ---------------------- */
 .password-toggle {
   position: absolute;
   right: 12px;
@@ -139,42 +166,34 @@
   justify-content: center;
   transition: color 0.2s;
 }
+.password-toggle:hover   { color: #4a5568; }
+.password-toggle:focus   { outline: none; }
 
-.password-toggle:hover {
-  color: #4a5568;
-}
-
-.password-toggle:focus {
-  outline: none;
-}
-
-/* Login button */
+/* ------------- button -------------------------------- */
 .btn-login {
   width: 100%;
   padding: 0.85rem;
-  background: #4299e1;
-  color: white;
+  background: var(--primary);
+  color: #fff;
   font-size: 1rem;
   font-weight: 600;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s;
   margin-top: 0.75rem;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.btn-login:hover {
-  background: #3182ce;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
+.btn-login:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(66, 153, 225, 0.3);
 }
 
-.btn-login:active {
-  transform: translateY(0);
-}
+.btn-login:active { transform: translateY(0); }
 
 .btn-login:disabled {
   background: #a0aec0;
@@ -183,10 +202,20 @@
   box-shadow: none;
 }
 
-/* Loading state */
-.btn-login.loading {
-  background: #3182ce;
+/* ripple on click */
+.btn-login:focus-visible::after,
+.btn-login:active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.2);
+  animation: pulse 0.6s forwards;
+  pointer-events: none;
 }
+
+/* loading state */
+.btn-login.loading { background: var(--primary-dark); }
 
 .loading-spinner {
   display: flex;
@@ -195,54 +224,43 @@
 }
 
 .spinner {
-  display: inline-block;
   width: 16px;
   height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: white;
+  border-top-color: #fff;
   animation: spin 0.8s linear infinite;
 }
 
-/* Animations */
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+/* ------------- keyframes ----------------------------- */
+@keyframes spin      { to { transform: rotate(360deg); } }
+
+@keyframes cardEnter {
+  0%   { opacity: 0; transform: translateY(30px) scale(0.96); }
+  60%  { opacity: 1; transform: translateY(-6px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes slideBounce {
+  0%     { transform: translateY(-12px); opacity: 0; }
+  60%    { transform: translateY(4px);  opacity: 1; }
+  100%   { transform: translateY(0); }
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateY(-10px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+@keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes blob {
+  to { transform: scale(1); opacity: 0.6; }
 }
 
-/* Responsive adjustments */
+@keyframes pulse {
+  0%   { opacity: 0; }
+  50%  { opacity: 0.4; }
+  100% { opacity: 0; }
+}
+
+/* ------------- responsive ---------------------------- */
 @media (max-width: 480px) {
-  .login-card {
-    padding: 1.5rem;
-    border-radius: 12px;
-  }
-  
-  .login-header h2 {
-    font-size: 1.5rem;
-  }
+  .login-card        { padding: 1.75rem; border-radius: 12px; }
+  .login-header h2   { font-size: 1.5rem; }
 }
-  

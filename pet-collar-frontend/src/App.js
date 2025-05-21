@@ -1,34 +1,35 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import LoginPage       from './pages/LoginPage';
-import AdminPage       from './pages/AdminPage';
-import UserEditPage    from './pages/UserEditPage';
-import ThemeStorePage  from './pages/ThemeStorePage';
-import PrivateRoute    from './components/PrivateRoute';
+import LoginPage              from './pages/LoginPage';
+import AdminPage              from './pages/AdminPage';
+import UserEditPage           from './pages/UserEditPage';
+import ThemeStorePage         from './pages/ThemeStorePage';
+import ThemeStoreLoginPage    from './pages/ThemeStoreLoginPage';
+import ThemeStoreRegisterPage from './pages/ThemeStoreRegisterPage';
 
-/**
- * ‣ Các URL KHÔNG cần token
- *   /login
- *   /user/edit/:id   (người quét QR xem hồ sơ)
- *   /theme-store
- *
- * ‣ Các URL CẦN token (admin) đặt trong <PrivateRoute>
- *
- * ‣ Luôn để wildcard “*” cuối cùng để không chặn routes khác
- */
+import PrivateRoute               from './components/PrivateRoute';
+import ThemeStorePrivateRoute     from './components/ThemeStorePrivateRoute';
+
 export default function App() {
   return (
     <Routes>
       {/* ---------- Public ---------- */}
       <Route path="/login"          element={<LoginPage />} />
       <Route path="/user/edit/:id"  element={<UserEditPage />} />
-      <Route path="/theme-store"    element={<ThemeStorePage />} />
 
-      {/* ---------- Admin (đòi hỏi JWT) ---------- */}
+      {/* Theme-Store Auth */}
+      <Route path="/theme-store/login"    element={<ThemeStoreLoginPage />} />
+      <Route path="/theme-store/register" element={<ThemeStoreRegisterPage />} />
+
+      {/* Theme-Store (yêu cầu login) */}
+      <Route element={<ThemeStorePrivateRoute />}>
+        <Route path="/theme-store" element={<ThemeStorePage />} />
+      </Route>
+
+      {/* ---------- Admin ---------- */}
       <Route element={<PrivateRoute />}>
         <Route path="/admin/*" element={<AdminPage />} />
-        {/* khai báo thêm các sub-route /admin/xxx ở đây nếu có */}
       </Route>
 
       {/* ---------- Fallback ---------- */}
