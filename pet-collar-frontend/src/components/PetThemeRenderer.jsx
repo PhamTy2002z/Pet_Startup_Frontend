@@ -1,3 +1,4 @@
+//src/components/PetThemeRenderer.js
 import { useEffect, useState, Suspense } from 'react';
 
 /**
