@@ -10,9 +10,9 @@ import {
 } from '../api/petService';
 import { FiPlus, FiTrash2, FiEdit2, FiCamera } from 'react-icons/fi';
 import './UserEditForm.css';
-import PetCard from './ThemePreset/PetCard';
-import PetCard2 from './ThemePreset/PetCard-2';
-import PetCard3 from './ThemePreset/PetCard-3';
+import PetCard from './theme-presets/pet-card/index';
+import PetCard2 from './theme-presets/pet-card-2/index';
+import PetCard3 from './theme-presets/pet-card-3/index';
 
 // Import react-toastify
 import { toast, ToastContainer } from 'react-toastify';

@@ -1,4 +1,5 @@
-/* eslint-disable */
+/* src/pages/ThemeStorePage.js */
+import { useNavigate, useParams } from 'react-router-dom';
 import React, {
   useState,
   useEffect,
@@ -6,7 +7,6 @@ import React, {
   memo,
   useRef,
 } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import {
   FiChevronLeft,
   FiHeart,
@@ -26,20 +26,17 @@ import {
 
 import {
   getStoreThemes,
-  purchaseTheme,
+  purchaseThemeStore,          // ⬅ lấy luôn từ cùng file
 } from '../api/storeThemeService';
 import { getPurchasedThemes } from '../api/themeService';
 import { useThemeStoreAuth } from '../contexts/ThemeStoreAuthContext';
+import PurchaseModal from '../components/PurchaseModal';
 import { toast } from 'react-toastify';
 import './ThemeStorePage.css';
 
-/* ------------------------------------------------------------------ */
 const API_BASE =
   process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
-/* ------------------------------------------------------------------ */
-/* THEME CARD                                                          */
-/* ------------------------------------------------------------------ */
 const ThemeCard = memo(
   ({ theme, owned, onToggleFav, onBuy, isFav, t, inStore }) => (
     <div className="theme-card">
@@ -63,7 +60,6 @@ const ThemeCard = memo(
         >
           <FiHeart />
         </button>
-
         {!theme.isPremium && <span className="free-badge">{t.free}</span>}
         {owned && inStore && (
           <span className="own-badge">
@@ -85,14 +81,10 @@ const ThemeCard = memo(
             <span className="theme-price">
               {theme.isPremium ? `${theme.price.toLocaleString()} ₫` : t.free}
             </span>
-
             {owned ? (
               <span className="in-collection-text">{t.inCollection}</span>
             ) : (
-              <button
-                className="apply-button"
-                onClick={() => onBuy(theme._id)}
-              >
+              <button className="apply-button" onClick={() => onBuy(theme)}>
                 <FiShoppingCart style={{ marginRight: 6 }} />
                 {t.buy}
               </button>
@@ -104,9 +96,6 @@ const ThemeCard = memo(
   ),
 );
 
-/* ------------------------------------------------------------------ */
-/* PAGE COMPONENT                                                      */
-/* ------------------------------------------------------------------ */
 export default function ThemeStorePage() {
   const navigate = useNavigate();
   const { id: petId } = useParams();
@@ -125,10 +114,11 @@ export default function ThemeStorePage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [collectionMode, setCollectionMode] = useState(false);
 
+  const [buyModalTheme, setBuyModalTheme] = useState(null);
+
   const profileRef = useRef(null);
   const toggleDarkMode = () => setDark((d) => !d);
 
-  /* ---------------- i18n ---------------- */
   const t = {
     vi: {
       title: 'Cửa hàng Theme',
@@ -174,7 +164,6 @@ export default function ThemeStorePage() {
     },
   }[lang];
 
-  /* ---------------- store list ---------------- */
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -185,7 +174,9 @@ export default function ThemeStorePage() {
             ...th,
             imageUrl: th.imageUrl.startsWith('http')
               ? th.imageUrl
-              : `${API_BASE}${th.imageUrl.startsWith('/') ? '' : '/'}${th.imageUrl}`,
+              : `${API_BASE}${
+                  th.imageUrl.startsWith('/') ? '' : '/'
+                }${th.imageUrl}`,
           })),
         );
       } catch (err) {
@@ -196,11 +187,10 @@ export default function ThemeStorePage() {
     })();
   }, []);
 
-  /* ---------------- purchased list ---------------- */
   const loadPurchased = async () => {
     if (purchased.length) return;
     try {
-      const list = await getPurchasedThemes(petId); // [{ theme }]
+      const list = await getPurchasedThemes(petId);
       setPurchased(list);
       setOwned(list.map((p) => p.theme._id));
     } catch (err) {
@@ -208,7 +198,6 @@ export default function ThemeStorePage() {
     }
   };
 
-  /* ---------------- outside-click menu ---------------- */
   useEffect(() => {
     const handler = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -219,22 +208,24 @@ export default function ThemeStorePage() {
     return () => window.removeEventListener('mousedown', handler);
   }, [profileOpen]);
 
-  /* ---------------- handlers ---------------- */
   const toggleFav = useCallback((id) => {
     setFav((f) => (f.includes(id) ? f.filter((i) => i !== id) : [...f, id]));
   }, []);
 
-  const buy = async (themeId) => {
+  const handleBuy = (theme) => setBuyModalTheme(theme);
+
+  const completePurchase = async (themeId) => {
     try {
-      await purchaseTheme(petId, themeId);
-      toast.success(t.buyOK);
+      const res = await purchaseThemeStore(themeId);
+      const code = res.redemptionCode.code;
       setOwned((o) => [...o, themeId]);
+      return code;
     } catch (e) {
       toast.error(e.response?.data?.error || 'Error');
+      throw e;
     }
   };
 
-  /* ---------------- filtering ---------------- */
   const baseList = collectionMode ? purchased.map((p) => p.theme) : themes;
 
   let filtered = baseList.filter(
@@ -244,12 +235,16 @@ export default function ThemeStorePage() {
   );
   if (!collectionMode) {
     if (filter === 'free') filtered = filtered.filter((th) => !th.isPremium);
-    else if (filter === 'premium') filtered = filtered.filter((th) => th.isPremium);
-    else if (filter === 'favorite') filtered = filtered.filter((th) => fav.includes(th._id));
-    else if (filter === 'owned') filtered = filtered.filter((th) => owned.includes(th._id) || !th.isPremium);
+    else if (filter === 'premium')
+      filtered = filtered.filter((th) => th.isPremium);
+    else if (filter === 'favorite')
+      filtered = filtered.filter((th) => fav.includes(th._id));
+    else if (filter === 'owned')
+      filtered = filtered.filter(
+        (th) => owned.includes(th._id) || !th.isPremium,
+      );
   }
 
-  /* ---------------- render ---------------- */
   if (loading) {
     return (
       <div className={`theme-store-page${dark ? ' dark' : ''}`}>
@@ -272,7 +267,6 @@ export default function ThemeStorePage() {
 
   return (
     <div className={`theme-store-page${dark ? ' dark' : ''}`}>
-      {/* Header */}
       <header className="store-header">
         <button className="back-button" onClick={() => navigate(-1)}>
           <FiChevronLeft />
@@ -332,7 +326,6 @@ export default function ThemeStorePage() {
         </div>
       </header>
 
-      {/* Search & filter hidden in collection */}
       {!collectionMode && (
         <>
           <div className="search-and-filters">
@@ -365,7 +358,9 @@ export default function ThemeStorePage() {
                 {['all', 'free', 'premium', 'favorite', 'owned'].map((k) => (
                   <button
                     key={k}
-                    className={`filter-option ${filter === k ? 'active' : ''}`}
+                    className={`filter-option ${
+                      filter === k ? 'active' : ''
+                    }`}
                     onClick={() => {
                       setFilter(k);
                       setFilterOpen(false);
@@ -412,7 +407,6 @@ export default function ThemeStorePage() {
         </>
       )}
 
-      {/* grid */}
       <div className="themes-grid">
         {filtered.map((th) => (
           <ThemeCard
@@ -421,7 +415,7 @@ export default function ThemeStorePage() {
             owned={owned.includes(th._id)}
             isFav={fav.includes(th._id)}
             onToggleFav={toggleFav}
-            onBuy={buy}
+            onBuy={handleBuy}
             t={t}
             inStore={!collectionMode}
           />
@@ -435,7 +429,6 @@ export default function ThemeStorePage() {
         )}
       </div>
 
-      {/* bottom nav */}
       <div className="bottom-nav">
         <button onClick={() => navigate('/')}>
           <FiHome />
@@ -471,6 +464,14 @@ export default function ThemeStorePage() {
         <div
           className="filter-overlay"
           onClick={() => setFilterOpen(false)}
+        />
+      )}
+
+      {buyModalTheme && (
+        <PurchaseModal
+          theme={buyModalTheme}
+          onClose={() => setBuyModalTheme(null)}
+          onPurchase={completePurchase}
         />
       )}
     </div>

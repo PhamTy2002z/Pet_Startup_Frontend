@@ -1,0 +1,92 @@
+/* src/components/PurchaseModal.css */
+.pm-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1200;
+  }
+  
+  .pm-card {
+    width: 92%;
+    max-width: 400px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    text-align: center;
+  }
+  
+  .pm-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .pm-title {
+    margin: 0 0 12px;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  
+  .pm-img {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .pm-desc {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 12px;
+  }
+  
+  .pm-price {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  
+  .pm-buy-btn,
+  .pm-close-main,
+  .pm-copy-btn {
+    width: 100%;
+    padding: 12px 0;
+    border: none;
+    border-radius: 8px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  
+  .pm-buy-btn {
+    background: #6a7bff;
+    color: #fff;
+  }
+  
+  .pm-copy-btn {
+    background: #f5f7ff;
+  }
+  
+  .pm-close-main {
+    background: #eee;
+  }
+  
+  .pm-done-icon {
+    color: #4cd97b;
+    margin-bottom: 12px;
+    margin-top: 8px;
+  }
+  
+  .pm-code {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 12px 0 4px;
+  }
+  

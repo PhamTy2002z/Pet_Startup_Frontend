@@ -1,5 +1,6 @@
+//src/components/theme-presets/PetCard.js
 import React from 'react';
-import './PetCard.css';
+import './styles.css';
 
 function KiwiBadge() {
   return (

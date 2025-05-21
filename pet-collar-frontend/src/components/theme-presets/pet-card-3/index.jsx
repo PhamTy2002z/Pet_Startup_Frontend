@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './PetCard-3.css';
+import './styles.css';
 import { FiLoader, FiSun, FiGlobe, FiHeart, FiCamera, FiStar, FiTv, FiVideo, FiSmile, FiZap } from 'react-icons/fi';
 
 // Theme variations

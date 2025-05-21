@@ -1,5 +1,5 @@
 import React from 'react';
-import './PetCard-2.css';
+import './styles.css';
 
 // Import react-icons instead of SVG files
 import { 

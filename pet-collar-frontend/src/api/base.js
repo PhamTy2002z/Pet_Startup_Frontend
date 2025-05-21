@@ -22,10 +22,10 @@ adminApi.interceptors.request.use((cfg) => {
 
 /* ---------- THEME-STORE USER ---------- */
 export const themeStoreApi = axios.create({
-  baseURL: `${API_BASE}${VERSION}/theme-store`,
+  baseURL: `${API_BASE}${VERSION}`,
 });
 themeStoreApi.interceptors.request.use((cfg) => {
-  const token = localStorage.getItem('theme_store_token');
+  const token = localStorage.getItem('theme_store_token');   // token được lưu khi login/register store
   if (token) cfg.headers.Authorization = `Bearer ${token}`;
   return cfg;
 });
