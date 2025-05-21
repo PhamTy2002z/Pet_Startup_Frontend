@@ -1,5 +1,11 @@
 /* eslint-disable */
-import React, { useState, useEffect, useCallback, memo, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  memo,
+  useRef,
+} from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   FiChevronLeft,
@@ -15,28 +21,28 @@ import {
   FiFilter,
   FiX,
   FiLogOut,
+  FiLayers,
 } from 'react-icons/fi';
+
 import {
   getStoreThemes,
   purchaseTheme,
-  applyTheme,
 } from '../api/storeThemeService';
+import { getPurchasedThemes } from '../api/themeService';
 import { useThemeStoreAuth } from '../contexts/ThemeStoreAuthContext';
 import { toast } from 'react-toastify';
 import './ThemeStorePage.css';
 
 /* ------------------------------------------------------------------ */
-/* 1.  CONSTANTS                                                       */
-/* ------------------------------------------------------------------ */
 const API_BASE =
   process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
 /* ------------------------------------------------------------------ */
-/* 2.  THEME CARD (memoised)                                           */
+/* THEME CARD                                                          */
 /* ------------------------------------------------------------------ */
 const ThemeCard = memo(
-  ({ theme, owned, onToggleFav, onApply, onBuy, isFav, t }) => (
-    <div className="theme-card" data-testid={`theme-card-${theme._id}`}>
+  ({ theme, owned, onToggleFav, onBuy, isFav, t, inStore }) => (
+    <div className="theme-card">
       <div className="theme-thumbnail">
         <img
           src={theme.imageUrl}
@@ -54,12 +60,12 @@ const ThemeCard = memo(
             e.stopPropagation();
             onToggleFav(theme._id);
           }}
-          aria-label={isFav ? 'Unfavourite' : 'Favourite'}
         >
           <FiHeart />
         </button>
+
         {!theme.isPremium && <span className="free-badge">{t.free}</span>}
-        {owned && (
+        {owned && inStore && (
           <span className="own-badge">
             <FiCheck /> {t.owned}
           </span>
@@ -74,52 +80,40 @@ const ThemeCard = memo(
           )}
         </div>
 
-        <div className="theme-actions">
-          <span className="theme-price">
-            {theme.isPremium
-              ? `${theme.price.toLocaleString()} ₫`
-              : t.free}
-          </span>
+        {inStore && (
+          <div className="theme-actions">
+            <span className="theme-price">
+              {theme.isPremium ? `${theme.price.toLocaleString()} ₫` : t.free}
+            </span>
 
-          <div className="action-buttons">
-            <button
-              className={`apply-button ${
-                owned || !theme.isPremium ? '' : 'disabled-btn'
-              }`}
-              onClick={() => onApply(theme._id)}
-              disabled={!owned && theme.isPremium}
-            >
-              {t.apply}
-            </button>
-
-            {theme.isPremium && !owned && (
+            {owned ? (
+              <span className="in-collection-text">{t.inCollection}</span>
+            ) : (
               <button
-                className="cart-add-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onBuy(theme._id);
-                }}
-                aria-label="Buy theme"
+                className="apply-button"
+                onClick={() => onBuy(theme._id)}
               >
-                <FiShoppingCart />
+                <FiShoppingCart style={{ marginRight: 6 }} />
+                {t.buy}
               </button>
             )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   ),
 );
 
 /* ------------------------------------------------------------------ */
-/* 3.  PAGE COMPONENT                                                  */
+/* PAGE COMPONENT                                                      */
 /* ------------------------------------------------------------------ */
 export default function ThemeStorePage() {
   const navigate = useNavigate();
-  const { id: petId } = useParams(); // /user/edit/:id/store
+  const { id: petId } = useParams();
   const { user, logout } = useThemeStoreAuth();
 
   const [themes, setThemes] = useState([]);
+  const [purchased, setPurchased] = useState([]);
   const [fav, setFav] = useState([]);
   const [owned, setOwned] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,27 +123,24 @@ export default function ThemeStorePage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [filter, setFilter] = useState('all');
   const [profileOpen, setProfileOpen] = useState(false);
+  const [collectionMode, setCollectionMode] = useState(false);
 
   const profileRef = useRef(null);
-
-  /* ---------------- util ---------------- */
-  const toggleDarkMode = () => setDark((prev) => !prev);
+  const toggleDarkMode = () => setDark((d) => !d);
 
   /* ---------------- i18n ---------------- */
   const t = {
     vi: {
       title: 'Cửa hàng Theme',
       free: 'Miễn phí',
-      apply: 'Áp dụng',
+      buy: 'Mua',
       owned: 'Đã mua',
+      inCollection: 'Trong bộ sưu tập',
       buyOK: 'Đã mua ✓',
-      applyOK: 'Áp dụng thành công',
       search: 'Tìm kiếm...',
-      night: 'Đêm',
-      day: 'Ngày',
       store: 'Cửa hàng',
-      profile: 'Hồ sơ',
-      home: 'Trang chủ',
+      collection: 'Bộ sưu tập',
+      logout: 'Đăng xuất',
       loading: 'Đang tải...',
       filters: 'Bộ lọc',
       allThemes: 'Tất cả',
@@ -157,23 +148,20 @@ export default function ThemeStorePage() {
       premiumThemes: 'Premium',
       favoriteThemes: 'Yêu thích',
       ownedThemes: 'Đã mua',
-      noResults: 'Không tìm thấy theme nào phù hợp.',
-      tryAdjust: 'Vui lòng thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.',
-      logout: 'Đăng xuất',
+      noResults: 'Không có theme phù hợp.',
+      tryAdjust: 'Thay đổi bộ lọc hoặc từ khóa.',
     },
     en: {
       title: 'Theme Store',
       free: 'Free',
-      apply: 'Apply',
+      buy: 'Buy',
       owned: 'Owned',
+      inCollection: 'In Collection',
       buyOK: 'Purchased ✓',
-      applyOK: 'Applied',
       search: 'Search...',
-      night: 'Night',
-      day: 'Day',
       store: 'Store',
-      profile: 'Profile',
-      home: 'Home',
+      collection: 'Themes Collection',
+      logout: 'Logout',
       loading: 'Loading...',
       filters: 'Filters',
       allThemes: 'All',
@@ -181,37 +169,46 @@ export default function ThemeStorePage() {
       premiumThemes: 'Premium',
       favoriteThemes: 'Favorites',
       ownedThemes: 'Owned',
-      noResults: 'No themes found.',
-      tryAdjust: 'Try adjusting your filters or search term.',
-      logout: 'Logout',
+      noResults: 'No matching themes.',
+      tryAdjust: 'Adjust filters or search term.',
     },
   }[lang];
 
-  /* ---------------- FETCH THEMES ---------------- */
+  /* ---------------- store list ---------------- */
   useEffect(() => {
     (async () => {
       setLoading(true);
       try {
         const list = await getStoreThemes();
-        const mapped = list.map((th) => ({
-          ...th,
-          imageUrl: th.imageUrl.startsWith('http')
-            ? th.imageUrl
-            : `${API_BASE}${
-                th.imageUrl.startsWith('/') ? '' : '/'
-              }${th.imageUrl}`,
-        }));
-        setThemes(mapped);
+        setThemes(
+          list.map((th) => ({
+            ...th,
+            imageUrl: th.imageUrl.startsWith('http')
+              ? th.imageUrl
+              : `${API_BASE}${th.imageUrl.startsWith('/') ? '' : '/'}${th.imageUrl}`,
+          })),
+        );
       } catch (err) {
-        console.error('Fetch store themes error:', err);
-        toast.error(err.response?.data?.error || 'Error loading themes');
+        toast.error(err.response?.data?.error || 'Error');
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  /* ------------ outside-click for profile menu ------------ */
+  /* ---------------- purchased list ---------------- */
+  const loadPurchased = async () => {
+    if (purchased.length) return;
+    try {
+      const list = await getPurchasedThemes(petId); // [{ theme }]
+      setPurchased(list);
+      setOwned(list.map((p) => p.theme._id));
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Error');
+    }
+  };
+
+  /* ---------------- outside-click menu ---------------- */
   useEffect(() => {
     const handler = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -222,7 +219,7 @@ export default function ThemeStorePage() {
     return () => window.removeEventListener('mousedown', handler);
   }, [profileOpen]);
 
-  /* ---------------- HANDLERS ---------------- */
+  /* ---------------- handlers ---------------- */
   const toggleFav = useCallback((id) => {
     setFav((f) => (f.includes(id) ? f.filter((i) => i !== id) : [...f, id]));
   }, []);
@@ -237,27 +234,22 @@ export default function ThemeStorePage() {
     }
   };
 
-  const doApply = async (themeId) => {
-    try {
-      await applyTheme(petId, themeId);
-      toast.success(t.applyOK);
-    } catch (e) {
-      toast.error(e.response?.data?.error || 'Error');
-    }
-  };
+  /* ---------------- filtering ---------------- */
+  const baseList = collectionMode ? purchased.map((p) => p.theme) : themes;
 
-  /* ---------------- FILTERED LIST ---------------- */
-  let filtered = themes.filter(
+  let filtered = baseList.filter(
     (th) =>
       th.name.toLowerCase().includes(search.toLowerCase()) ||
       (th.description || '').toLowerCase().includes(search.toLowerCase()),
   );
-  if (filter === 'free')       filtered = filtered.filter(th => !th.isPremium);
-  else if (filter === 'premium') filtered = filtered.filter(th => th.isPremium);
-  else if (filter === 'favorite') filtered = filtered.filter(th => fav.includes(th._id));
-  else if (filter === 'owned') filtered = filtered.filter(th => owned.includes(th._id) || !th.isPremium);
+  if (!collectionMode) {
+    if (filter === 'free') filtered = filtered.filter((th) => !th.isPremium);
+    else if (filter === 'premium') filtered = filtered.filter((th) => th.isPremium);
+    else if (filter === 'favorite') filtered = filtered.filter((th) => fav.includes(th._id));
+    else if (filter === 'owned') filtered = filtered.filter((th) => owned.includes(th._id) || !th.isPremium);
+  }
 
-  /* ---------------- RENDER ---------------- */
+  /* ---------------- render ---------------- */
   if (loading) {
     return (
       <div className={`theme-store-page${dark ? ' dark' : ''}`}>
@@ -286,7 +278,9 @@ export default function ThemeStorePage() {
           <FiChevronLeft />
         </button>
 
-        <h1 className="store-title">{t.title}</h1>
+        <h1 className="store-title">
+          {collectionMode ? t.collection : t.title}
+        </h1>
 
         <div className="header-actions">
           {user && (
@@ -303,6 +297,18 @@ export default function ThemeStorePage() {
 
               {profileOpen && (
                 <div className="profile-dropdown">
+                  <button
+                    onClick={async () => {
+                      await loadPurchased();
+                      setCollectionMode(true);
+                      setProfileOpen(false);
+                      setSearch('');
+                    }}
+                  >
+                    <FiLayers size={16} style={{ marginRight: 8 }} />
+                    {t.collection}
+                  </button>
+
                   <button onClick={logout}>
                     <FiLogOut size={16} style={{ marginRight: 8 }} />
                     {t.logout}
@@ -320,128 +326,107 @@ export default function ThemeStorePage() {
             <span>{lang === 'vi' ? 'EN' : 'VI'}</span>
           </button>
 
-          <button
-            className="dark-mode-btn"
-            onClick={toggleDarkMode}
-            aria-label={dark ? t.day : t.night}
-          >
+          <button className="dark-mode-btn" onClick={toggleDarkMode}>
             {dark ? <FiSun size={18} /> : <FiMoon size={18} />}
           </button>
         </div>
       </header>
 
-      {/* Search and Filters */}
-      <div className="search-and-filters">
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder={t.search}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button 
-            className="filter-button" 
-            onClick={() => setFilterOpen(true)}
-            aria-label="Filter themes"
-          >
-            <FiFilter size={18} />
-          </button>
-        </div>
+      {/* Search & filter hidden in collection */}
+      {!collectionMode && (
+        <>
+          <div className="search-and-filters">
+            <div className="search-bar">
+              <input
+                type="text"
+                placeholder={t.search}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <button
+                className="filter-button"
+                onClick={() => setFilterOpen(true)}
+              >
+                <FiFilter size={18} />
+              </button>
+            </div>
 
-        {/* Filter options */}
-        <div className={`filter-drawer ${filterOpen ? 'open' : ''}`}>
-          <div className="filter-header">
-            <h3>{t.filters}</h3>
-            <button 
-              className="close-filter"
-              onClick={() => setFilterOpen(false)}
-            >
-              <FiX size={20} />
-            </button>
+            <div className={`filter-drawer ${filterOpen ? 'open' : ''}`}>
+              <div className="filter-header">
+                <h3>{t.filters}</h3>
+                <button
+                  className="close-filter"
+                  onClick={() => setFilterOpen(false)}
+                >
+                  <FiX size={20} />
+                </button>
+              </div>
+              <div className="filter-options">
+                {['all', 'free', 'premium', 'favorite', 'owned'].map((k) => (
+                  <button
+                    key={k}
+                    className={`filter-option ${filter === k ? 'active' : ''}`}
+                    onClick={() => {
+                      setFilter(k);
+                      setFilterOpen(false);
+                    }}
+                  >
+                    {t[
+                      k === 'all'
+                        ? 'allThemes'
+                        : k === 'free'
+                        ? 'freeThemes'
+                        : k === 'premium'
+                        ? 'premiumThemes'
+                        : k === 'favorite'
+                        ? 'favoriteThemes'
+                        : 'ownedThemes'
+                    ]}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="filter-options">
-            <button 
-              className={`filter-option ${filter === 'all' ? 'active' : ''}`}
-              onClick={() => { setFilter('all'); setFilterOpen(false); }}
-            >
-              {t.allThemes}
-            </button>
-            <button 
-              className={`filter-option ${filter === 'free' ? 'active' : ''}`}
-              onClick={() => { setFilter('free'); setFilterOpen(false); }}
-            >
-              {t.freeThemes}
-            </button>
-            <button 
-              className={`filter-option ${filter === 'premium' ? 'active' : ''}`}
-              onClick={() => { setFilter('premium'); setFilterOpen(false); }}
-            >
-              {t.premiumThemes}
-            </button>
-            <button 
-              className={`filter-option ${filter === 'favorite' ? 'active' : ''}`}
-              onClick={() => { setFilter('favorite'); setFilterOpen(false); }}
-            >
-              {t.favoriteThemes}
-            </button>
-            <button 
-              className={`filter-option ${filter === 'owned' ? 'active' : ''}`}
-              onClick={() => { setFilter('owned'); setFilterOpen(false); }}
-            >
-              {t.ownedThemes}
-            </button>
+
+          <div className="filter-chips">
+            {['all', 'free', 'premium', 'favorite', 'owned'].map((k) => (
+              <button
+                key={k}
+                className={`filter-chip ${filter === k ? 'active' : ''}`}
+                onClick={() => setFilter(k)}
+              >
+                {t[
+                  k === 'all'
+                    ? 'allThemes'
+                    : k === 'free'
+                    ? 'freeThemes'
+                    : k === 'premium'
+                    ? 'premiumThemes'
+                    : k === 'favorite'
+                    ? 'favoriteThemes'
+                    : 'ownedThemes'
+                ]}
+              </button>
+            ))}
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* Filter chips */}
-      <div className="filter-chips">
-        <button 
-          className={`filter-chip ${filter === 'all' ? 'active' : ''}`}
-          onClick={() => setFilter('all')}
-        >
-          {t.allThemes}
-        </button>
-        <button 
-          className={`filter-chip ${filter === 'free' ? 'active' : ''}`}
-          onClick={() => setFilter('free')}
-        >
-          {t.freeThemes}
-        </button>
-        <button 
-          className={`filter-chip ${filter === 'premium' ? 'active' : ''}`}
-          onClick={() => setFilter('premium')}
-        >
-          {t.premiumThemes}
-        </button>
-        <button 
-          className={`filter-chip ${filter === 'favorite' ? 'active' : ''}`}
-          onClick={() => setFilter('favorite')}
-        >
-          {t.favoriteThemes}
-        </button>
-        <button 
-          className={`filter-chip ${filter === 'owned' ? 'active' : ''}`}
-          onClick={() => setFilter('owned')}
-        >
-          {t.ownedThemes}
-        </button>
-      </div>
-
-      {/* Themes grid */}
+      {/* grid */}
       <div className="themes-grid">
         {filtered.map((th) => (
           <ThemeCard
             key={th._id}
             theme={th}
+            owned={owned.includes(th._id)}
             isFav={fav.includes(th._id)}
-            owned={owned.includes(th._id) || !th.isPremium}
             onToggleFav={toggleFav}
-            onApply={doApply}
             onBuy={buy}
             t={t}
+            inStore={!collectionMode}
           />
         ))}
+
         {filtered.length === 0 && (
           <div className="no-results">
             <p>{t.noResults}</p>
@@ -450,30 +435,41 @@ export default function ThemeStorePage() {
         )}
       </div>
 
-      {/* Bottom nav */}
+      {/* bottom nav */}
       <div className="bottom-nav">
         <button onClick={() => navigate('/')}>
           <FiHome />
-          <span className="nav-label">{t.home}</span>
+          <span className="nav-label">Home</span>
         </button>
-        <button onClick={() => navigate(-1)}>
-          <FiUser />
-          <span className="nav-label">{t.profile}</span>
-        </button>
-        <button className="active">
+        <button
+          onClick={() => {
+            setCollectionMode(false);
+            setSearch('');
+          }}
+          className={!collectionMode ? 'active' : undefined}
+        >
           <FiShoppingBag />
           <span className="nav-label">{t.store}</span>
         </button>
+        <button
+          onClick={async () => {
+            await loadPurchased();
+            setCollectionMode(true);
+            setSearch('');
+          }}
+          className={collectionMode ? 'active' : undefined}
+        >
+          <FiLayers />
+          <span className="nav-label">{t.collection}</span>
+        </button>
         <button onClick={toggleDarkMode}>
           {dark ? <FiSun /> : <FiMoon />}
-          <span className="nav-label">{dark ? t.day : t.night}</span>
         </button>
       </div>
 
-      {/* Overlay for filter drawer */}
       {filterOpen && (
-        <div 
-          className="filter-overlay" 
+        <div
+          className="filter-overlay"
           onClick={() => setFilterOpen(false)}
         />
       )}

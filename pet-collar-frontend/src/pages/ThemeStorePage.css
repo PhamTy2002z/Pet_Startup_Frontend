@@ -1130,3 +1130,9 @@
 .theme-store-page.dark .profile-dropdown {
   background: var(--color-card);
 }
+
+.in-collection-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-success);
+}
