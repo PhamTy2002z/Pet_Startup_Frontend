@@ -21,3 +21,11 @@ export const purchaseThemeStore = (themeId) =>
   themeStoreApi
     .post('/theme-store/purchase', { themeId })
     .then((r) => r.data); // { success, redemptionCode, userTheme }
+    
+/* --------- LẤY LỊCH SỬ MUA CỦA THEME-STORE USER (COLLECTION) --------- */
+export const getMyPurchaseHistory = (page = 1, limit = 100) =>
+  themeStoreApi
+    .get('/theme-store/my-purchase-history', {
+      params: { page, limit },
+    })
+    .then((r) => r.data); // { results: [...], pagination: {...} }

@@ -133,7 +133,7 @@
 }
 
 /* Theme Grid */
-.theme-grid {
+.theme-management .theme-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
@@ -141,11 +141,11 @@
   transition: opacity 0.3s;
 }
 
-.theme-grid.collapsed {
+.theme-management .theme-grid.collapsed {
   display: none;
 }
 
-.theme-card {
+.theme-management .admin-theme-card {
   background-color: white;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-sm);
@@ -158,12 +158,12 @@
   border: 1px solid var(--gray-light);
 }
 
-.theme-card:hover {
+.theme-management .admin-theme-card:hover {
   box-shadow: var(--shadow);
   transform: translateY(-2px);
 }
 
-.theme-image {
+.theme-management .theme-image {
   height: 180px;
   overflow: hidden;
   background-color: #f8f9fa;
@@ -173,18 +173,18 @@
   border-bottom: 1px solid var(--gray-light);
 }
 
-.theme-image img {
+.theme-management .theme-image img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   transition: transform 0.3s ease;
 }
 
-.theme-card:hover .theme-image img {
+.theme-management .admin-theme-card:hover .theme-image img {
   transform: scale(1);
 }
 
-.theme-info {
+.theme-management .theme-info {
   padding: 16px;
   flex-grow: 1;
   display: flex;
@@ -192,28 +192,28 @@
   gap: 8px;
 }
 
-.theme-info h3 {
+.theme-management .theme-info h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: var(--dark);
 }
 
-.theme-info p {
+.theme-management .theme-info p {
   margin: 0;
   font-size: 14px;
   color: var(--gray-medium);
   line-height: 1.4;
 }
 
-.theme-status-row {
+.theme-management .theme-attributes {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 6px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
 }
 
-.status-badge {
+.theme-management .status-badge {
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 12px;
@@ -223,17 +223,18 @@
   gap: 4px;
 }
 
-.status-badge.active {
+.theme-management .status-badge.active {
   background-color: rgba(76, 175, 80, 0.1);
   color: var(--success);
 }
 
-.status-badge.inactive {
+.theme-management .status-badge.inactive {
   background-color: rgba(158, 158, 158, 0.1);
   color: var(--gray-medium);
 }
 
-.price-badge, .store-badge {
+.theme-management .price-badge, 
+.theme-management .store-badge {
   display: inline-flex;
   align-items: center;
   padding: 4px 8px;
@@ -245,45 +246,46 @@
   gap: 4px;
 }
 
-.store-badge.hidden {
+.theme-management .store-badge.hidden {
   background-color: rgba(244, 67, 54, 0.1);
   color: var(--danger);
 }
 
 /* Theme badges */
-.active-badge, .premium-badge, .hidden-badge {
+.theme-management .active-badge, 
+.theme-management .premium-badge, 
+.theme-management .hidden-badge {
   position: absolute;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background-color: var(--primary);
-  color: white;
+  top: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 5;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  z-index: 1;
 }
 
-.active-badge {
+.theme-management .active-badge {
   background-color: var(--success);
-  top: 10px;
-  left: 10px;
+  color: white;
+  right: 12px;
 }
 
-.premium-badge {
-  background-color: gold;
-  color: #333;
-  top: 10px;
-  right: 10px;
+.theme-management .premium-badge {
+  background-color: var(--warning);
+  color: white;
+  left: 12px;
 }
 
-.hidden-badge {
+.theme-management .hidden-badge {
   background-color: var(--danger);
-  top: 10px;
-  right: 10px;
+  color: white;
+  right: 12px;
+  top: 50px;
 }
 
-.theme-actions {
+.theme-management .theme-actions {
   padding: 12px 16px;
   border-top: 1px solid var(--gray-light);
   background-color: #f8f9fa;
@@ -329,7 +331,7 @@
 }
 
 /* Theme List */
-.theme-item {
+.theme-management .theme-item {
   display: flex;
   margin-bottom: 12px;
   background-color: white;
@@ -340,11 +342,11 @@
   transition: var(--transition);
 }
 
-.theme-item:hover {
+.theme-management .theme-item:hover {
   box-shadow: var(--shadow);
 }
 
-.theme-item .theme-image {
+.theme-management .theme-item .theme-image {
   width: 100px;
   height: 100px;
   flex-shrink: 0;
@@ -352,13 +354,13 @@
   border-bottom: none;
 }
 
-.theme-item .theme-image img {
+.theme-management .theme-item .theme-image img {
   width: 100%;
   height: 100%;
   object-fit: contain; /* Show whole image instead of cropping */
 }
 
-.theme-item .theme-info {
+.theme-management .theme-item .theme-info {
   flex-grow: 1;
   padding: 12px 16px;
   display: flex;
@@ -373,7 +375,7 @@
   margin-top: 4px;
 }
 
-.theme-actions-list {
+.theme-management .theme-actions-list {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -382,7 +384,7 @@
   border-left: 1px solid var(--gray-light);
 }
 
-.theme-actions-list button {
+.theme-management .theme-actions-list button {
   border: none;
   background: none;
   cursor: pointer;
@@ -417,7 +419,7 @@
 }
 
 /* Pagination */
-.theme-pagination {
+.theme-management .theme-pagination {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -779,62 +781,62 @@
   color: var(--dark);
 }
 
-/* Responsive design */
+/* Media queries for responsive design */
 @media (max-width: 1200px) {
-  .theme-grid {
+  .theme-management .theme-grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 992px) {
-  .theme-grid {
+  .theme-management .theme-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .theme-actions-list {
+  .theme-management .theme-actions-list {
     flex-direction: column;
     padding: 8px;
   }
 }
 
 @media (max-width: 768px) {
-  .dashboard-header {
+  .theme-management .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
   
-  .create-theme-btn {
+  .theme-management .create-theme-btn {
     width: 100%;
     justify-content: center;
   }
   
-  .control-panel {
+  .theme-management .control-panel {
     flex-direction: column;
     gap: 12px;
   }
   
-  .search-bar {
+  .theme-management .search-bar {
     max-width: none;
   }
   
-  .form-row {
+  .theme-management .form-row {
     flex-direction: column;
     gap: 20px;
   }
   
-  .theme-item {
+  .theme-management .theme-item {
     flex-direction: column;
   }
   
-  .theme-item .theme-image {
+  .theme-management .theme-item .theme-image {
     width: 100%;
     height: 140px;
     border-right: none;
     border-bottom: 1px solid var(--gray-light);
   }
   
-  .theme-actions-list {
+  .theme-management .theme-actions-list {
     flex-direction: row;
     padding: 12px;
     justify-content: center;
@@ -844,7 +846,7 @@
 }
 
 @media (max-width: 576px) {
-  .theme-grid {
+  .theme-management .theme-grid {
     grid-template-columns: 1fr;
   }
   
@@ -852,7 +854,7 @@
     padding: 12px;
   }
   
-  .theme-pagination button {
+  .theme-management .theme-pagination button {
     width: 32px;
     height: 32px;
   }

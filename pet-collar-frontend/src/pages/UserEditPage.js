@@ -1,5 +1,4 @@
 // src/pages/UserEditPage.js
-// src/pages/UserEditPage.js
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import FirstTimeScanPopup from '../components/FirstTimeScanPopup';

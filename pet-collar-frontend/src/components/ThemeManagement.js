@@ -592,7 +592,7 @@ export default function ThemeManagement() {
                 return (
                   <div 
                     key={theme._id} 
-                    className={`theme-card ${theme.isActive ? 'active' : 'inactive'} ${theme.isPremium ? 'premium' : ''} ${theme.inStore ? '' : 'hidden'}`}
+                    className={`admin-theme-card ${theme.isActive ? 'active' : 'inactive'} ${theme.isPremium ? 'premium' : ''} ${theme.inStore ? '' : 'hidden'}`}
                   >
                     {theme.isActive && <div className="active-badge"><FiCheck size={14} /></div>}
                     {theme.isPremium && <div className="premium-badge"><FiDollarSign size={14} /></div>}
