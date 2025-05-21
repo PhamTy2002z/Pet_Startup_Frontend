@@ -1,9 +1,11 @@
 // src/pages/UserEditPage.js
-import React, { useState, useEffect } from 'react';
+// src/pages/UserEditPage.js
+import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import UserEditForm from '../components/UserEditForm';
 import FirstTimeScanPopup from '../components/FirstTimeScanPopup';
-import EditPopup from '../components/EditPopup';
+import EditPopup           from '../components/EditPopup';
+import PetThemeRenderer    from '../components/PetThemeRenderer';
+
 import {
   getPetById,
   getPetAvatarUrl,
@@ -12,161 +14,132 @@ import {
   updatePetDescription,
   uploadPetAvatar
 } from '../api/petService';
+
 import {
-  FiMenu,
-  FiSettings,
-  FiHome,
-  FiUser,
-  FiMoon,
-  FiInfo,
-  FiPhone,
-  FiCalendar,
-  FiAlertTriangle,
-  FiEdit,
-  FiGlobe,
-  FiShoppingBag,
-  FiChevronDown,
-  FiCheck
+  getPurchasedThemes,
+  redeemThemeCode,
+  applyTheme as applyPetTheme
+} from '../api/themeService';
+
+import {
+  FiMenu, FiSettings, FiHome, FiUser, FiMoon,
+  FiInfo, FiPhone, FiCalendar, FiAlertTriangle,
+  FiEdit, FiGlobe, FiShoppingBag, FiChevronDown,
+  FiCheck, FiGift
 } from 'react-icons/fi';
 import './UserEditPage.css';
 
+/* ─────────────────────────── Redeem Popup ─────────────────────────── */
+const RedeemThemePopup = ({
+  isOpen, onClose,
+  code, setCode,
+  onRedeem, result,
+  pet, t
+}) => {
+  if (!isOpen) return null;
+  return (
+    <div className="modal-overlay">
+      <div className="modal-card">
+        <h3>{t.redeemTheme}</h3>
+
+        <input
+          className="redeem-input"
+          placeholder={t.enterCode}
+          value={code}
+          onChange={(e)=>setCode(e.target.value)}
+        />
+
+        {result && (
+          <p className={result.success ? 'redeem-success' : 'redeem-fail'}>
+            {result.success ? t.redeemSuccess : t.redeemFailed}
+          </p>
+        )}
+
+        {/* Xem thử card nếu redeem thành công */}
+        {result?.success && (
+          <div className="theme-preview">
+            <Suspense fallback={null}>
+              <PetThemeRenderer
+                presetKey={result.theme.presetKey}
+                pet={pet}
+              />
+            </Suspense>
+          </div>
+        )}
+
+        <div className="modal-actions">
+          <button className="primary-btn" onClick={onRedeem}>
+            {t.redeem}
+          </button>
+          <button className="secondary-btn" onClick={onClose}>✕</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+/* ───────────────────────────────────────────────────────────────────── */
+
 const UserEditPage = () => {
-  const { id } = useParams();
+  const { id }  = useParams();
   const navigate = useNavigate();
 
-  const [showPopup, setShowPopup] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [petData, setPetData] = useState({
-    info: {
-      name: '',
-      species: '',
-      description: '',
-      birthDate: ''
-    },
-    owner: {
-      name: '',
-      phone: '',
-      email: ''
-    },
-    vaccinations: [],
-    reExaminations: [],
-    allergicInfo: { substances: [], note: '' },
-    avatarUrl: '',
-    avatarFileId: null
+  /* ────────────── STATE CŨ ────────────── */
+  const [showPopup,   setShowPopup]   = useState(false);
+  const [isLoading,   setIsLoading]   = useState(true);
+  const [petData,     setPetData]     = useState({
+    info: { name:'', species:'', description:'', birthDate:'' },
+    owner:{ name:'', phone:'', email:'' },
+    vaccinations:[], reExaminations:[],
+    allergicInfo:{ substances:[], note:'' },
+    avatarUrl:'', avatarFileId:null
   });
 
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab,   setActiveTab]   = useState('profile');
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [editSection, setEditSection] = useState(null);
   const [refreshData, setRefreshData] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [language, setLanguage] = useState('vi');
-  const [darkMode, setDarkMode] = useState(false);
-  const [showThemeDropdown, setShowThemeDropdown] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState('Default');
-  const [previewTheme, setPreviewTheme] = useState(null);
+  const [errorMessage,setErrorMessage]= useState('');
+  const [language,    setLanguage]    = useState('vi');
+  const [darkMode,    setDarkMode]    = useState(false);
 
-  const availableThemes = [
-    { id: 1, name: 'Default', colors: ['#5b5b9f', '#e2e8f0', '#fff'] },
-    { id: 2, name: 'Pastel Paws', colors: ['#FFCAE9', '#B5EAEA', '#FFDCDC'] },
-    { id: 3, name: 'Forest Friends', colors: ['#C1F4C5', '#6ECEDA', '#FFF5BA'] },
-    { id: 4, name: 'Cosmic Cats', colors: ['#D4A5FF', '#FFB2E6', '#9381FF'] }
-  ];
+  /* ────────────── NEW: THEMES ────────────── */
+  const [redeemedThemes,   setRedeemedThemes]   = useState([]); // list themes đã redeem
+  const [showThemeDropdown,setShowThemeDropdown]= useState(false);
+  const [currentTheme,     setCurrentTheme]     = useState('Default');
+  const [currentPresetKey, setCurrentPresetKey] = useState(null);
 
-  const applyTheme = (themeName) => {
-    setCurrentTheme(themeName);
-    setShowThemeDropdown(false);
-    const selected = availableThemes.find(t => t.name === themeName) || availableThemes[0];
-    const root = document.documentElement;
-    switch (selected.name) {
-      case 'Pastel Paws':
-        root.style.setProperty('--color-primary', '#FFCAE9');
-        root.style.setProperty('--color-nav-active', '#FFCAE9');
-        root.style.setProperty('--color-bg-alt', '#FFF5F9');
-        root.style.setProperty('--color-tag-strong-bg', '#FFE0F5');
-        root.style.setProperty('--color-tag-strong-text', '#D16BB0');
-        break;
-      case 'Forest Friends':
-        root.style.setProperty('--color-primary', '#6ECEDA');
-        root.style.setProperty('--color-nav-active', '#6ECEDA');
-        root.style.setProperty('--color-bg-alt', '#F0FBF0');
-        root.style.setProperty('--color-tag-strong-bg', '#E0F5E0');
-        root.style.setProperty('--color-tag-strong-text', '#4A7B6B');
-        break;
-      case 'Cosmic Cats':
-        root.style.setProperty('--color-primary', '#9381FF');
-        root.style.setProperty('--color-nav-active', '#9381FF');
-        root.style.setProperty('--color-bg-alt', '#F5F0FF');
-        root.style.setProperty('--color-tag-strong-bg', '#E8E0FF');
-        root.style.setProperty('--color-tag-strong-text', '#6250B5');
-        break;
-      default:
-        root.style.setProperty('--color-primary', '#5b5b9f');
-        root.style.setProperty('--color-nav-active', '#5b5b9f');
-        root.style.setProperty('--color-bg-alt', '#F5F9F9');
-        root.style.setProperty('--color-tag-strong-bg', '#e8f4ff');
-        root.style.setProperty('--color-tag-strong-text', '#2e7de9');
-        break;
-    }
-  };
+  /* Redeem flow */
+  const [showRedeemPopup,  setShowRedeemPopup]  = useState(false);
+  const [redeemCode,       setRedeemCode]       = useState('');
+  const [redeemResult,     setRedeemResult]     = useState(null);
 
-  const previewThemeOnHover = (themeName) => {
-    if (!themeName) {
-      setPreviewTheme(null);
-      applyTheme(currentTheme);
-      return;
-    }
-    setPreviewTheme(themeName);
-    applyTheme(themeName);
-  };
-
+  /* ─────────────── I18N ─────────────── */
   const labels = {
     vi: {
-      profile: 'Hồ sơ',
-      home: 'Trang chủ',
-      themeStore: 'Theme Store',
-      night: 'Ban đêm',
-      upcomingSchedules: 'Lịch hẹn sắp tới:',
-      allergies: 'Dị ứng:',
-      petDetails: 'Chi tiết thú cưng:',
-      changeLanguage: 'English',
-      noSchedules: 'Không có lịch hẹn',
-      noAllergies: 'Không có thông tin dị ứng',
-      loading: 'Đang tải...',
-      petInformation: 'Thông tin thú cưng',
-      ownerInformation: 'Thông tin chủ nuôi',
-      vaccinationSchedule: 'Lịch tiêm chủng',
-      reExaminationSchedule: 'Lịch tái khám',
-      allergicInformation: 'Thông tin dị ứng',
-      noVaccinations: 'Không có lịch tiêm chủng',
-      noReExaminations: 'Không có lịch tái khám',
-      theme: 'Chủ đề:',
-      applyTheme: 'Áp dụng'
+      profile:'Hồ sơ', home:'Trang chủ', themeStore:'Theme Store', night:'Ban đêm',
+      upcomingSchedules:'Lịch hẹn sắp tới:', allergies:'Dị ứng:', petDetails:'Chi tiết thú cưng:',
+      changeLanguage:'English', noSchedules:'Không có lịch hẹn', noAllergies:'Không có thông tin dị ứng',
+      loading:'Đang tải...', petInformation:'Thông tin thú cưng', ownerInformation:'Thông tin chủ nuôi',
+      vaccinationSchedule:'Lịch tiêm chủng', reExaminationSchedule:'Lịch tái khám',
+      allergicInformation:'Thông tin dị ứng', noVaccinations:'Không có lịch tiêm chủng',
+      noReExaminations:'Không có lịch tái khám',
+      theme:'Chủ đề:', redeemTheme:'Đổi Theme', redeem:'Đổi',
+      enterCode:'Nhập mã code...', redeemSuccess:'Đổi thành công!', redeemFailed:'Mã không hợp lệ',
+      redeemedThemes:'Theme đã đổi'
     },
     en: {
-      profile: 'Profile',
-      home: 'Home',
-      themeStore: 'Theme Store',
-      night: 'Night',
-      upcomingSchedules: 'Upcoming Schedules:',
-      allergies: 'Allergies:',
-      petDetails: 'Pet Details:',
-      changeLanguage: 'Tiếng Việt',
-      noSchedules: 'No scheduled appointments',
-      noAllergies: 'No allergies recorded',
-      loading: 'Loading...',
-      petInformation: 'Pet Information',
-      ownerInformation: 'Owner Information',
-      vaccinationSchedule: 'Vaccination Schedule',
-      reExaminationSchedule: 'Re-examination Schedule',
-      allergicInformation: 'Allergic Information',
-      noVaccinations: 'No upcoming vaccinations',
-      noReExaminations: 'No upcoming re-examinations',
-      theme: 'Theme:',
-      applyTheme: 'Apply'
+      profile:'Profile', home:'Home', themeStore:'Theme Store', night:'Night',
+      upcomingSchedules:'Upcoming Schedules:', allergies:'Allergies:', petDetails:'Pet Details:',
+      changeLanguage:'Tiếng Việt', noSchedules:'No scheduled appointments', noAllergies:'No allergies recorded',
+      loading:'Loading...', petInformation:'Pet Information', ownerInformation:'Owner Information',
+      vaccinationSchedule:'Vaccination Schedule', reExaminationSchedule:'Re-examination Schedule',
+      allergicInformation:'Allergic Information', noVaccinations:'No upcoming vaccinations',
+      noReExaminations:'No upcoming re-examinations',
+      theme:'Theme:', redeemTheme:'Redeem Theme', redeem:'Redeem',
+      enterCode:'Enter redeem code...', redeemSuccess:'Redeemed successfully!', redeemFailed:'Invalid code',
+      redeemedThemes:'Redeemed Themes'
     }
   };
-
   const t = labels[language];
 
   useEffect(() => {
@@ -174,38 +147,64 @@ const UserEditPage = () => {
       try {
         setIsLoading(true);
         const pet = await getPetById(id);
-        
-        // Check if this is a first-time scan (no basic information set)
-        const isFirstTimeScan = !pet.info.name && !pet.owner.name && !pet.owner.phone;
-        setShowPopup(isFirstTimeScan);
-        
+
+        /* first-time scan */
+        const isFirst = !pet.info.name && !pet.owner.name && !pet.owner.phone;
+        setShowPopup(isFirst);
+
         setPetData({
-          info: {
-            name: pet.info.name || 'Unnamed Pet',
-            species: pet.info.species || 'Unknown Species',
-            description: pet.info.description || '',
-            birthDate: pet.info.birthDate || ''
-          },
-          owner: {
-            name: pet.owner.name || '',
-            phone: pet.owner.phone || '',
-            email: pet.owner.email || ''
-          },
-          vaccinations: pet.vaccinations || [],
-          reExaminations: pet.reExaminations || [],
-          allergicInfo: pet.allergicInfo || { substances: [], note: '' },
+          info: pet.info,
+          owner: pet.owner,
+          vaccinations: pet.vaccinations||[],
+          reExaminations:pet.reExaminations||[],
+          allergicInfo: pet.allergicInfo||{ substances:[], note:'' },
           avatarUrl: pet.avatarFileId ? getPetAvatarUrl(pet.avatarFileId) : '',
-          avatarFileId: pet.avatarFileId || null
+          avatarFileId: pet.avatarFileId||null
         });
+
+        /* redeemed themes */
+        const themes = await getPurchasedThemes(id); // [{id,name,presetKey}]
+        setRedeemedThemes(themes);
+
+        /* nếu pet đã áp dụng theme */
+        if (pet.activeTheme) {
+          setCurrentTheme(pet.activeTheme.name);
+          setCurrentPresetKey(pet.activeTheme.presetKey);
+        }
+
         setIsLoading(false);
-      } catch (error) {
-        console.error(error);
-        setErrorMessage('Failed to load pet profile. Please try again later.');
+      } catch(err){
+        console.error(err);
+        setErrorMessage('Failed to load pet profile.');
         setIsLoading(false);
       }
     };
     fetchPetData();
   }, [id, refreshData]);
+  /* ─────────────── HANDLER: REDEEM ─────────────── */
+  const handleRedeemTheme = async () => {
+    if (!redeemCode.trim()) return;
+    try {
+      const res = await redeemThemeCode(redeemCode.trim(), id); // { success, theme }
+      setRedeemResult(res);
+      if (res.success) {
+        setRedeemedThemes(await getPurchasedThemes(id));
+        setRedeemCode('');
+      }
+    } catch {
+      setRedeemResult({ success:false });
+    }
+  };
+
+  /* ─────────────── HANDLER: APPLY ─────────────── */
+  const handleApplyTheme = async (theme) => {
+    try {
+      await applyPetTheme(id, theme.id);
+      setCurrentTheme(theme.name);
+      setCurrentPresetKey(theme.presetKey);
+      setShowThemeDropdown(false);
+    } catch { /* toast lỗi nếu muốn */ }
+  };
 
   const formatReExamSchedule = () => {
     if (!petData.reExaminations.length) return [{ label: t.noSchedules, date: '' }];
@@ -272,11 +271,9 @@ const UserEditPage = () => {
     const bd = new Date(birthDate);
     const today = new Date();
     let age = today.getFullYear() - bd.getFullYear();
-    if (
-      today.getMonth() < bd.getMonth() ||
-      (today.getMonth() === bd.getMonth() && today.getDate() < bd.getDate())
-    ) age--;
-    return `${age} ${age === 1 ? 'year' : 'years'} old`;
+    if (today.getMonth()<bd.getMonth() || (today.getMonth()===bd.getMonth() && today.getDate()<bd.getDate()))
+      age--;
+    return `${age} ${age===1?'year':'years'} old`;
   };
 
   const getNextVaccination = () => {
@@ -498,42 +495,50 @@ const UserEditPage = () => {
             <h2 className="profile-name">{petData.info.name}</h2>
             <p className="profile-role">{petData.info.species}</p>
             <div className="profile-actions">
+            <button className="redeem-btn" onClick={() => setShowRedeemPopup(true)}>
+              <FiGift size={14} />
+               <span>{t.redeemTheme}</span>
+                </button>
               <button className="language-toggle-btn" onClick={toggleLanguage}>
                 <FiGlobe size={14} />
                 <span>{t.changeLanguage}</span>
               </button>
-
+              {/* THAY TOÀN BỘ KHỐI CŨ BẰNG KHỐI NÀY */}
               <div className="theme-dropdown-container">
                 <button
-                  className="theme-dropdown-btn"
+                   className="theme-dropdown-btn"
                   onClick={() => setShowThemeDropdown(!showThemeDropdown)}
-                >
+                            >
                   <span>{t.theme} {currentTheme}</span>
-                  <FiChevronDown size={14} />
-                </button>
+                 <FiChevronDown size={14} />
+                   </button>
 
-                {showThemeDropdown && (
-                  <div className="theme-dropdown-menu">
-                    {availableThemes.map(th => (
-                      <button
-                        key={th.id}
-                        className={`theme-option ${currentTheme === th.name ? 'active' : ''}`}
-                        onClick={() => applyTheme(th.name)}
-                        onMouseEnter={() => previewThemeOnHover(th.name)}
-                        onMouseLeave={() => previewThemeOnHover(null)}
-                      >
-                        <div className="theme-colors">
-                          {th.colors.map((c, i) => (
-                            <span key={i} className="color-dot" style={{ backgroundColor: c }}></span>
-                          ))}
-                        </div>
-                        <span>{th.name}</span>
-                        {currentTheme === th.name && <FiCheck size={14} />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+  {showThemeDropdown && (
+    <div className="theme-dropdown-menu cards-view">
+      {redeemedThemes.length ? (
+        redeemedThemes.map(th => (
+          <button
+            key={th.id}
+            className={`theme-card ${currentTheme === th.name ? 'active' : ''}`}
+            onClick={() => handleApplyTheme(th)}
+          >
+            <Suspense fallback={<div className="theme-card-img" />}>
+              <PetThemeRenderer
+                presetKey={th.presetKey}
+                pet={{ name: petData.info.name, imageUrl: petData.avatarUrl }}
+              />
+            </Suspense>
+            <span className="theme-card-name">{th.name}</span>
+            {currentTheme === th.name && <FiCheck size={14} />}
+          </button>
+        ))
+      ) : (
+        <p className="empty-note">{t.redeemedThemes}: 0</p>
+      )}
+    </div>
+  )}
+</div>
+
             </div>
           </div>
         </div>
@@ -592,6 +597,16 @@ const UserEditPage = () => {
           onClose={() => setShowEditPopup(false)}
           onSubmit={handlePopupSubmit}
         />
+        <RedeemThemePopup
+           isOpen={showRedeemPopup}
+            onClose={() => { setShowRedeemPopup(false); setRedeemResult(null); setRedeemCode(''); }}
+            code={redeemCode}
+            setCode={setRedeemCode}
+            onRedeem={handleRedeemTheme}
+            result={redeemResult}
+            pet={{ name: petData.info.name, imageUrl: petData.avatarUrl }}
+             t={t}
+             />
       </main>
 
       <nav className="bottom-nav">
